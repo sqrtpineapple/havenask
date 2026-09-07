@@ -46,3 +46,20 @@ strict_cc_slow_test(
         '//aios/storage/indexlib/util/testutil:unittest'
     ]
 )
+
+strict_cc_fast_test(
+    name='block_file_accessor_ylt_test',
+    srcs=['BlockFileAccessorYltTest.cpp'],
+    copts=['-std=c++20', '-fcoroutines', '-fno-access-control'],
+    deps=[
+        '//aios/autil:env_util',
+        '//aios/storage/indexlib/file_system:file_system',
+        '//aios/storage/indexlib/file_system/file',
+        '//aios/storage/indexlib/file_system/fslib',
+        '//aios/storage/indexlib/file_system/fslib:ylt_fslib_file_wrapper',
+        '//aios/storage/indexlib/util:future_executor',
+        '//aios/storage/indexlib/util/cache',
+        '//aios/storage/indexlib/util/testutil:unittest',
+        '//aios/ylt:ylt_io_context_executor',
+    ],
+)

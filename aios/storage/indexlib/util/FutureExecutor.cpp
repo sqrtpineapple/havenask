@@ -45,12 +45,15 @@ std::thread FutureExecutor::reportMetricsThread;
 async_simple::Executor* FutureExecutor::CreateExecutor(int threadNum, int maxAio)
 {
     static int32_t idx = 0;
+    const bool useYlt = autil::EnvUtil::getEnv("INDEXLIB_USE_IO_URING", false);
+    const std::string executorType = useYlt ? "ylt_io" : "async_io";
     auto params = async_simple::ExecutorCreator::Parameters()
-                      .SetExecutorName("async_io_thread_pool_" + std::to_string(idx++))
+                      .SetExecutorName(executorType + "_thread_pool_" + std::to_string(idx++))
                       .SetThreadNum(threadNum)
                       .Set<uint32_t>("max_aio", maxAio);
-    auto executor = async_simple::ExecutorCreator::Create(/*type*/ "async_io", params);
-    AUTIL_LOG(INFO, "pool created[%p], threadNum[%d], max_aio [%d]", executor.get(), threadNum, maxAio);
+    auto executor = async_simple::ExecutorCreator::Create(executorType, params);
+    AUTIL_LOG(INFO, "pool created[%p], type[%s], threadNum[%d], max_aio [%d]", executor.get(), executorType.c_str(),
+              threadNum, maxAio);
     return executor.release();
 }
 void FutureExecutor::DestroyExecutor(async_simple::Executor* executor)

@@ -21,6 +21,7 @@
 #include <iosfwd>
 #include <stdexcept>
 #include <string.h>
+#include <string_view>
 #include <sys/uio.h>
 #include <tuple>
 #include <type_traits>
@@ -30,17 +31,21 @@
 #include "autil/TimeUtility.h"
 #include "autil/TimeoutTerminator.h"
 #include "fslib/common/common_type.h"
+#include "fslib/fs/File.h"
+#include "fslib/fs/FileSystem.h"
 #include "CoroInterface.h"
 #include "async_simple/coro/Collect.h"
 #include "async_simple/coro/FutureAwaiter.h"
 #include "Helper.h"
 #include "async_simple/Try.h"
 #include "async_simple/Unit.h"
+#include "async_simple/executors/YltIOContextExecutor.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FileBlockCache.h"
 #include "indexlib/file_system/FileSystemMetricsReporter.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/file_system/fslib/FslibWrapper.h"
+#include "indexlib/file_system/fslib/YltFslibFileWrapper.h"
 #include "indexlib/file_system/package/PackageOpenMeta.h"
 #include "indexlib/util/Exception.h"
 
@@ -67,13 +72,48 @@ using namespace indexlib::util;
 namespace indexlib { namespace file_system {
 AUTIL_LOG_SETUP(indexlib.file_system, BlockFileAccessor);
 
+namespace {
+
+bool IsLocalFile(const std::string& path) noexcept
+{
+    constexpr std::string_view localPrefix = "LOCAL://";
+    return path.find("://") == std::string::npos || path.compare(0, localPrefix.size(), localPrefix) == 0;
+}
+
+FSResult<std::unique_ptr<FslibFileWrapper>> OpenBlockFile(const std::string& path, bool useDirectIO,
+                                                          ssize_t fileLength,
+                                                          async_simple::Executor* executor) noexcept
+{
+    if (dynamic_cast<async_simple::executors::YltIOContextExecutor*>(executor) == nullptr || !IsLocalFile(path)) {
+        return FslibWrapper::OpenFile(path, fslib::READ, useDirectIO, fileLength);
+    }
+
+    std::unique_ptr<fslib::fs::File> file(fslib::fs::FileSystem::openFile(path, fslib::READ, useDirectIO, fileLength));
+    if (!file) {
+        return {FSEC_ERROR, nullptr};
+    }
+    if (!file->isOpened()) {
+        return {ParseFromFslibEC(file->getLastError()), nullptr};
+    }
+
+    auto wrapper = std::make_unique<YltFslibFileWrapper>(file.release(), useDirectIO);
+    auto ec = wrapper->Open(executor).Code();
+    if (ec != FSEC_OK) {
+        [[maybe_unused]] auto closeResult = wrapper->Close();
+        return {ec, nullptr};
+    }
+    return {FSEC_OK, std::move(wrapper)};
+}
+
+} // namespace
+
 const size_t BlockFileAccessor::DEFAULT_IO_BATCH_SIZE = 4;
 
 FSResult<void> BlockFileAccessor::Open(const string& path, const PackageOpenMeta& packageOpenMeta) noexcept
 {
     _fileId = FileBlockCache::GetFileId(_linkRoot + '/' + packageOpenMeta.GetPhysicalFilePath() + "#" + path);
-    auto [ec, file] = FslibWrapper::OpenFile(packageOpenMeta.GetPhysicalFilePath(), fslib::READ, _useDirectIO,
-                                             packageOpenMeta.GetPhysicalFileLength());
+    auto [ec, file] = OpenBlockFile(packageOpenMeta.GetPhysicalFilePath(), _useDirectIO,
+                                    packageOpenMeta.GetPhysicalFileLength(), _executor);
     RETURN_IF_FS_ERROR(ec, "OpenFile [%s] failed", packageOpenMeta.GetPhysicalFilePath().c_str());
     _filePtr = std::move(file);
     _fileLength = packageOpenMeta.GetLength();
@@ -91,7 +131,7 @@ FSResult<void> BlockFileAccessor::Open(const string& path, int64_t fileLength) n
     } else {
         _fileLength = fileLength;
     }
-    auto [ec, file] = FslibWrapper::OpenFile(path, fslib::READ, _useDirectIO, _fileLength);
+    auto [ec, file] = OpenBlockFile(path, _useDirectIO, _fileLength, _executor);
     RETURN_IF_FS_ERROR(ec, "OpenFile [%s] failed", path.c_str());
     _filePtr = std::move(file);
     _fileBeginOffset = 0;

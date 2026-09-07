@@ -93,6 +93,7 @@ strict_cc_library(
         ':headers', ':interface', '//aios/autil:diagnostic',
         '//aios/storage/indexlib/file_system:common',
         '//aios/storage/indexlib/file_system/fslib',
+        '//aios/storage/indexlib/file_system/fslib:ylt_fslib_file_wrapper',
         '//aios/storage/indexlib/file_system/load_config',
         '//aios/storage/indexlib/file_system/package:meta',
         '//aios/storage/indexlib/util:future_executor',
@@ -103,6 +104,7 @@ strict_cc_library(
         '//aios/storage/indexlib/util/cache',
         '//aios/storage/indexlib/util/memory_control',
         '//aios/storage/indexlib/util/metrics:metric_reporter',
-        '//aios/storage/indexlib/util/slice_array'
+        '//aios/storage/indexlib/util/slice_array',
+        '//aios/ylt:ylt_io_context_executor'
     ]
 )
