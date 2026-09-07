@@ -157,11 +157,11 @@ private:
     bool IsLastNode() const { SKEY_NODE_FUNC(IsLastNode); }
 
 public:
-    FL_LAZY(future_lite::Unit)
+    FL_LAZY(async_simple::Unit)
     Init(const file_system::FileReaderPtr& skeyReader, const file_system::FileReaderPtr& valueReader,
          const config::KKVIndexConfig* kkvConfig, OnDiskPKeyOffset offset, uint32_t defaultTs, bool storeTs,
          bool keepSortSeq, KVMetricsCollector* metricsCollector = nullptr);
-    FL_LAZY(future_lite::Unit) SwitchChunk(uint64_t offset = 0);
+    FL_LAZY(async_simple::Unit) SwitchChunk(uint64_t offset = 0);
 
     bool IsValid() const override final { return mTypedSKeyChunk != nullptr; }
     bool MoveToNext() override final;
@@ -275,7 +275,7 @@ void KKVBuiltSegmentDocIterator<SKeyType>::FillResultBuffer(SearchSKeyContext* s
             break;
         }
         if (!MoveToNext() && !HasHitLastNode()) {
-            future_lite::interface::syncAwait(SwitchChunk());
+            async_simple::interface::syncAwait(SwitchChunk());
         }
         SKeyType tmpSkey = skey;
         if (!MoveToValidPosition(skeyContext, minimumTsInSecond, currentTsInSecond, foundSkeys, tmpSkey, ts)) {
@@ -316,7 +316,7 @@ KKVBuiltSegmentDocIterator<SKeyType>::CreateOnDiskValueDecoder(const config::KKV
     return valueDecoder;
 }
 template <typename SKeyType>
-inline FL_LAZY(future_lite::Unit) KKVBuiltSegmentDocIterator<SKeyType>::Init(
+inline FL_LAZY(async_simple::Unit) KKVBuiltSegmentDocIterator<SKeyType>::Init(
     const file_system::FileReaderPtr& skeyReader, const file_system::FileReaderPtr& valueReader,
     const config::KKVIndexConfig* kkvConfig, OnDiskPKeyOffset offset, uint32_t defaultTs, bool storeTs,
     bool keepSortSeq, KVMetricsCollector* metricsCollector)
@@ -355,21 +355,22 @@ inline FL_LAZY(future_lite::Unit) KKVBuiltSegmentDocIterator<SKeyType>::Init(
     }
     mReadOption.advice = file_system::IO_ADVICE_LOW_LATENCY;
     if (hintSize > OnDiskPKeyOffset::HINT_BLOCK_SIZE) {
-        (FL_COAWAIT mSKeyDecoder->PrefetchAsync(hintSize, blockOffset, mReadOption)).GetOrThrow();
+        auto prefetchResult = FL_COAWAIT mSKeyDecoder->PrefetchAsync(hintSize, blockOffset, mReadOption);
+        (void)prefetchResult.GetOrThrow();
     }
 
-    FL_COAWAIT SwitchChunk(mChunkOffset.inChunkOffset);
+    [[maybe_unused]] auto _switch_result = FL_COAWAIT SwitchChunk(mChunkOffset.inChunkOffset);
     mHasPKeyDeleted = [this]() -> bool { SKEY_NODE_FUNC(IsPKeyDeleted); }();
     if (mHasPKeyDeleted) {
         mPKeyDeletedTs = GetCurrentTs();
         auto ret = MoveToNext();
         (void)ret;
     }
-    FL_CORETURN future_lite::Unit {};
+    FL_CORETURN async_simple::Unit{};
 }
 
 template <typename SKeyType>
-inline FL_LAZY(future_lite::Unit) KKVBuiltSegmentDocIterator<SKeyType>::SwitchChunk(uint64_t offset)
+inline FL_LAZY(async_simple::Unit) KKVBuiltSegmentDocIterator<SKeyType>::SwitchChunk(uint64_t offset)
 {
     mHasPKeyDeleted = false;
     mPKeyDeletedTs = 0;
@@ -386,7 +387,7 @@ inline FL_LAZY(future_lite::Unit) KKVBuiltSegmentDocIterator<SKeyType>::SwitchCh
     if (IsValid()) {
         DoNext();
     }
-    FL_CORETURN future_lite::Unit {};
+    FL_CORETURN async_simple::Unit{};
 }
 
 template <typename SKeyType>
@@ -398,7 +399,7 @@ inline bool KKVBuiltSegmentDocIterator<SKeyType>::MoveToNext()
     }
     if (mTypedSKeyChunk->IsEnd()) {
         if (!mIsOnline) {
-            future_lite::interface::syncAwait(SwitchChunk());
+            async_simple::interface::syncAwait(SwitchChunk());
             return true;
         }
         mTypedSKeyChunk = nullptr;
@@ -548,7 +549,7 @@ KKVBuiltSegmentDocIterator<SKeyType>::MoveToValidPosition(SearchSKeyContext* ske
         switch (status) {
         case FILTERED:
             if (!MoveToNext() && !HasHitLastNode()) {
-                future_lite::interface::syncAwait(SwitchChunk());
+                async_simple::interface::syncAwait(SwitchChunk());
                 continue;
             }
             break;

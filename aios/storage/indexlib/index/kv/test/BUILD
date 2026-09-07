@@ -41,7 +41,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     deps=[
         ':kv_index_config_builder',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',
         '//aios/storage/indexlib/framework/mock:FakeSegment',
         '//aios/storage/indexlib/index/kv:reader',
@@ -77,7 +77,7 @@ strict_cc_library(
     srcs=[],
     hdrs=['VarLenIndexerReadWriteTestBase.h'],
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:async_simple',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',
         '//aios/storage/indexlib/file_system/test:test-util',
         '//aios/storage/indexlib/index/kv:kv_mem_indexer',
@@ -91,7 +91,7 @@ strict_cc_library(
     srcs=[],
     hdrs=['FixedLenIndexerReadWriteTestBase.h'],
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:async_simple',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',
         '//aios/storage/indexlib/file_system/test:test-util',
         '//aios/storage/indexlib/index/kv:kv_mem_indexer',

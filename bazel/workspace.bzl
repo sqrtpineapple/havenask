@@ -14,6 +14,9 @@ def aios_workspace():
     yalantinglibs_version = '0.6.1'
     http_archive(
         name='yalantinglibs',
+        build_file='//bazel:yalantinglibs.BUILD',
+        patch_args=['-p1'],
+        patches=['//bazel:yalantinglibs-0.6.1.patch'],
         sha256='2ef2089a49a08f764c558e9caf46e1d37697b111e04a48e5c5156f57f3afff24',
         strip_prefix='yalantinglibs-{}'.format(yalantinglibs_version),
         urls=[

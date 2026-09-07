@@ -279,7 +279,7 @@ inline FL_LAZY(index::KKVIterator*) KKVReaderImpl<SKeyType>::InnerLookupImpl(
     }
     index::KKVIteratorImplBase* iter = nullptr;
     auto pool = readOptions.pool;
-    if (!future_lite::interface::USE_COROUTINES) {
+    if (!async_simple::interface::USE_COROUTINES) {
         iter = POOL_COMPATIBLE_NEW_CLASS(pool, NormalKKVIteratorImplTyped, pool, indexOptions.GetIndexConfig().get(),
                                          indexOptions.GetTTL(), pkeyHash, std::move(skeyHashVec), builtSegReaders,
                                          buildingSegReaders, currentTimeInSecond, metricsCollector);

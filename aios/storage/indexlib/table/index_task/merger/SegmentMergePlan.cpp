@@ -41,7 +41,7 @@ void SegmentMergePlan::UpdateTargetSegmentInfo(segmentid_t sourceSegId,
     targetSegInfo->shardCount = segInfo->shardCount;
     // doc count may not right, will be upate later
     // estimate memory use may be used
-    targetSegInfo->docCount += segInfo->docCount;
+    targetSegInfo->docCount = targetSegInfo->docCount + segInfo->docCount;
 }
 
 }} // namespace indexlibv2::table

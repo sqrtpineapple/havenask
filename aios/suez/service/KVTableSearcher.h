@@ -62,12 +62,12 @@ struct KVTableSearcherMetricsCollector {
 struct LookupOptions {
     std::vector<std::string> attrs;
     uint32_t timeout;
-    future_lite::Executor *executor;
+    async_simple::Executor *executor;
     autil::mem_pool::Pool *pool;
 
     LookupOptions(const std::vector<std::string> &attrs_,
                   uint32_t timeout_,
-                  future_lite::Executor *executor_,
+                  async_simple::Executor *executor_,
                   autil::mem_pool::Pool *pool_)
         : attrs(attrs_), timeout(timeout_), executor(executor_), pool(pool_) {}
 };

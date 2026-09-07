@@ -40,7 +40,7 @@ public:
 public:
     void Init(T pk, OperationItem* items, size_t itemSize, segmentid_t segmentId);
     bool Process(const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                 future_lite::Executor* executor) override;
+                 async_simple::Executor* executor) override;
 
     DocOperateType GetDocOperateType() const override { return UPDATE_FIELD; }
     OperationBase::SerializedOperationType GetSerializedType() const override { return OperationBase::UPDATE_FIELD_OP; }
@@ -76,7 +76,7 @@ private:
     OperationItem* mItems;
     uint32_t mItemSize;
     segmentid_t mSegmentId;
-    future_lite::Executor* mExecutor;
+    async_simple::Executor* mExecutor;
 
 private:
     IE_LOG_DECLARE();
@@ -110,7 +110,7 @@ void UpdateFieldOperation<T>::Init(T pk, OperationItem* items, size_t itemSize, 
 
 template <typename T>
 bool UpdateFieldOperation<T>::Process(const partition::PartitionModifierPtr& modifier,
-                                      const OperationRedoHint& redoHint, future_lite::Executor* executor)
+                                      const OperationRedoHint& redoHint, async_simple::Executor* executor)
 {
     assert(modifier);
     mExecutor = executor;

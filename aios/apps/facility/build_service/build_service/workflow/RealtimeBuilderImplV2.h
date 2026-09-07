@@ -35,7 +35,7 @@
 #include "build_service/workflow/RealtimeBuilderDefine.h"
 #include "build_service/workflow/RealtimeErrorDefine.h"
 #include "build_service/workflow/StopOption.h"
-#include "future_lite/TaskScheduler.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/framework/ITablet.h"
 #include "indexlib/framework/Locator.h"
@@ -46,7 +46,7 @@ namespace indexlib { namespace util {
 typedef std::shared_ptr<MetricProvider> MetricProviderPtr;
 }} // namespace indexlib::util
 
-namespace future_lite {
+namespace async_simple {
 class NamedTaskScheduler;
 }
 
@@ -56,7 +56,7 @@ class RealtimeBuilderImplV2
 {
 public:
     RealtimeBuilderImplV2(const std::string& configPath, std::shared_ptr<indexlibv2::framework::ITablet> tablet,
-                          const RealtimeBuilderResource& builderResource, future_lite::NamedTaskScheduler* tasker);
+                          const RealtimeBuilderResource& builderResource, async_simple::NamedTaskScheduler* tasker);
 
     virtual ~RealtimeBuilderImplV2();
 
@@ -149,14 +149,14 @@ private:
     int64_t _errorTime;
 
     int32_t _buildCtrlTaskId;
-    future_lite::TaskScheduler::Handle _buildCtrlTaskHandle;
+    async_simple::TaskScheduler::Handle _buildCtrlTaskHandle;
     std::function<void()> _reconstructor;
 
 protected:
     proto::PartitionId _partitionId;
     util::SwiftClientCreatorPtr _swiftClientCreator;
     BuildFlowThreadResource _buildFlowThreadResource;
-    future_lite::NamedTaskScheduler* _tasker;
+    async_simple::NamedTaskScheduler* _tasker;
 
 private:
     BS_LOG_DECLARE();

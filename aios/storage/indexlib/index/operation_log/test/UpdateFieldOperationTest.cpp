@@ -1,6 +1,6 @@
 #include "indexlib/index/operation_log/UpdateFieldOperation.h"
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/operation_log/OperationLogProcessor.h"
 #include "indexlib/index/primary_key/PrimaryKeyReader.h"
 #include "unittest/unittest.h"
@@ -17,7 +17,7 @@ public:
 
 public:
     MOCK_METHOD(docid64_t, LookupWithDocRange,
-                (const autil::uint128_t&, (std::pair<docid_t, docid_t>), future_lite::Executor*), (const, override));
+                (const autil::uint128_t&, (std::pair<docid_t, docid_t>), async_simple::Executor*), (const, override));
 };
 
 class MockModifier : public OperationLogProcessor

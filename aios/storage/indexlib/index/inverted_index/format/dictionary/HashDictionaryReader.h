@@ -40,7 +40,7 @@ public:
 protected:
     index::Result<bool> InnerLookup(dictkey_t key, file_system::ReadOption option,
                                     dictvalue_t& value) noexcept override;
-    inline future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
+    inline async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
     InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept override;
 
     std::shared_ptr<DictionaryIterator> CreateIterator() const override;
@@ -88,7 +88,7 @@ index::Result<bool> HashDictionaryReaderTyped<KeyType>::InnerLookup(dictkey_t ke
 }
 
 template <typename KeyType>
-future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
+async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
 HashDictionaryReaderTyped<KeyType>::InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept
 {
     co_return co_await _innerDictionaryReader->InnerLookupAsync(key, option);

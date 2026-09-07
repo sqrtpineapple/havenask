@@ -49,7 +49,7 @@ class MetricsTags;
 using namespace std;
 using namespace autil;
 using namespace navi;
-using namespace future_lite::interface;
+using namespace async_simple::interface;
 using namespace kmonitor;
 
 namespace sql {
@@ -106,7 +106,7 @@ private:
 };
 
 AsyncKVLookupCallbackCtxV2::AsyncKVLookupCallbackCtxV2(const AsyncPipePtr &pipe,
-                                                       future_lite::Executor *executor)
+                                                       async_simple::Executor *executor)
     : _asyncPipe(pipe)
     , _executor(executor) {}
 
@@ -139,7 +139,7 @@ void AsyncKVLookupCallbackCtxV2::asyncGet(KVLookupOption option) {
 
     if (_asyncPipe == nullptr) {
         NAVI_LOG(DEBUG, "async pipe is nullptr, use sync with reader v2");
-        auto result = future_lite::interface::syncAwaitViaExecutor(
+        auto result = async_simple::interface::syncAwaitViaExecutor(
             kvReader->BatchGetAsync(_pksForSearch, _rawResults, _readOptions), _executor);
         processStatusVec(std::move(result));
         _metricsCollector.lookupTime = incCallbackVersion();
@@ -148,10 +148,10 @@ void AsyncKVLookupCallbackCtxV2::asyncGet(KVLookupOption option) {
         assert(_executor && "executor is nullptr");
         NAVI_LOG(DEBUG, "async pipe ready, use async with reader v2");
         auto ctx = shared_from_this();
-        future_lite::interface::awaitViaExecutor(
+        async_simple::interface::awaitViaExecutor(
             kvReader->BatchGetAsync(_pksForSearch, _rawResults, _readOptions),
             _executor,
-            [ctx](future_lite::interface::use_try_t<StatusVector> statusVecTry) {
+            [ctx](async_simple::interface::use_try_t<StatusVector> statusVecTry) {
                 ctx->onSessionCallback(std::move(statusVecTry));
             });
     }
@@ -173,8 +173,8 @@ AsyncKVLookupCallbackCtxV2::getReader(const std::shared_ptr<indexlibv2::framewor
 }
 
 void AsyncKVLookupCallbackCtxV2::onSessionCallback(
-    future_lite::interface::use_try_t<StatusVector> statusVecTry) {
-    assert(!future_lite::interface::tryHasError(statusVecTry));
+    async_simple::interface::use_try_t<StatusVector> statusVecTry) {
+    assert(!async_simple::interface::tryHasError(statusVecTry));
     processStatusVec(std::move(statusVecTry));
     _metricsCollector.lookupTime = incCallbackVersion();
     endLookupSession({});
@@ -190,15 +190,15 @@ void AsyncKVLookupCallbackCtxV2::prepareReadOptions(const KVLookupOption &option
 }
 
 void AsyncKVLookupCallbackCtxV2::processStatusVec(
-    future_lite::interface::use_try_t<StatusVector> statusVecTry) {
-    assert(!future_lite::interface::tryHasError(statusVecTry));
+    async_simple::interface::use_try_t<StatusVector> statusVecTry) {
+    assert(!async_simple::interface::tryHasError(statusVecTry));
 
-    auto statusVec = std::move(future_lite::interface::getTryValue(statusVecTry));
+    auto statusVec = std::move(async_simple::interface::getTryValue(statusVecTry));
     assert(statusVec.size() == _pksForSearch.size());
     _results.resize(statusVec.size());
     for (size_t i = 0; i < statusVec.size(); ++i) {
-        assert(!future_lite::interface::tryHasError(statusVec[i]));
-        auto status = future_lite::interface::getTryValue(statusVec[i]);
+        assert(!async_simple::interface::tryHasError(statusVec[i]));
+        auto status = async_simple::interface::getTryValue(statusVec[i]);
         if (status == indexlibv2::index::KVResultStatus::FOUND) {
             _results[i] = &_rawResults[i];
         } else {

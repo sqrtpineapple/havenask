@@ -48,7 +48,7 @@ public:
     std::shared_ptr<FileNode> GetFileNode() const noexcept override { return {}; }
 
 private:
-    future_lite::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
+    async_simple::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
                                                                             ReadOption option) noexcept override
     {
         assert(std::is_sorted(batchIO.begin(), batchIO.end()));
@@ -105,7 +105,7 @@ void FileReaderTest::TestBartchReadNonIncreasingOrder()
         batchIO.emplace_back(buffer[0], 4096, 4096);
         batchIO.emplace_back(buffer[1], 4096, 0);
 
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(4096, readResult[0].GetOrThrow());
         ASSERT_EQ(4096, readResult[1].GetOrThrow());
     }
@@ -115,7 +115,7 @@ void FileReaderTest::TestBartchReadNonIncreasingOrder()
         batchIO.emplace_back(buffer[0], 1, 4096);
         batchIO.emplace_back(buffer[1], 4096, 0);
 
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(1, readResult[0].GetOrThrow());
         ASSERT_EQ(4096, readResult[1].GetOrThrow());
     }
@@ -130,7 +130,7 @@ void FileReaderTest::TestBartchReadNonIncreasingOrder()
             batchIO.emplace_back(buffer[i], len, offset);
             expectedResult.push_back(len);
         }
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         for (size_t i = 0; i < expectedResult.size(); ++i) {
             ASSERT_EQ(expectedResult[i], readResult[i].GetOrThrow());
         }
@@ -146,7 +146,7 @@ void FileReaderTest::TestReadOutOfRange()
         batchIO.emplace_back(buffer[0], 4096, 40960000);
         batchIO.emplace_back(buffer[1], 4096, 0);
 
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_FALSE(readResult[0].OK());
         ASSERT_FALSE(readResult[1].OK());
     }
@@ -155,7 +155,7 @@ void FileReaderTest::TestReadOutOfRange()
         char buffer[4][4097];
         batchIO.emplace_back(buffer[0], 4097, 0);
 
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_FALSE(readResult[0].OK());
     }
     {
@@ -163,7 +163,7 @@ void FileReaderTest::TestReadOutOfRange()
         char buffer[4][4096];
         batchIO.emplace_back(buffer[0], 4096, 0);
 
-        auto readResult = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto readResult = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_TRUE(readResult[0].OK());
         ASSERT_EQ(4096, readResult[0].GetOrThrow());
     }

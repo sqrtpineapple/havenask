@@ -49,7 +49,7 @@ void SubDocOperation::Init(DocOperateType docOperateType, OperationBase* mainOpe
 }
 
 bool SubDocOperation::Process(const PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                              future_lite::Executor* executor)
+                              async_simple::Executor* executor)
 {
     SubDocModifierPtr subDocModifier = DYNAMIC_POINTER_CAST(SubDocModifier, modifier);
     assert(subDocModifier);

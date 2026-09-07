@@ -24,7 +24,7 @@ strict_cc_library(
     deps=[
         ':SingleEncodedNullValue', '//aios/autil:NoCopyable',
         '//aios/autil:const_string_util', '//aios/autil:string_type',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/index/common/field_format:attribute_field_format'
     ]

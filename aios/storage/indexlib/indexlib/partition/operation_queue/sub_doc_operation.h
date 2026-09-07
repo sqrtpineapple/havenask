@@ -48,7 +48,7 @@ public:
     bool Load(autil::mem_pool::Pool* pool, char*& cursor) override;
 
     bool Process(const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                 future_lite::Executor* mExecutor) override;
+                 async_simple::Executor* mExecutor) override;
 
     OperationBase* Clone(autil::mem_pool::Pool* pool) override;
 

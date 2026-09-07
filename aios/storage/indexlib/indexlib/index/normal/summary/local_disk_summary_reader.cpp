@@ -114,7 +114,7 @@ bool LocalDiskSummaryReader::GetDocument(docid_t docId, SearchSummaryDocument* s
     return false;
 }
 
-future_lite::coro::Lazy<vector<index::ErrorCode>>
+async_simple::coro::Lazy<vector<index::ErrorCode>>
 LocalDiskSummaryReader::GetDocumentFromSummaryAsync(const std::vector<docid_t>& docIds, Pool* sessionPool,
                                                     file_system::ReadOption readOption,
                                                     const SearchSummaryDocVec* docs) const noexcept
@@ -159,12 +159,12 @@ LocalDiskSummaryReader::GetDocumentFromSummaryAsync(const std::vector<docid_t>& 
     co_return ret;
 }
 
-future_lite::coro::Lazy<vector<future_lite::Try<vector<index::ErrorCode>>>>
+async_simple::coro::Lazy<vector<async_simple::Try<vector<index::ErrorCode>>>>
 LocalDiskSummaryReader::GetBuiltSegmentTasks(const vector<docid_t>& docIds, Pool* sessionPool,
                                              file_system::ReadOption readOption,
                                              const SearchSummaryDocVec* docs) const noexcept
 {
-    vector<future_lite::coro::Lazy<vector<index::ErrorCode>>> segmentTasks;
+    vector<async_simple::coro::Lazy<vector<index::ErrorCode>>> segmentTasks;
 
     // get value from built segment async
 
@@ -191,10 +191,10 @@ LocalDiskSummaryReader::GetBuiltSegmentTasks(const vector<docid_t>& docIds, Pool
                 mSegmentReaders[i]->GetDocument(segmentDocIds[idx], sessionPool, readOption, &segmentDocs[idx]));
         }
     }
-    co_return co_await future_lite::coro::collectAll(move(segmentTasks));
+    co_return co_await async_simple::coro::collectAll(move(segmentTasks));
 }
 
-future_lite::coro::Lazy<vector<index::ErrorCode>>
+async_simple::coro::Lazy<vector<index::ErrorCode>>
 LocalDiskSummaryReader::GetDocumentAsync(const std::vector<docid_t>& docIds, Pool* sessionPool,
                                          file_system::ReadOption readOption,
                                          const SearchSummaryDocVec* docs) const noexcept
@@ -208,7 +208,7 @@ LocalDiskSummaryReader::GetDocumentAsync(const std::vector<docid_t>& docIds, Poo
         co_return vector<index::ErrorCode>(docIds.size(), index::ErrorCode::Runtime);
     }
     vector<index::ErrorCode> result(docIds.size(), index::ErrorCode::OK);
-    vector<future_lite::coro::Lazy<vector<index::ErrorCode>>> subTasks;
+    vector<async_simple::coro::Lazy<vector<index::ErrorCode>>> subTasks;
     subTasks.reserve(mAttrReaders.size() + 1);
     subTasks.push_back(GetDocumentFromSummaryAsync(docIds, sessionPool, readOption, docs));
     vector<vector<string>> attributeValues(mAttrReaders.size()), packAttributeValues(mPackAttrReaders.size());
@@ -222,7 +222,7 @@ LocalDiskSummaryReader::GetDocumentAsync(const std::vector<docid_t>& docIds, Poo
         subTasks.push_back(iter->BatchSeek(docIds, readOption, &attributeValues[i]));
     }
 
-    auto taskResult = co_await future_lite::coro::collectAll(move(subTasks));
+    auto taskResult = co_await async_simple::coro::collectAll(move(subTasks));
 
     for (size_t docIdx = 0; docIdx < docIds.size(); ++docIdx) {
         assert(!taskResult[0].hasError());

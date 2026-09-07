@@ -148,7 +148,7 @@ LocalDiskSummaryDiskIndexer::GetDocument(docid_t localDocId,
     return std::make_pair(Status::InternalError("Deserialize summary[docid = %d] FAILED.", localDocId), false);
 }
 
-future_lite::coro::Lazy<std::vector<indexlib::index::ErrorCode>>
+async_simple::coro::Lazy<std::vector<indexlib::index::ErrorCode>>
 LocalDiskSummaryDiskIndexer::GetDocument(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                                          indexlib::file_system::ReadOption readOption,
                                          const SearchSummaryDocVec* docs) noexcept

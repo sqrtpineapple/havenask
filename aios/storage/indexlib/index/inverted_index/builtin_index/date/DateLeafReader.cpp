@@ -47,7 +47,7 @@ DateLeafReader::DateLeafReader(const std::shared_ptr<indexlibv2::config::DateInd
 
 DateLeafReader::~DateLeafReader() {}
 
-future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
 DateLeafReader::Lookup(uint64_t leftTerm, uint64_t rightTerm, docid64_t baseDocId, autil::mem_pool::Pool* sessionPool,
                        file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept
 {
@@ -72,7 +72,7 @@ DateLeafReader::Lookup(uint64_t leftTerm, uint64_t rightTerm, docid64_t baseDocI
     co_return result;
 }
 
-future_lite::coro::Lazy<ErrorCode> DateLeafReader::FillSegmentPostings(
+async_simple::coro::Lazy<ErrorCode> DateLeafReader::FillSegmentPostings(
     const DateTerm::Ranges& ranges, docid64_t baseDocId, const std::shared_ptr<SegmentPostings>& dateSegmentPostings,
     autil::mem_pool::Pool* sessionPool, file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept
 {
@@ -89,7 +89,7 @@ future_lite::coro::Lazy<ErrorCode> DateLeafReader::FillSegmentPostings(
     }
     std::shared_ptr<DictionaryIterator> iter = _dictReader->CreateIterator();
     assert(iter);
-    std::vector<future_lite::coro::Lazy<index::Result<SegmentPosting>>> tasks;
+    std::vector<async_simple::coro::Lazy<index::Result<SegmentPosting>>> tasks;
     if (tracer) {
         option.blockCounter = tracer->GetDictionaryBlockCacheCounter();
     }
@@ -123,7 +123,7 @@ future_lite::coro::Lazy<ErrorCode> DateLeafReader::FillSegmentPostings(
             tracer->IncDictionaryHitCount(seekDictCount - 1);
         }
     }
-    auto taskResult = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto taskResult = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < taskResult.size(); ++i) {
         assert(!taskResult[i].hasError());
         if (taskResult[i].value().Ok()) {
@@ -136,7 +136,7 @@ future_lite::coro::Lazy<ErrorCode> DateLeafReader::FillSegmentPostings(
     co_return ErrorCode::OK;
 }
 
-future_lite::coro::Lazy<index::Result<SegmentPosting>>
+async_simple::coro::Lazy<index::Result<SegmentPosting>>
 DateLeafReader::FillOneSegment(dictvalue_t value, docid64_t baseDocId, autil::mem_pool::Pool* sessionPool,
                                file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept
 {

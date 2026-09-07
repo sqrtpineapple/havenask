@@ -82,7 +82,7 @@ void SummaryReaderImpl::AddPackAttrReader(fieldid_t fieldId, const PackAttribute
     mSummaryGroups[groupId]->AddPackAttrReader(fieldId, attrReader);
 }
 
-future_lite::coro::Lazy<index::ErrorCodeVec>
+async_simple::coro::Lazy<index::ErrorCodeVec>
 SummaryReaderImpl::GetDocument(const vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                                file_system::ReadOption option,
                                const vector<SearchSummaryDocument*>* docs) const noexcept
@@ -90,7 +90,7 @@ SummaryReaderImpl::GetDocument(const vector<docid_t>& docIds, autil::mem_pool::P
     return GetDocument(docIds, mAllGroupIds, sessionPool, option, docs);
 }
 
-future_lite::coro::Lazy<index::ErrorCodeVec>
+async_simple::coro::Lazy<index::ErrorCodeVec>
 SummaryReaderImpl::InnerGetDocumentAsync(const vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                          autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                                          const vector<SearchSummaryDocument*>* docs) const noexcept
@@ -129,7 +129,7 @@ SummaryReaderImpl::InnerGetDocumentAsync(const vector<docid_t>& docIds, const Su
     co_return result;
 }
 
-future_lite::coro::Lazy<index::ErrorCodeVec>
+async_simple::coro::Lazy<index::ErrorCodeVec>
 SummaryReaderImpl::InnerGetDocumentAsyncOrdered(const vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                                 autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                                                 const vector<SearchSummaryDocument*>* docs) const noexcept
@@ -142,11 +142,11 @@ SummaryReaderImpl::InnerGetDocumentAsyncOrdered(const vector<docid_t>& docIds, c
             co_return vector<ErrorCode>(docIds.size(), ErrorCode::Runtime);
         }
     }
-    vector<future_lite::coro::Lazy<vector<index::ErrorCode>>> tasks;
+    vector<async_simple::coro::Lazy<vector<index::ErrorCode>>> tasks;
     for (size_t i = 0; i < groupVec.size(); ++i) {
         tasks.push_back(mSummaryGroups[groupVec[i]]->GetDocumentAsync(docIds, sessionPool, option, docs));
     }
-    auto taskResults = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto taskResults = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < docIds.size(); ++i) {
         ec.push_back(ErrorCode::OK);
     }
@@ -162,7 +162,7 @@ SummaryReaderImpl::InnerGetDocumentAsyncOrdered(const vector<docid_t>& docIds, c
     co_return ec;
 }
 
-future_lite::coro::Lazy<index::ErrorCodeVec>
+async_simple::coro::Lazy<index::ErrorCodeVec>
 SummaryReaderImpl::GetDocument(const vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                                const vector<SearchSummaryDocument*>* docs) const noexcept
@@ -174,9 +174,12 @@ SummaryReaderImpl::GetDocument(const vector<docid_t>& docIds, const SummaryGroup
 
     assert(docIds.size() == docs->size());
     index::ErrorCodeVec ec;
-    auto executor = co_await future_lite::CurrentExecutor();
+    auto executor = co_await async_simple::CurrentExecutor();
     if (mExecutor) {
-        ec = co_await InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs).via(mExecutor);
+        std::vector<async_simple::coro::RescheduleLazy<indexlib::index::ErrorCodeVec>> ops;
+        ops.push_back(InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs).via(mExecutor));
+        auto anyResult = co_await async_simple::coro::collectAny(std::move(ops));
+        ec = anyResult.value();
     } else if (executor) {
         ec = co_await InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs);
     } else {

@@ -49,7 +49,7 @@ public:
               const file_system::SliceFileReaderPtr& expandSliceFile = file_system::SliceFileReaderPtr());
 
     inline uint64_t GetOffset(docid_t docId) const __ALWAYS_INLINE;
-    inline future_lite::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
+    inline async_simple::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
                                                                   indexlib::file_system::ReadOption readOption,
                                                                   std::vector<uint64_t>* offsets) const noexcept;
     bool SetOffset(docid_t docId, uint64_t offset);
@@ -135,7 +135,7 @@ inline uint64_t CompressOffsetReader::GetOffset(docid_t docId) const
     indexlib::util::ThrowIfStatusError(status);
     return offset;
 }
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 CompressOffsetReader::GetOffset(const std::vector<docid_t>& docIds, indexlib::file_system::ReadOption readOption,
                                 std::vector<uint64_t>* offsets) const noexcept
 {

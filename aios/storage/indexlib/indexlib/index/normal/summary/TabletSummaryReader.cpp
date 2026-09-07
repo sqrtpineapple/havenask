@@ -31,7 +31,7 @@ TabletSummaryReader::TabletSummaryReader(indexlibv2::index::SummaryReader* summa
     mPKIndexReader = pkIndexReader;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 TabletSummaryReader::GetDocument(const std::vector<docid_t>& docIds, const indexlib::index::SummaryGroupIdVec& groupVec,
                                  autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                                  const indexlib::index::SearchSummaryDocVec* docs) const noexcept
@@ -40,7 +40,7 @@ TabletSummaryReader::GetDocument(const std::vector<docid_t>& docIds, const index
                                                    (indexlibv2::index::SummaryReader::SearchSummaryDocVec*)docs);
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 TabletSummaryReader::GetDocument(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                                  indexlib::file_system::ReadOption option,
                                  const indexlib::index::SearchSummaryDocVec* docs) const noexcept

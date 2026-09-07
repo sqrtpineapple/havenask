@@ -18,7 +18,7 @@
 #include "autil/Log.h"
 #include "autil/NoCopyable.h"
 #include "fslib/fslib.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/file_system/file/ReadOption.h"
@@ -66,7 +66,7 @@ public:
 public:
     std::pair<Status, bool> GetDocument(docid_t localDocId,
                                         indexlib::document::SearchSummaryDocument* summaryDoc) const;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        indexlib::file_system::ReadOption readOption,
                                                                        const SearchSummaryDocVec* docs) noexcept;

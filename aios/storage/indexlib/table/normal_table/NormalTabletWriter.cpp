@@ -18,7 +18,7 @@
 #include <unordered_set>
 
 #include "autil/TimeUtility.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/config/BuildOptionConfig.h"
 #include "indexlib/config/TabletOptions.h"
 #include "indexlib/config/TabletSchema.h"
@@ -333,7 +333,7 @@ void NormalTabletWriter::ValidateDocumentBatch(document::IDocumentBatch* batch)
             }
             if (_pkReader) {
                 const std::string& pkStr = doc->GetPrimaryKey();
-                auto docid = _pkReader->Lookup(pkStr, /*future_lite::Executor*=*/nullptr);
+                auto docid = _pkReader->Lookup(pkStr, /*async_simple::Executor*=*/nullptr);
                 if (docid != INVALID_DOCID) {
                     batch->DropDoc(i);
                 }

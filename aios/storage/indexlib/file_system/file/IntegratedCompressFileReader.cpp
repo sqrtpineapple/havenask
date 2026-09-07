@@ -94,7 +94,7 @@ void IntegratedCompressFileReader::LoadBuffer(size_t offset, ReadOption option) 
     _curBlockIdxs[0] = blockIdx;
 }
 
-future_lite::coro::Lazy<std::vector<ErrorCode>>
+async_simple::coro::Lazy<std::vector<ErrorCode>>
 IntegratedCompressFileReader::BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                                               ReadOption option) noexcept
 {

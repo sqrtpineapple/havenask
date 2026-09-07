@@ -8,7 +8,7 @@ strict_cc_library(
     hdrs=['FileReader.h', 'FileWriter.h', 'ReadOption.h'],
     visibility=['//visibility:public'],
     deps=[
-        '//aios/autil:NoCopyable', '//aios/future_lite',
+        '//aios/autil:NoCopyable', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/util:CoroutineConfig'
     ]
 )

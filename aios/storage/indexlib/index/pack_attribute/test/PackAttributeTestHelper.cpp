@@ -121,7 +121,7 @@ PackAttributeTestHelper::MakePackAttributeConfig(const std::string& packAttribut
         "compress_type": {2}
     }} )";
     std::string jsonStr =
-        fmt::format(jsonTemplate, autil::legacy::ToJsonString(packName),
+        fmt::format(fmt::runtime(jsonTemplate), autil::legacy::ToJsonString(packName),
                     autil::legacy::ToJsonString(subAttributeNames, true), autil::legacy::ToJsonString(compressStr));
     autil::legacy::Any any = autil::legacy::json::ParseJson(jsonStr);
     indexlibv2::config::IndexConfigDeserializeResource resource(GetFieldConfigs(), MutableRuntimeSettings());

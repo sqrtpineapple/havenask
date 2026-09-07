@@ -19,8 +19,8 @@
 #include "autil/Log.h"
 #include "autil/MurmurHash.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/MoveWrapper.h"
+#include "CoroInterface.h"
+#include "async_simple/MoveWrapper.h"
 #include "indexlib/framework/Locator.h"
 #include "indexlib/index/kkv/building/KKVBuildingSegmentReader.h"
 #include "indexlib/index/kkv/built/KKVBuiltSegmentReader.h"
@@ -65,6 +65,16 @@ private:
             , lastSeg(other.lastSeg)
         {
         }
+        SegResult& operator=(SegResult&& other) noexcept {
+            if (this != &other) {
+                kkvDocs = std::move(other.kkvDocs);
+                hasPKeyDeleted = other.hasPKeyDeleted;
+                iterHolder = std::move(other.iterHolder);
+                valueFetcher = std::move(other.valueFetcher);
+                lastSeg = other.lastSeg;
+            }
+            return *this;
+        }
     };
 
 private:
@@ -81,7 +91,7 @@ private:
     using PooledSKeySet = typename SKeyContext::PooledSKeySet;
 
     using SegResultVec = std::vector<SegResult, autil::mem_pool::pool_allocator<SegResult>>;
-    using SegResultTry = future_lite::Try<SegResult>;
+    using SegResultTry = async_simple::Try<SegResult>;
 
 public:
     static Status SearchBuilding(SearchContext<SKeyType>& context, KKVDocs& kkvDocs);
@@ -230,11 +240,11 @@ inline FL_LAZY(Status) KKVSearchCoroutine<SKeyType>::SearchBuilt(SearchContext<S
         ++segResultIter;
     }
 
-    autil::mem_pool::pool_allocator<future_lite::Try<bool>> outAlloc(pool);
-    auto allResult = FL_COAWAIT future_lite::interface::collectAll(std::move(fetchValueTasks), outAlloc);
+    autil::mem_pool::pool_allocator<async_simple::Try<bool>> outAlloc(pool);
+    auto allResult = FL_COAWAIT async_simple::interface::collectAll(std::move(fetchValueTasks), outAlloc);
     for (const auto& oneResult : allResult) {
         // NOTE, not expected exception in under layer function
-        auto ret = future_lite::interface::getTryValue(oneResult); // rethrow exception if error
+        auto ret = async_simple::interface::getTryValue(oneResult); // rethrow exception if error
         if (!ret) {
             FL_CORETURN Status::IOError();
         }
@@ -320,12 +330,12 @@ inline FL_LAZY(Status) KKVSearchCoroutine<SKeyType>::CollectSKeysFromBuiltSegmen
     }
 
     if (retStatus.IsOK()) {
-        autil::mem_pool::pool_allocator<future_lite::Try<std::pair<Status, SegResult>>> outAlloc(pool);
+        autil::mem_pool::pool_allocator<async_simple::Try<std::pair<Status, SegResult>>> outAlloc(pool);
         // NOTE, not expected exception in under layer function
-        auto tryRet = FL_COAWAIT future_lite::interface::collectAll(std::move(segTasks), outAlloc);
+        auto tryRet = FL_COAWAIT async_simple::interface::collectAll(std::move(segTasks), outAlloc);
         for (auto& it : tryRet) {
             // TODO(xinfei.sxf) is this exist copy
-            auto& [status, segResult] = future_lite::interface::getTryValue(it); // rethrow exception if error
+            auto& [status, segResult] = async_simple::interface::getTryValue(it); // rethrow exception if error
             if (!status.IsOK()) {
                 FL_CORETURN status;
             }

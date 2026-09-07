@@ -70,9 +70,9 @@ private:
     bool reopenRt(const TableVersion &version);
 
 private:
-    future_lite::Executor *_executor;
-    future_lite::Executor *_dumpExecutor;
-    future_lite::TaskScheduler *_taskScheduler;
+    async_simple::Executor *_executor;
+    async_simple::Executor *_dumpExecutor;
+    async_simple::TaskScheduler *_taskScheduler;
     std::unique_ptr<LogReplicator> _logReplicator;
     mutable autil::ThreadMutex _mutex;
 };

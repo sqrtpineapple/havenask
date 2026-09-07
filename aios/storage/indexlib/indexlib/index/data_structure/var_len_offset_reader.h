@@ -38,7 +38,7 @@ public:
               const file_system::SliceFileReaderPtr& extFileReader = file_system::SliceFileReaderPtr());
 
     inline uint64_t GetOffset(docid_t docId) const __ALWAYS_INLINE;
-    inline future_lite::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
+    inline async_simple::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
                                                                   file_system::ReadOption option,
                                                                   std::vector<uint64_t>* offsets) const noexcept;
     inline bool IsU32Offset() const __ALWAYS_INLINE;
@@ -83,7 +83,7 @@ inline uint64_t VarLenOffsetReader::GetOffset(docid_t docId) const
     }
     return mUncompressOffsetReader.GetOffset(docId);
 }
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 VarLenOffsetReader::GetOffset(const std::vector<docid_t>& docIds, file_system::ReadOption option,
                               std::vector<uint64_t>* offsets) const noexcept
 {

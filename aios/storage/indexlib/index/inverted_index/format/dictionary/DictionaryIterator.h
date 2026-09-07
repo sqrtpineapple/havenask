@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/common/DictKeyInfo.h"
 #include "indexlib/index/common/ErrorCode.h"
@@ -35,12 +35,12 @@ public:
     virtual bool HasNext() const = 0;
     virtual void Next(index::DictKeyInfo& key, dictvalue_t& value) = 0;
     virtual void Seek(dictkey_t key) { assert(false); }
-    virtual future_lite::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption option) noexcept
+    virtual async_simple::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption option) noexcept
     {
         assert(false);
         co_return index::ErrorCode::UnSupported;
     }
-    virtual future_lite::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
+    virtual async_simple::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
                                                                 dictvalue_t& value) noexcept
     {
         assert(false);

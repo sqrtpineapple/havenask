@@ -348,7 +348,7 @@ void PlainMemSegment::UpdateSegmentInfo(const indexlibv2::framework::Locator& lo
     if (_segmentMeta.segmentInfo->maxTTL < maxTTL) {
         _segmentMeta.segmentInfo->maxTTL = maxTTL;
     }
-    _segmentMeta.segmentInfo->docCount += addDocCount;
+    _segmentMeta.segmentInfo->docCount = _segmentMeta.segmentInfo->docCount + addDocCount;
 }
 
 bool PlainMemSegment::NeedDump() const

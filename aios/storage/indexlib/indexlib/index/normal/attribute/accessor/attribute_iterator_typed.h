@@ -61,11 +61,11 @@ public:
 
     inline bool UpdateValue(docid_t docId, const T& value, bool isNull = false);
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
                                                            file_system::ReadOption readOption, std::vector<T>* values,
                                                            std::vector<bool>* isNullVec) noexcept;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
                                                            file_system::ReadOption readOption,
                                                            std::vector<std::string>* values) noexcept override;
 
@@ -225,7 +225,7 @@ inline bool AttributeIteratorTyped<T, ReaderTraits>::UpdateValue(docid_t docId, 
 }
 
 template <typename T, typename ReaderTraits>
-future_lite::coro::Lazy<index::ErrorCodeVec> AttributeIteratorTyped<T, ReaderTraits>::BatchSeek(
+async_simple::coro::Lazy<index::ErrorCodeVec> AttributeIteratorTyped<T, ReaderTraits>::BatchSeek(
     const std::vector<docid_t>& docIds, file_system::ReadOption readOption, std::vector<std::string>* values) noexcept
 {
     assert(mFieldPrinter);
@@ -242,7 +242,7 @@ future_lite::coro::Lazy<index::ErrorCodeVec> AttributeIteratorTyped<T, ReaderTra
 }
 
 template <typename T, typename ReaderTraits>
-future_lite::coro::Lazy<index::ErrorCodeVec>
+async_simple::coro::Lazy<index::ErrorCodeVec>
 AttributeIteratorTyped<T, ReaderTraits>::BatchSeek(const std::vector<docid_t>& docIds,
                                                    file_system::ReadOption readOption, std::vector<T>* values,
                                                    std::vector<bool>* isNullVec) noexcept
@@ -259,7 +259,7 @@ AttributeIteratorTyped<T, ReaderTraits>::BatchSeek(const std::vector<docid_t>& d
     assert(isNullVec);
     values->resize(docIds.size());
     isNullVec->resize(docIds.size());
-    std::vector<future_lite::coro::Lazy<index::ErrorCodeVec>> segmentTasks;
+    std::vector<async_simple::coro::Lazy<index::ErrorCodeVec>> segmentTasks;
     docid_t currentSegDocIdEnd = 0;
     std::deque<std::vector<docid_t>> taskDocIds;
     std::deque<std::vector<T>> segmentValues;
@@ -283,7 +283,7 @@ AttributeIteratorTyped<T, ReaderTraits>::BatchSeek(const std::vector<docid_t>& d
                                                                  &segmentValues[size], &segmentIsNull[size]));
         }
     }
-    auto segmentResults = co_await future_lite::coro::collectAll(move(segmentTasks));
+    auto segmentResults = co_await async_simple::coro::collectAll(move(segmentTasks));
     docIdx = 0;
     for (size_t i = 0; i < segmentResults.size(); ++i) {
         assert(!segmentResults[i].hasError());

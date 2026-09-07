@@ -29,7 +29,7 @@
 
 #include "autil/Log.h"
 #include "autil/ThreadPool.h"
-#include "future_lite/NamedTaskScheduler.h"
+#include "NamedTaskScheduler.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -219,7 +219,7 @@ private:
     std::unique_ptr<MemSegmentCreator> _memSegmentCreator;
 
     std::shared_ptr<TabletReaderContainer> _tabletReaderContainer;
-    std::unique_ptr<future_lite::NamedTaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::NamedTaskScheduler> _taskScheduler;
 
     std::shared_ptr<TabletMetrics> _tabletMetrics;
     std::unique_ptr<MetricsManager> _metricsManager;

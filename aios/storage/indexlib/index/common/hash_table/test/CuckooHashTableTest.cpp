@@ -7,7 +7,7 @@
 
 #include "autil/Log.h"
 #include "autil/StringUtil.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/file_system/FileSystemCreator.h"
 #include "indexlib/file_system/FileSystemOptions.h"
 #include "indexlib/file_system/IDirectory.h"
@@ -604,10 +604,10 @@ TEST_F(CuckooHashTableTest, TestFileIterator)
         key = key * 11 + 17;
         Traits::ValueType actualValue;
         if (key % 3 == 2) {
-            ASSERT_EQ(DELETED, future_lite::interface::syncAwait(reader.Find(key, actualValue, nullptr, nullptr)))
+            ASSERT_EQ(DELETED, async_simple::interface::syncAwait(reader.Find(key, actualValue, nullptr, nullptr)))
                 << "key:" << key;
         } else {
-            ASSERT_EQ(OK, future_lite::interface::syncAwait(reader.Find(key, actualValue, nullptr, nullptr)))
+            ASSERT_EQ(OK, async_simple::interface::syncAwait(reader.Find(key, actualValue, nullptr, nullptr)))
                 << "key:" << key;
             ASSERT_EQ(i, actualValue);
         }

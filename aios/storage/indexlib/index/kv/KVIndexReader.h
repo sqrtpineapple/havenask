@@ -18,8 +18,8 @@
 #include "autil/ConstString.h"
 #include "autil/Log.h"
 #include "autil/mem_pool/pool_allocator.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/coro/Lazy.h"
+#include "CoroInterface.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/index/IIndexReader.h"
@@ -79,7 +79,7 @@ class KVIndexReader : public IIndexReader
 {
 public:
     template <typename T>
-    using use_try_t = future_lite::interface::use_try_t<T>;
+    using use_try_t = async_simple::interface::use_try_t<T>;
 
     using StatusPoolAlloc = autil::mem_pool::pool_allocator<use_try_t<KVResultStatus>>;
     using StatusPoolVector = std::vector<use_try_t<KVResultStatus>, StatusPoolAlloc>;
@@ -187,13 +187,13 @@ protected:
 inline KVResultStatus KVIndexReader::Get(const autil::StringView& key, autil::StringView& value,
                                          const KVReadOptions& options) const
 {
-    return future_lite::interface::syncAwait(GetAsync(key, value, options));
+    return async_simple::interface::syncAwait(GetAsync(key, value, options));
 }
 
 inline KVResultStatus KVIndexReader::Get(index::keytype_t key, autil::StringView& value,
                                          const KVReadOptions& options) const
 {
-    return future_lite::interface::syncAwait(GetAsync(key, value, options));
+    return async_simple::interface::syncAwait(GetAsync(key, value, options));
 }
 
 inline KVResult KVIndexReader::Get(const autil::StringView& key, const KVReadOptions& options) const
@@ -284,7 +284,7 @@ inline FL_LAZY(KVIndexReader::StatusPoolVector)
             lazyGroups.push_back(InnerGet(&options, keys[i], values[i], &metricsCollectors[i]));
         }
         StatusPoolAlloc alloc(options.pool);
-        auto res = FL_COAWAIT future_lite::interface::collectAllWindowed(options.maxConcurrency, options.yield,
+        auto res = FL_COAWAIT async_simple::interface::collectAllWindowed(options.maxConcurrency, options.yield,
                                                                          std::move(lazyGroups), alloc);
         int64_t sstable_latency = 0;
         for (auto& metricsCollector : metricsCollectors) {
@@ -298,7 +298,7 @@ inline FL_LAZY(KVIndexReader::StatusPoolVector)
             lazyGroups.push_back(InnerGet(&options, keys[i], values[i], NULL));
         }
         StatusPoolAlloc alloc(options.pool);
-        FL_CORETURN FL_COAWAIT future_lite::interface::collectAll(std::move(lazyGroups), alloc);
+        FL_CORETURN FL_COAWAIT async_simple::interface::collectAll(std::move(lazyGroups), alloc);
     }
 }
 
@@ -314,7 +314,7 @@ inline FL_LAZY(KVIndexReader::ResultPoolVector) KVIndexReader::InnerBatchGetResu
     assert(statPoolVec.size() == values.size());
     for (size_t i = 0; i < statPoolVec.size(); i++) {
         index::FieldValueExtractor extractor(_formatter.get(), values[i], options.pool);
-        KVResult result(future_lite::interface::getTryValue(statPoolVec[i]), std::move(extractor));
+        KVResult result(async_simple::interface::getTryValue(statPoolVec[i]), std::move(extractor));
         res.push_back(std::move(result));
     }
     FL_CORETURN res;

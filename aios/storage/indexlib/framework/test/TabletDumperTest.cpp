@@ -1,6 +1,6 @@
 #include "indexlib/framework/TabletDumper.h"
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/framework/Version.h"
 #include "indexlib/framework/mock/MockMemSegment.h"
 #include "indexlib/framework/mock/MockSegmentDumpItem.h"
@@ -15,13 +15,13 @@ public:
     TabletDumperTest() = default;
     ~TabletDumperTest() = default;
 
-    void setUp() override { _executor.reset(new future_lite::executors::SimpleExecutor(5)); }
+    void setUp() override { _executor.reset(new async_simple::executors::SimpleExecutor(5)); }
     void tearDown() override {}
 
 private:
     static constexpr uint32_t DEFAULT_DUMP_THREAD_COUNT {4};
 
-    std::unique_ptr<future_lite::Executor> _executor = nullptr;
+    std::unique_ptr<async_simple::Executor> _executor = nullptr;
 };
 
 namespace {

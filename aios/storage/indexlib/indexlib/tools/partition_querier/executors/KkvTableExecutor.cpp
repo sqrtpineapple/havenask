@@ -71,12 +71,12 @@ Status KkvTableExecutor::QueryKkvTable(const IndexPartitionReaderPtr& indexParti
         KKVIterator* kkvIterator = nullptr;
         if (skList.empty()) {
             kkvIterator =
-                future_lite::interface::syncAwait(kkvReader->LookupAsync(prefixKey, curTs, tsc_default, &pool));
+                async_simple::interface::syncAwait(kkvReader->LookupAsync(prefixKey, curTs, tsc_default, &pool));
         } else {
             auto sk = skList[i];
             StringView suffixKey = autil::MakeCString(sk, &pool);
             vector<StringView> suffixKeys = {suffixKey};
-            kkvIterator = future_lite::interface::syncAwait(
+            kkvIterator = async_simple::interface::syncAwait(
                 kkvReader->LookupAsync(prefixKey, suffixKeys, curTs, tsc_default, &pool));
         }
         if (!kkvIterator) {

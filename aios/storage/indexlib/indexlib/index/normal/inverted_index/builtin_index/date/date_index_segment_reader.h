@@ -41,16 +41,16 @@ public:
 public:
     void Open(const config::IndexConfigPtr& indexConfig, const index_base::SegmentData& segmentData,
               const NormalIndexSegmentReader* hintReader) override;
-    future_lite::coro::Lazy<index::Result<SegmentPostingsVec>> Lookup(uint64_t leftTerm, uint64_t rightTerm,
+    async_simple::coro::Lazy<index::Result<SegmentPostingsVec>> Lookup(uint64_t leftTerm, uint64_t rightTerm,
                                                                       autil::mem_pool::Pool* sessionPool,
                                                                       file_system::ReadOption option) noexcept;
 
 private:
-    future_lite::coro::Lazy<index::ErrorCode>
+    async_simple::coro::Lazy<index::ErrorCode>
     FillSegmentPostings(const DateTerm::Ranges& ranges, const std::shared_ptr<SegmentPostings>& dateSegmentPostings,
                         autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept;
 
-    future_lite::coro::Lazy<index::Result<SegmentPosting>>
+    async_simple::coro::Lazy<index::Result<SegmentPosting>>
     FillOneSegment(dictvalue_t value, autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept;
     void NormalizeTerms(uint64_t minTime, uint64_t maxTime, uint64_t& leftTerm, uint64_t& rightTerm);
 

@@ -15,7 +15,7 @@
 #include "autil/StringUtil.h"
 #include "autil/TimeUtility.h"
 #include "build_service/config/ResourceReader.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "ha3/common/QueryInfo.h"
 #include "indexlib/config/index_partition_options.h"
 #include "indexlib/config/index_partition_schema.h"
@@ -67,8 +67,8 @@ void OpTestBase::SetUp() {
     if (_needBuildIndex) {
         ASSERT_NO_FATAL_FAILURE(prepareIndex());
     }
-    _asyncInterExecutor = std::make_unique<future_lite::executors::SimpleExecutor>(1);
-    _asyncIntraExecutor = std::make_unique<future_lite::executors::SimpleExecutor>(1);
+    _asyncInterExecutor = std::make_unique<async_simple::executors::SimpleExecutor>(1);
+    _asyncIntraExecutor = std::make_unique<async_simple::executors::SimpleExecutor>(1);
 
     if (_needBuildTablet) {
         ASSERT_NO_FATAL_FAILURE(prepareTablet());

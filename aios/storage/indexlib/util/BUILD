@@ -106,7 +106,7 @@ strict_cc_library(
     name='FutureExecutor',
     export_name='future_executor',
     deps=[
-        '//aios/future_lite', '//aios/storage/indexlib/base:constants',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:constants',
         '//aios/storage/indexlib/util/metrics:monitor'
     ]
 )

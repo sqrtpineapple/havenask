@@ -74,7 +74,7 @@ ResultPtr KVSearcher::Search(const string& keyStr, uint64_t timestamp, TableSear
     ResultPtr result(new test::Result());
     StringView value;
     if (mReader) {
-        if (!future_lite::interface::syncAwait(mReader->GetAsync(key, value, timestamp, searchCacheType, &pool))) {
+        if (!async_simple::interface::syncAwait(mReader->GetAsync(key, value, timestamp, searchCacheType, &pool))) {
             return result;
         }
         if (mPackAttrFormatter) {
@@ -90,7 +90,7 @@ ResultPtr KVSearcher::Search(const string& keyStr, uint64_t timestamp, TableSear
         indexlibv2::index::KVReadOptions options;
         options.timestamp = timestamp;
         options.pool = &pool;
-        auto kvResult = future_lite::interface::syncAwait(_kvReader->GetAsync(key, options));
+        auto kvResult = async_simple::interface::syncAwait(_kvReader->GetAsync(key, options));
         if (kvResult.status != indexlibv2::index::KVResultStatus::FOUND) {
             return result;
         }

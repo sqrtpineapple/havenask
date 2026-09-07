@@ -30,7 +30,7 @@
 #include "build_service/proto/Heartbeat.pb.h"
 #include "build_service/task_base/Task.h"
 #include "build_service/util/Log.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/config/CustomIndexTaskClassInfo.h"
 #include "indexlib/config/ITabletSchema.h"
@@ -143,7 +143,7 @@ private:
     std::shared_ptr<indexlibv2::framework::MetricsManager> _metricsManager;
     std::unique_ptr<indexlibv2::framework::ITabletFactory> _tabletFactory;
     std::unique_ptr<indexlibv2::framework::IndexTaskContextCreator> _contextCreator;
-    std::unique_ptr<future_lite::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _executor;
     std::unique_ptr<indexlibv2::framework::LocalExecuteEngine> _engine;
     std::shared_ptr<GeneralTaskMetrics> _generalTaskMetrics;
     std::atomic<int64_t> _availableMemory = 0;

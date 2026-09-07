@@ -19,7 +19,7 @@
 #include <utility>
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/file_system/file/FileReader.h"
 #include "indexlib/index/common/DictKeyInfo.h"
@@ -60,7 +60,7 @@ public:
         return InnerLookup(key.GetKey(), option, value);
     }
 
-    future_lite::coro::Lazy<index::Result<LookupResult>> LookupAsync(const index::DictKeyInfo& key,
+    async_simple::coro::Lazy<index::Result<LookupResult>> LookupAsync(const index::DictKeyInfo& key,
                                                                      file_system::ReadOption option) noexcept
     {
         if (key.IsNull()) {
@@ -74,7 +74,7 @@ public:
     virtual index::Result<bool> InnerLookup(dictkey_t key, file_system::ReadOption option,
                                             dictvalue_t& value) noexcept = 0;
 
-    virtual future_lite::coro::Lazy<index::Result<LookupResult>>
+    virtual async_simple::coro::Lazy<index::Result<LookupResult>>
     InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept
     {
         dictvalue_t value;

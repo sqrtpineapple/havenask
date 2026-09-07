@@ -64,7 +64,7 @@ void MultiShardingIndexReader::Open(const IndexConfigPtr& indexConfig, const Par
     }
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 MultiShardingIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                                       autil::mem_pool::Pool* pool, file_system::ReadOption option) noexcept
 {
@@ -205,7 +205,7 @@ PostingIterator* MultiShardingIndexReader::CreateMainPostingIterator(const index
     return nullptr;
 }
 
-future_lite::coro::Lazy<index::Result<index::PostingIterator*>>
+async_simple::coro::Lazy<index::Result<index::PostingIterator*>>
 MultiShardingIndexReader::CreateMainPostingIteratorAsync(const index::DictKeyInfo key, uint32_t statePoolSize,
                                                          autil::mem_pool::Pool* sessionPool, bool needBuildingSegment,
                                                          file_system::ReadOption option,

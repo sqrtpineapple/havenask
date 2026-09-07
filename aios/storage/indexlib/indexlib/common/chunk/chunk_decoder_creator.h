@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common/chunk/chunk_decoder.h"
 #include "indexlib/common/chunk/chunk_define.h"
 #include "indexlib/common/chunk/integrated_plain_chunk_decoder.h"
@@ -75,7 +75,7 @@ inline ChunkDecoder* ChunkDecoderCreator::Create(file_system::FileReader* fileRe
                                                  uint64_t offset, uint32_t recordLen, autil::mem_pool::Pool* pool,
                                                  file_system::ReadOption option)
 {
-    return future_lite::interface::syncAwait(CreateAsync(fileReader, openType, offset, recordLen, pool, option));
+    return async_simple::interface::syncAwait(CreateAsync(fileReader, openType, offset, recordLen, pool, option));
 }
 
 inline FL_LAZY(ChunkDecoder*) ChunkDecoderCreator::CreateAsync(file_system::FileReader* fileReader,
@@ -98,7 +98,8 @@ inline FL_LAZY(ChunkDecoder*) ChunkDecoderCreator::CreateAsync(file_system::File
     }
 
     ChunkMeta meta;
-    (FL_COAWAIT fileReader->ReadAsyncCoro(&meta, sizeof(meta), offset, option)).GetOrThrow();
+    auto metaResult = FL_COAWAIT fileReader->ReadAsyncCoro(&meta, sizeof(meta), offset, option);
+    metaResult.GetOrThrow();
     if (meta.isEncoded) {
         assert(false);
         FL_CORETURN nullptr;
@@ -106,8 +107,8 @@ inline FL_LAZY(ChunkDecoder*) ChunkDecoderCreator::CreateAsync(file_system::File
 
     assert(fileReader->GetBaseAddress() == NULL);
     char* buffer = IE_POOL_COMPATIBLE_NEW_VECTOR(pool, char, meta.length);
-    if ((FL_COAWAIT fileReader->ReadAsyncCoro(buffer, meta.length, offset + sizeof(meta), option)).GetOrThrow() !=
-        meta.length) {
+    auto bufferResult = FL_COAWAIT fileReader->ReadAsyncCoro(buffer, meta.length, offset + sizeof(meta), option);
+    if (bufferResult.GetOrThrow() != meta.length) {
         INDEXLIB_FATAL_ERROR(FileIO, "read chunk data [offset:%lu, length:%u] failed!", offset + sizeof(meta),
                              meta.length);
     }

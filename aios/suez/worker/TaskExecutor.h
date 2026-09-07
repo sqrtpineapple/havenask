@@ -98,8 +98,8 @@ private:
     RpcServer *_rpcServer;
     std::unique_ptr<autil::ThreadPool> _deployThreadPool;
     std::unique_ptr<autil::ThreadPool> _loadThreadPool;
-    std::unique_ptr<future_lite::Executor> _asyncInterExecutor;
-    std::unique_ptr<future_lite::Executor> _asyncIntraExecutor;
+    std::unique_ptr<async_simple::Executor> _asyncInterExecutor;
+    std::unique_ptr<async_simple::Executor> _asyncIntraExecutor;
     int64_t _targetVersion; // last updated target version
     bool _allowPartialTableReady;
     bool _needShutdownGracefully;

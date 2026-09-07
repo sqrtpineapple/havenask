@@ -15,7 +15,7 @@
  */
 #include "indexlib/index/normal/inverted_index/accessor/normal_index_reader.h"
 
-#include "future_lite/MoveWrapper.h"
+#include "async_simple/MoveWrapper.h"
 #include "indexlib/index/common/KeyHasherWrapper.h"
 #include "indexlib/index/inverted_index/BufferedPostingIterator.h"
 #include "indexlib/index/inverted_index/BuildingIndexReader.h"
@@ -43,9 +43,9 @@
 using namespace std;
 using namespace autil;
 
-using future_lite::Try;
-using future_lite::Unit;
-using future_lite::coro::Lazy;
+using async_simple::Try;
+using async_simple::Unit;
+using async_simple::coro::Lazy;
 
 using namespace indexlib::index;
 using namespace indexlib::config;
@@ -78,7 +78,7 @@ NormalIndexReader::~NormalIndexReader()
 index::Result<PostingIterator*> NormalIndexReader::Lookup(const Term& term, uint32_t statePoolSize, PostingType type,
                                                           autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(DoLookupAsync(&term, {}, statePoolSize, type, sessionPool, /*option*/ nullptr));
+    return async_simple::coro::syncAwait(DoLookupAsync(&term, {}, statePoolSize, type, sessionPool, /*option*/ nullptr));
 }
 
 Lazy<index::Result<PostingIterator*>> NormalIndexReader::LookupAsync(const Term* term, uint32_t statePoolSize,
@@ -193,11 +193,11 @@ index::Result<PostingIterator*> NormalIndexReader::PartialLookup(const Term& ter
                                                                  uint32_t statePoolSize, PostingType type,
                                                                  autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(
+    return async_simple::coro::syncAwait(
         DoLookupAsync(&term, ranges, statePoolSize, type, sessionPool, /*option*/ nullptr));
 }
 
-future_lite::coro::Lazy<index::Result<bool>>
+async_simple::coro::Lazy<index::Result<bool>>
 NormalIndexReader::FillTruncSegmentPosting(const Term& term, const index::DictKeyInfo& key, uint32_t segmentIdx,
                                            SegmentPosting& segPosting, file_system::ReadOption option) noexcept
 {
@@ -237,7 +237,7 @@ NormalIndexReader::FillTruncSegmentPosting(const Term& term, const index::DictKe
     co_return metaRet.Value();
 }
 
-future_lite::coro::Lazy<index::Result<bool>>
+async_simple::coro::Lazy<index::Result<bool>>
 NormalIndexReader::GetSegmentPostingFromTruncIndex(const Term& term, const index::DictKeyInfo& key, uint32_t segmentIdx,
                                                    file_system::ReadOption option, SegmentPosting& segPosting) noexcept
 {
@@ -316,9 +316,9 @@ Lazy<index::Result<index::PostingIterator*>> NormalIndexReader::CreatePostingIte
             tasks.push_back(FillSegmentPostingAsync(term, termHashKey, i, segmentPostings.back(), option));
         }
     }
-    std::vector<future_lite::Try<index::Result<bool>>> results;
+    std::vector<async_simple::Try<index::Result<bool>>> results;
     if (mExecutor) {
-        results = co_await future_lite::coro::collectAll(std::move(tasks));
+        results = co_await async_simple::coro::collectAll(std::move(tasks));
     } else {
         for (size_t i = 0; i < tasks.size(); ++i) {
             results.emplace_back(co_await tasks[i]);
@@ -407,7 +407,7 @@ void NormalIndexReader::FillRangeByBuiltSegments(const index::Term* term, const 
     needBuildingSegment = (currentRangeIdx < ranges.size());
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 NormalIndexReader::CreatePostingIteratorAsync(const Term* term, const DocIdRangeVector& ranges, uint32_t statePoolSize,
                                               autil::mem_pool::Pool* sessionPool,
                                               file_system::ReadOption option) noexcept
@@ -469,7 +469,7 @@ PostingIterator* NormalIndexReader::CreateMainPostingIterator(index::DictKeyInfo
     return NULL;
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>> NormalIndexReader::CreateMainPostingIteratorAsync(
+async_simple::coro::Lazy<index::Result<PostingIterator*>> NormalIndexReader::CreateMainPostingIteratorAsync(
     index::DictKeyInfo key, uint32_t statePoolSize, autil::mem_pool::Pool* sessionPool, bool needBuildingSegment,
     file_system::ReadOption option, indexlib::index::InvertedIndexSearchTracer* tracer) noexcept
 {

@@ -15,7 +15,7 @@
  */
 #pragma once
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/file_system/file/CompressFileReader.h"
 #include "indexlib/file_system/file/FileReader.h"
 #include "indexlib/index/kkv/common/ChunkDefine.h"

@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/file_system/file/FileReader.h"
 #include "indexlib/index/kkv/built/KKVBuiltValueFetcher.h"
 #include "indexlib/index/kkv/common/KKVResultBuffer.h"

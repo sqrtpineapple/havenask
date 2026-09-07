@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/IIndexReader.h"
 #include "indexlib/index/common/DictKeyInfo.h"
@@ -62,7 +62,7 @@ public:
                                                    PostingType type = pt_default,
                                                    autil::mem_pool::Pool* sessionPool = nullptr) = 0;
     // pool in LookupAsync and BatchLookup should be thread-safe
-    virtual future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    virtual async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept = 0;
 
@@ -78,7 +78,7 @@ public:
 
     virtual bool GetSegmentPosting(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                                    file_system::ReadOption option, InvertedIndexSearchTracer* tracer = nullptr) = 0;
-    virtual future_lite::coro::Lazy<index::Result<bool>>
+    virtual async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept = 0;
 

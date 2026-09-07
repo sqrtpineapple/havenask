@@ -151,7 +151,7 @@ void BuiltKKVSegmentReaderTest::TestMultiRegion()
         EXPECT_TRUE(KeyHasherWrapper::GetHashKeyByFieldType(ft_uint64, pkeyStr.c_str(), pkeyStr.size(), pkey));
         pkey = kkvOptions1.GetLookupKeyHash(pkey);
         typedef KKVBuiltSegmentDocIterator<SKeyType> SegmentIterator;
-        auto kkvIter = future_lite::interface::syncAwait(
+        auto kkvIter = async_simple::interface::syncAwait(
             segReader.template Lookup<SegmentIterator>(pkey, mPool.get(), &kkvOptions2), &mEx);
         ASSERT_FALSE(kkvIter);
     }
@@ -170,7 +170,7 @@ void BuiltKKVSegmentReaderTest::CheckData(const SegmentData& segData, const KKVI
     EXPECT_TRUE(KeyHasherWrapper::GetHashKeyByFieldType(ft_uint64, pkeyStr.c_str(), pkeyStr.size(), pkey));
     pkey = kkvOptions.GetLookupKeyHash(pkey);
     typedef KKVBuiltSegmentDocIterator<SKeyType> SegmentIterator;
-    auto kkvIter = future_lite::interface::syncAwait(
+    auto kkvIter = async_simple::interface::syncAwait(
         segReader.template Lookup<SegmentIterator>(pkey, mPool.get(), &kkvOptions), &mEx);
     ASSERT_TRUE(kkvIter);
 

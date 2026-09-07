@@ -32,8 +32,8 @@ public:
               const std::shared_ptr<indexlib::file_system::IDirectory>& dir, const std::string fileName,
               const indexlib::file_system::FSOpenType openType) override;
 
-    future_lite::coro::Lazy<indexlib::index::Result<docid_t>> LookupAsync(const Key& hashKey,
-                                                                          future_lite::Executor* executor) noexcept
+    async_simple::coro::Lazy<indexlib::index::Result<docid_t>> LookupAsync(const Key& hashKey,
+                                                                          async_simple::Executor* executor) noexcept
     {
         if (_bloomFilter && !_bloomFilter->Contains(hashKey)) {
             co_return INVALID_DOCID;

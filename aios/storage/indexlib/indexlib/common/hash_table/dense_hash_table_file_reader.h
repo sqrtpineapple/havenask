@@ -18,9 +18,9 @@
 #include <memory>
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
-#include "future_lite/Try.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
+#include "async_simple/Try.h"
 #include "indexlib/common/hash_table/closed_hash_table_traits.h"
 #include "indexlib/common/hash_table/dense_hash_table.h"
 #include "indexlib/common/hash_table/hash_table_file_reader_base.h"
@@ -147,13 +147,15 @@ public:
                                              "read length: [%lu], file length: [%lu]",
                                              offset, sizeof(bucket), accessor->GetFileLength());
                     }
-                    handle = (FL_COAWAIT accessor->GetBlockAsyncCoro(offset, option)).GetOrThrow();
+                    auto handleResult = FL_COAWAIT accessor->GetBlockAsyncCoro(offset, option);
+                    handle = handleResult.GetOrThrow();
                 }
                 blockOffset = handle.GetOffset();
                 ::memcpy((void*)&bucket, handle.GetData() + offset - blockOffset, sizeof(bucket));
             } else {
-                auto result =
-                    (FL_COAWAIT mFileNode->ReadAsyncCoro(&bucket, sizeof(bucket), offset, option)).GetOrThrow();
+                auto readResult =
+                    FL_COAWAIT mFileNode->ReadAsyncCoro(&bucket, sizeof(bucket), offset, option);
+                auto result = readResult.GetOrThrow();
                 if (unlikely(result != sizeof(Bucket))) {
                     INDEXLIB_FATAL_ERROR(IndexCollapsed,
                                          "fileReader read length [%lu]"

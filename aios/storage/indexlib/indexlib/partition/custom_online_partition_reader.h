@@ -43,7 +43,7 @@ DECLARE_REFERENCE_CLASS(index_base, SegmentDirectory);
 DECLARE_REFERENCE_CLASS(index_base, Version);
 DECLARE_REFERENCE_CLASS(util, BlockMemoryQuotaController);
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -105,7 +105,7 @@ public:
     const std::map<segmentid_t, std::string>& GetBuiltSegmentLifecycles() const { return mSegmentLifecycles; }
 
 private:
-    std::shared_ptr<future_lite::Executor> CreateExecutor(const table::TableFactoryWrapperPtr& factoryWrapper,
+    std::shared_ptr<async_simple::Executor> CreateExecutor(const table::TableFactoryWrapperPtr& factoryWrapper,
                                                           const config::IndexPartitionSchemaPtr& schema,
                                                           const config::IndexPartitionOptions& options) const;
 
@@ -143,7 +143,7 @@ private:
     size_t mInMemRtSegmentCount;
     size_t mOnDiskRtSegmentCount;
     size_t mUsedOnDiskRtSegmentCount;
-    std::shared_ptr<future_lite::Executor> mFutureExecutor;
+    std::shared_ptr<async_simple::Executor> mFutureExecutor;
     std::map<segmentid_t, std::string> mSegmentLifecycles;
 
 private:

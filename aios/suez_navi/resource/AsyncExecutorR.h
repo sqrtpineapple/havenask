@@ -17,7 +17,7 @@
 
 #include "navi/engine/Resource.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -27,26 +27,25 @@ class AsyncExecutorR : public navi::RootResource
 {
 public:
     AsyncExecutorR();
-    AsyncExecutorR(future_lite::Executor *asyncInterExecutor,
-                   future_lite::Executor *asyncIntraExecutor);
+    AsyncExecutorR(async_simple::Executor *asyncInterExecutor,
+                   async_simple::Executor *asyncIntraExecutor);
     ~AsyncExecutorR();
     AsyncExecutorR(const AsyncExecutorR &) = delete;
     AsyncExecutorR &operator=(const AsyncExecutorR &) = delete;
 public:
-    future_lite::Executor *getAsyncInterExecutor() const {
+    async_simple::Executor *getAsyncInterExecutor() const {
         return _asyncInterExecutor;
     }
-    future_lite::Executor *getAsyncIntraExecutor() const {
+    async_simple::Executor *getAsyncIntraExecutor() const {
         return _asyncIntraExecutor;
     }
 public:
     static const std::string RESOURCE_ID;
 private:
-    future_lite::Executor *_asyncInterExecutor;
-    future_lite::Executor *_asyncIntraExecutor;
+    async_simple::Executor *_asyncInterExecutor;
+    async_simple::Executor *_asyncIntraExecutor;
 };
 
 NAVI_TYPEDEF_PTR(AsyncExecutorR);
 
 }
-

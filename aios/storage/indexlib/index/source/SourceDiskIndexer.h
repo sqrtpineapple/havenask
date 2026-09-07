@@ -17,7 +17,7 @@
 
 #include "autil/Log.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/DiskIndexerParameter.h"
 #include "indexlib/index/IDiskIndexer.h"
@@ -50,7 +50,7 @@ public:
                            const std::shared_ptr<indexlib::file_system::IDirectory>& indexDirectory) override;
     size_t EvaluateCurrentMemUsed() override;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t>& docIds, const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                 autil::mem_pool::PoolBase* pool, indexlib::file_system::ReadOption readOption,
                 const std::vector<indexlib::document::SerializedSourceDocument*>* docs) const;

@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/file_system/file/BlockFileNode.h"
 #include "indexlib/file_system/file/BufferedFileReader.h"
@@ -48,7 +49,7 @@ public:
 
     index::Result<bool> InnerLookup(dictkey_t key, file_system::ReadOption option,
                                     dictvalue_t& value) noexcept override;
-    future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
+    async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
     InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept override
     {
         co_return co_await DoLookupAsync(key, option);
@@ -57,7 +58,7 @@ public:
     std::shared_ptr<DictionaryIterator> CreateIterator() const override;
 
 private:
-    future_lite::coro::Lazy<index::Result<LookupResult>> DoLookupAsync(KeyType key,
+    async_simple::coro::Lazy<index::Result<LookupResult>> DoLookupAsync(KeyType key,
                                                                        file_system::ReadOption option) noexcept;
 
     std::shared_ptr<file_system::Directory> _directory;
@@ -122,7 +123,7 @@ template <typename KeyType>
 index::Result<bool> BlockHashDictionaryReaderTyped<KeyType>::InnerLookup(dictkey_t key, file_system::ReadOption option,
                                                                          dictvalue_t& value) noexcept
 {
-    auto resultWithEc = future_lite::coro::syncAwait(DoLookupAsync((KeyType)key, option));
+    auto resultWithEc = async_simple::coro::syncAwait(DoLookupAsync((KeyType)key, option));
     if (!resultWithEc.Ok()) {
         return resultWithEc.GetErrorCode();
     }
@@ -156,7 +157,7 @@ inline std::shared_ptr<DictionaryIterator> BlockHashDictionaryReaderTyped<KeyTyp
 }
 
 template <typename KeyType>
-inline future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
+inline async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
 BlockHashDictionaryReaderTyped<KeyType>::DoLookupAsync(KeyType key, file_system::ReadOption option) noexcept
 {
     uint32_t blockIdx = key % _blockCount;

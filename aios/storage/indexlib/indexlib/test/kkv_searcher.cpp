@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/common/field_format/pack_attribute//pack_attribute_formatter.h"
 #include "indexlib/config/kkv_index_config.h"
 #include "indexlib/config/value_config.h"
@@ -62,8 +62,8 @@ ResultPtr KKVSearcher::Search(const string& prefixKey, uint64_t timestamp, Table
         IE_POOL_COMPATIBLE_DELETE_CLASS(&mPool, kkvDocIter);
         FL_CORETURN result;
     };
-    future_lite::executors::SimpleExecutor ex(1);
-    return future_lite::interface::syncAwait(queryTask(), &ex);
+    async_simple::executors::SimpleExecutor ex(1);
+    return async_simple::interface::syncAwait(queryTask(), &ex);
 }
 
 ResultPtr KKVSearcher::Search(const string& prefixKey, const vector<string>& suffixKeys, uint64_t timestamp,
@@ -85,8 +85,8 @@ ResultPtr KKVSearcher::Search(const string& prefixKey, const vector<string>& suf
         IE_POOL_COMPATIBLE_DELETE_CLASS(&mPool, kkvDocIter);
         FL_CORETURN result;
     };
-    future_lite::executors::SimpleExecutor ex(1);
-    return future_lite::interface::syncAwait(queryTask(), &ex);
+    async_simple::executors::SimpleExecutor ex(1);
+    return async_simple::interface::syncAwait(queryTask(), &ex);
 }
 
 void KKVSearcher::FillResult(const ResultPtr& result, KKVIterator* iter)

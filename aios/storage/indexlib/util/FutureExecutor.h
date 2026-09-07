@@ -19,7 +19,7 @@
 #include <thread>
 
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/util/metrics/MetricProvider.h"
 
 namespace indexlib { namespace util {
@@ -31,21 +31,21 @@ private:
     ~FutureExecutor() {}
 
 public:
-    static future_lite::Executor* GetInternalBuildExecutor();
-    static future_lite::Executor* GetInternalExecutor();
-    static void SetInternalExecutor(future_lite::Executor* executor);
-    static void SetInternalBuildExecutor(future_lite::Executor* executor);
+    static async_simple::Executor* GetInternalBuildExecutor();
+    static async_simple::Executor* GetInternalExecutor();
+    static void SetInternalExecutor(async_simple::Executor* executor);
+    static void SetInternalBuildExecutor(async_simple::Executor* executor);
 
     static bool RegisterMetricsReporter(util::MetricProviderPtr metricProvider);
 
-    static future_lite::Executor* CreateExecutor(int threadNum, int maxAio);
-    static void DestroyExecutor(future_lite::Executor* executor);
+    static async_simple::Executor* CreateExecutor(int threadNum, int maxAio);
+    static void DestroyExecutor(async_simple::Executor* executor);
 
 private:
     static std::once_flag internalExecutorFlag;
-    static future_lite::Executor* internalExecutor;
+    static async_simple::Executor* internalExecutor;
     static std::once_flag internalBuildExecutorFlag;
-    static future_lite::Executor* internalBuildExecutor;
+    static async_simple::Executor* internalBuildExecutor;
     static std::thread reportMetricsThread;
 
 private:

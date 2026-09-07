@@ -43,7 +43,7 @@ public:
     std::string GetTaskPlan() { return _taskPlanStr; }
     void SetTaskPlan(const std::string& taskPlan) { _taskPlanStr = taskPlan; }
 
-    future_lite::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<framework::IndexTaskPlan> plan,
+    async_simple::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<framework::IndexTaskPlan> plan,
                                                     framework::IndexTaskContext* context) override
     {
         if (_taskPlanStr.empty()) {

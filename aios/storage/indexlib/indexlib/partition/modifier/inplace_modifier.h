@@ -83,7 +83,7 @@ private:
     docid_t mBuildingSegmentBaseDocid;
     InMemorySegmentModifierPtr mBuildingSegmentModifier;
     IndexPartitionReaderPtr mPartitionReader;
-    future_lite::Executor* mBuildExecutor;
+    async_simple::Executor* mBuildExecutor;
 
 private:
     friend class InplaceModifierTest;

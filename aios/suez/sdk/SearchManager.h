@@ -23,7 +23,7 @@
 #include <utility>
 
 #include "autil/legacy/json.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "sap/common/common.h"
 #include "suez/sdk/BizMeta.h"
 #include "suez/sdk/IndexProvider.h"

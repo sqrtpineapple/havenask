@@ -15,7 +15,7 @@ strict_cc_library(
     ],
     visibility=['//aios/storage/indexlib:__subpackages__'],
     deps=(['//aios/storage/indexlib/file_system'] +
-          ['//aios/future_lite/future_lite/executors:simple_async_io_executor'])
+          ['//aios/ylt:simple_async_io_executor'])
 )
 strict_cc_library(
     name='directory-checker',

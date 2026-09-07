@@ -187,15 +187,15 @@ void FslibFileWrapper::FlushE() noexcept(false)
     THROW_IF_FS_ERROR(ec, "Flush file[%s] FAILED", _file->getFileName());
 }
 
-future_lite::Future<FSResult<size_t>> FslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset,
-                                                                   int advice, future_lite::Executor* executor) noexcept
+async_simple::Future<FSResult<size_t>> FslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset,
+                                                                   int advice, async_simple::Executor* executor) noexcept
 {
     size_t realLength = 0;
     auto ec = PRead(buffer, length, offset, realLength);
-    return future_lite::makeReadyFuture<FSResult<size_t>>({ec, realLength});
+    return async_simple::makeReadyFuture<FSResult<size_t>>({ec, realLength});
 }
 
-future_lite::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
+async_simple::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
                                                                         int advice, int64_t timeout) noexcept
 {
     size_t readLength = 0;
@@ -203,7 +203,7 @@ future_lite::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadVAsync(const io
     co_return FSResult<size_t>(ec, readLength);
 }
 
-future_lite::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset,
+async_simple::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset,
                                                                        int advice, int64_t timeout) noexcept
 {
     iovec iov;
@@ -212,12 +212,12 @@ future_lite::coro::Lazy<FSResult<size_t>> FslibFileWrapper::PReadAsync(void* buf
     co_return co_await PReadVAsync(&iov, 1, offset, advice, timeout);
 }
 
-future_lite::Future<FSResult<size_t>> FslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
-                                                                    int advice, future_lite::Executor* executor,
+async_simple::Future<FSResult<size_t>> FslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
+                                                                    int advice, async_simple::Executor* executor,
                                                                     int64_t timeout) noexcept
 {
     size_t realLength = 0;
     auto ec = PReadV(iov, iovcnt, offset, realLength);
-    return future_lite::makeReadyFuture<FSResult<size_t>>({ec, realLength});
+    return async_simple::makeReadyFuture<FSResult<size_t>>({ec, realLength});
 }
 }} // namespace indexlib::file_system

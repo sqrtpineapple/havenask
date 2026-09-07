@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common_define.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/index/kkv/kkv_define.h"

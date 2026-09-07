@@ -16,6 +16,7 @@
 #pragma once
 #include <memory>
 
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/file_system/file/FileReader.h"
 #include "indexlib/index/common/ErrorCode.h"
 #include "indexlib/index/common/block_array/KeyValueItem.h"
@@ -43,9 +44,9 @@ public:
                                                           indexlib::file_system::ReadOption option,
                                                           Value* value) const noexcept
     {
-        return future_lite::coro::syncAwait(GetValueInBlockAsync(key, blockId, keyCountInBlock, option, value));
+        return async_simple::coro::syncAwait(GetValueInBlockAsync(key, blockId, keyCountInBlock, option, value));
     }
-    virtual future_lite::coro::Lazy<indexlib::index::Result<bool>>
+    virtual async_simple::coro::Lazy<indexlib::index::Result<bool>>
     GetValueInBlockAsync(const Key& key, uint64_t blockId, uint64_t keyCountInBlock,
                          indexlib::file_system::ReadOption option, Value* value) const noexcept = 0;
     virtual AccessMode GetMode() const = 0;

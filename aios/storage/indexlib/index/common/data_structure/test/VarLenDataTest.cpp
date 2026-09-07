@@ -400,7 +400,7 @@ TEST_F(VarLenDataTest, TestBatchGetValueBadParam)
         std::vector<StringView> values;
         indexlib::index::ErrorCodeVec expectedRet(docIds.size(), indexlib::index::ErrorCode::Runtime);
         auto ret =
-            future_lite::coro::syncAwait(reader.GetValue(docIds, &pool, indexlib::file_system::ReadOption(), &values));
+            async_simple::coro::syncAwait(reader.GetValue(docIds, &pool, indexlib::file_system::ReadOption(), &values));
         ASSERT_EQ(expectedRet, ret);
     }
     // test docid is out of bounds
@@ -409,7 +409,7 @@ TEST_F(VarLenDataTest, TestBatchGetValueBadParam)
         std::vector<StringView> values;
         indexlib::index::ErrorCodeVec expectedRet(docIds.size(), indexlib::index::ErrorCode::Runtime);
         auto ret =
-            future_lite::coro::syncAwait(reader.GetValue(docIds, &pool, indexlib::file_system::ReadOption(), &values));
+            async_simple::coro::syncAwait(reader.GetValue(docIds, &pool, indexlib::file_system::ReadOption(), &values));
         ASSERT_EQ(expectedRet, ret);
     }
 }

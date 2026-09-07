@@ -33,6 +33,6 @@ cc_library(
         '//aios/suez/sdk:sdk', '//aios/suez/sdk:remote_table_writer',
         '//aios/suez/heartbeat:heartbeat', '//aios/suez/search:search',
         '//aios/suez/table:table'
-    ] + ['//aios/future_lite/future_lite/executors:simple_async_io_executor']),
+    ] + ['//aios/ylt:simple_async_io_executor']),
     alwayslink=1
 )

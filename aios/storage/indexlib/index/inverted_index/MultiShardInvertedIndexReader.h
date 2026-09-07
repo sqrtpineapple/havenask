@@ -16,8 +16,8 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Executor.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/IIndexReader.h"
 #include "indexlib/index/IndexReaderParameter.h"
 #include "indexlib/index/inverted_index/InvertedIndexReader.h"
@@ -51,7 +51,7 @@ public:
                                            PostingType type = pt_default,
                                            autil::mem_pool::Pool* sessionPool = nullptr) override;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override;
 
@@ -64,14 +64,14 @@ public:
 
     bool GetSegmentPosting(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option, InvertedIndexSearchTracer* tracer = nullptr) override;
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option,
                            InvertedIndexSearchTracer* tracer = nullptr) noexcept override;
 
     std::vector<std::shared_ptr<DictionaryReader>> GetDictReaders() const;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     CreateMainPostingIteratorAsync(const index::DictKeyInfo key, uint32_t statePoolSize,
                                    autil::mem_pool::Pool* sessionPool, bool needBuildingSegment,
                                    file_system::ReadOption option) noexcept;
@@ -98,7 +98,7 @@ inline bool MultiShardInvertedIndexReader::GetSegmentPosting(const index::DictKe
     return _indexReaders[shardIdx]->GetSegmentPosting(key, segmentIdx, segPosting, option, tracer);
 }
 
-inline future_lite::coro::Lazy<index::Result<bool>>
+inline async_simple::coro::Lazy<index::Result<bool>>
 MultiShardInvertedIndexReader::GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx,
                                                       SegmentPosting& segPosting, file_system::ReadOption option,
                                                       InvertedIndexSearchTracer* tracer) noexcept

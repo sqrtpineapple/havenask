@@ -15,7 +15,7 @@
  */
 #include "suez/sdk/TableWriter.h"
 
-#include <future_lite/uthread/Latch.h>
+#include <async_simple/uthread/Latch.h>
 
 #include "RawDocument2SwiftFieldFilter.h"
 #include "autil/Log.h"
@@ -185,7 +185,7 @@ void TableWriter::setEnableWrite(bool flag) {
 void TableWriter::write(const std::string &format,
                         const WalDocVector &docs,
                         const std::function<void(autil::Result<WriteResult>)> &done,
-                        future_lite::Executor *executor) {
+                        async_simple::Executor *executor) {
     if (!_enableWrite) {
         done(RuntimeError::make("%s is disabled, can not write", _pid->ShortDebugString().c_str()));
         return;
@@ -242,7 +242,7 @@ void TableWriter::write(const std::string &format,
 
     if (executor != nullptr) {
         autil::Result<std::vector<int64_t>> logResult;
-        future_lite::uthread::Latch latch(1);
+        async_simple::uthread::Latch latch(1);
         auto latchDone = [&latch, &logResult](autil::Result<std::vector<int64_t>> ret) {
             logResult = std::move(ret);
             latch.downCount();

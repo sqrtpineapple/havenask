@@ -22,8 +22,8 @@
 #include "autil/WorkItem.h"
 #include "build_service/task_base/TaskBase.h"
 #include "build_service/util/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/TaskScheduler.h"
+#include "async_simple/Executor.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/config/ITabletSchema.h"
@@ -54,7 +54,7 @@ public:
 private:
     indexlib::Status getLatestVersion(indexlibv2::framework::Version* version) const;
     void setFailFlag();
-    std::unique_ptr<future_lite::Executor> createExecutor(const std::string& executorName, uint32_t threadCount) const;
+    std::unique_ptr<async_simple::Executor> createExecutor(const std::string& executorName, uint32_t threadCount) const;
     int64_t getMachineTotalMemoryMb() const;
     bool createQuotaController(int64_t buildTotalMemory);
     bool prepareResource();
@@ -74,10 +74,10 @@ private:
     std::string _buildMode;
     std::string _indexRoot;
     std::string _finalIndexRoot;
-    std::unique_ptr<future_lite::Executor> _executor;
-    std::unique_ptr<future_lite::Executor> _dumpExecutor;
-    std::unique_ptr<future_lite::Executor> _localMergeExecutor;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _dumpExecutor;
+    std::unique_ptr<async_simple::Executor> _localMergeExecutor;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler;
     std::shared_ptr<indexlibv2::MemoryQuotaController> _totalMemoryController;
     std::shared_ptr<indexlibv2::MemoryQuotaController> _buildMemoryController;
     std::shared_ptr<indexlibv2::config::ITabletSchema> _tabletSchema;

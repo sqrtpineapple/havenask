@@ -39,7 +39,7 @@ class DocumentBatchRtBuilderImplV2 : public RealtimeBuilderImplV2
 public:
     DocumentBatchRtBuilderImplV2(const std::string& configPath, std::shared_ptr<indexlibv2::framework::ITablet> tablet,
                                  const RealtimeBuilderResource& builderResource,
-                                 future_lite::NamedTaskScheduler* tasker);
+                                 async_simple::NamedTaskScheduler* tasker);
 
     virtual ~DocumentBatchRtBuilderImplV2();
 

@@ -18,7 +18,7 @@
 #include <optional>
 
 #include "autil/NoCopyable.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/framework/index_task/IIndexTaskPlanCreator.h"
 #include "indexlib/framework/index_task/MergeTaskDefine.h"
@@ -38,19 +38,19 @@ public:
     };
 
 public:
-    virtual future_lite::coro::Lazy<Status> Recover() = 0;
+    virtual async_simple::coro::Lazy<Status> Recover() = 0;
     virtual std::optional<TaskStat> GetRunningTaskStat() const = 0;
-    virtual future_lite::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() = 0;
+    virtual async_simple::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() = 0;
     virtual std::unique_ptr<IndexTaskContext> CreateTaskContext(versionid_t baseVersionId, const std::string& taskType,
                                                                 const std::string& taskName,
                                                                 const std::string& taskTraceId,
                                                                 const std::map<std::string, std::string>& params) = 0;
-    virtual future_lite::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
+    virtual async_simple::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
                                                             IndexTaskContext* context) = 0;
 
-    virtual future_lite::coro::Lazy<std::pair<Status, MergeTaskStatus>> WaitMergeResult() = 0;
+    virtual async_simple::coro::Lazy<std::pair<Status, MergeTaskStatus>> WaitMergeResult() = 0;
     virtual Status CleanTask(bool removeTempFiles) = 0;
-    virtual future_lite::coro::Lazy<Status> CancelCurrentTask() = 0;
+    virtual async_simple::coro::Lazy<Status> CancelCurrentTask() = 0;
     virtual void Stop() = 0;
 };
 

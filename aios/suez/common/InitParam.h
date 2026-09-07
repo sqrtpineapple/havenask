@@ -24,7 +24,7 @@ namespace autil {
 class ThreadPool;
 }
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -41,8 +41,8 @@ public:
 public:
     RpcServer *rpcServer = nullptr;
     KMonitorMetaInfo kmonMetaInfo;
-    future_lite::Executor *asyncInterExecutor = nullptr;
-    future_lite::Executor *asyncIntraExecutor = nullptr;
+    async_simple::Executor *asyncInterExecutor = nullptr;
+    async_simple::Executor *asyncIntraExecutor = nullptr;
 
     autil::ThreadPool *deployThreadPool = nullptr;
     autil::ThreadPool *loadThreadPool = nullptr;

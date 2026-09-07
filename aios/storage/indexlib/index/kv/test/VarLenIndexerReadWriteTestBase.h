@@ -1,8 +1,8 @@
 #pragma once
 #include "autil/TimeoutTerminator.h"
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/ITabletSchema.h"
 #include "indexlib/document/kv/KVDocumentBatch.h"
 #include "indexlib/document/raw_document/test/RawDocumentMaker.h"
@@ -80,10 +80,10 @@ protected:
     template <FieldType ft>
     void CheckReader(IKVSegmentReader* reader, bool valueSort, bool checkIterator)
     {
-        future_lite::executors::SimpleExecutor ex(1);
+        async_simple::executors::SimpleExecutor ex(1);
         autil::TimeoutTerminator timeoutTerminator;
 #define GetSync(key, value, ts)                                                                                        \
-    future_lite::interface::syncAwait(reader->Get(key, value, ts, _pool.get(), nullptr, &timeoutTerminator), &ex)
+    async_simple::interface::syncAwait(reader->Get(key, value, ts, _pool.get(), nullptr, &timeoutTerminator), &ex)
 
         using Type = typename indexlib::index::FieldTypeTraits<ft>::AttrItemType;
         PackAttributeFormatter formatter;

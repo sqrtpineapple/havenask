@@ -1,8 +1,8 @@
 #include "indexlib/table/kv_table/KVTabletWriter.h"
 
 #include "autil/TimeUtility.h"
-#include "future_lite/TaskScheduler.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "TaskScheduler.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/IndexConfigHash.h"
 #include "indexlib/document/DocumentBatch.h"
 #include "indexlib/document/IDocumentBatch.h"
@@ -69,8 +69,8 @@ public:
 private:
     mem_pool::Pool* _pool = nullptr;
     std::shared_ptr<indexlibv2::config::ITabletSchema> _schema;
-    std::unique_ptr<future_lite::Executor> _executor = nullptr;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler = nullptr;
+    std::unique_ptr<async_simple::Executor> _executor = nullptr;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler = nullptr;
     shared_ptr<indexlibv2::config::TabletOptions> _tabletOptions;
     shared_ptr<KVTabletFactory> _factory;
     BuildResource _resource;
@@ -88,8 +88,8 @@ void KVTabletWriterTest::setUp()
     setenv("DISABLE_CODEGEN", "true", 1);
     _pool = new mem_pool::Pool();
     // prepare executor
-    _executor.reset(new future_lite::executors::SimpleExecutor(2));
-    _taskScheduler.reset(new future_lite::TaskScheduler(_executor.get()));
+    _executor.reset(new async_simple::executors::SimpleExecutor(2));
+    _taskScheduler.reset(new async_simple::TaskScheduler(_executor.get()));
     // prepare buildResource
     kmonitor::MetricsTags metricsTags;
     _metricsManager = std::make_shared<framework::MetricsManager>(

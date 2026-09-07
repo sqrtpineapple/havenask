@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "autil/StringUtil.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/index/kv/Common.h"
 #include "navi/common.h"
 #include "navi/log/NaviLogger.h"
@@ -31,7 +31,7 @@ using namespace std;
 using namespace autil;
 using namespace navi;
 using namespace indexlibv2::index;
-using namespace future_lite::interface;
+using namespace async_simple::interface;
 
 namespace sql {
 

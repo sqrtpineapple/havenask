@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -32,7 +32,7 @@ private:
     AsyncExecutorFactory &operator=(const AsyncExecutorFactory &);
 
 public:
-    static std::unique_ptr<future_lite::Executor>
+    static std::unique_ptr<async_simple::Executor>
     createAsyncExecutor(const std::string &name, size_t threadNum, const std::string &typeStr);
 };
 

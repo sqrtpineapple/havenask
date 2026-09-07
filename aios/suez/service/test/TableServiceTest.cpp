@@ -6,7 +6,7 @@
 #include "aios/network/gig/multi_call/rpc/GigRpcServer.h"
 #include "autil/RangeUtil.h"
 #include "autil/StringUtil.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/framework/ITabletReader.h"
 #include "indexlib/framework/mock/MockTablet.h"
 #include "indexlib/framework/mock/MockTabletReader.h"
@@ -31,7 +31,7 @@ class TableServiceTest : public TESTBASE {
 public:
     void setUp() {
         AUTIL_ROOT_LOG_SETLEVEL(INFO);
-        _executor = make_unique<future_lite::executors::SimpleExecutor>(5);
+        _executor = make_unique<async_simple::executors::SimpleExecutor>(5);
         _rpcServer = make_unique<multi_call::GigRpcServer>();
     }
 
@@ -67,7 +67,7 @@ private:
     std::unique_ptr<indexlibv2::table::KVTableTestHelper> _helper;
     std::shared_ptr<multi_call::GigRpcServer> _rpcServer;
     RpcServer _rpcServerWrapper;
-    std::unique_ptr<future_lite::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _executor;
 };
 
 bool TableServiceTest::initGrpcServer() {

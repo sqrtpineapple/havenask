@@ -38,7 +38,7 @@ public:
     bool Load(autil::mem_pool::Pool* pool, char*& cursor) override;
 
     bool Process(const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                 future_lite::Executor* executor) override;
+                 async_simple::Executor* executor) override;
 
     OperationBase* Clone(autil::mem_pool::Pool* pool) override;
 
@@ -63,7 +63,7 @@ private:
     bool DeleteDocInDocRange(const partition::PartitionModifierPtr& modifier,
                              const index::PrimaryKeyIndexReaderPtr& pkReader,
                              const std::vector<std::pair<docid_t, docid_t>>& cachedRanges,
-                             future_lite::Executor* executor, bool doAll);
+                             async_simple::Executor* executor, bool doAll);
 
 private:
     T mPkHash;
@@ -96,7 +96,7 @@ void RemoveOperation<T>::Init(T pk, segmentid_t segmentId)
 
 template <typename T>
 bool RemoveOperation<T>::Process(const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                                 future_lite::Executor* executor)
+                                 async_simple::Executor* executor)
 {
     assert(modifier);
     const index::PartitionInfoPtr& partInfo = modifier->GetPartitionInfo();
@@ -147,7 +147,7 @@ template <typename T>
 bool RemoveOperation<T>::DeleteDocInDocRange(const partition::PartitionModifierPtr& modifier,
                                              const index::PrimaryKeyIndexReaderPtr& pkReader,
                                              const std::vector<std::pair<docid_t, docid_t>>& cachedRanges,
-                                             future_lite::Executor* executor, bool doAll)
+                                             async_simple::Executor* executor, bool doAll)
 {
     for (auto range : cachedRanges) {
         docid_t docId = pkReader->LookupWithDocRange(mPkHash, range, executor);

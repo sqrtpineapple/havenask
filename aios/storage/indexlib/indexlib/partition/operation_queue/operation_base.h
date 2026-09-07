@@ -24,7 +24,7 @@
 #include "indexlib/partition/index_partition_reader.h"
 #include "indexlib/partition/modifier/partition_modifier.h"
 #include "indexlib/partition/operation_queue/operation_redo_hint.h"
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -43,7 +43,7 @@ public:
 public:
     virtual bool Load(autil::mem_pool::Pool* pool, char*& cursor) = 0;
     virtual bool Process(const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                         future_lite::Executor* executor) = 0;
+                         async_simple::Executor* executor) = 0;
     virtual OperationBase* Clone(autil::mem_pool::Pool* pool) = 0;
     virtual SerializedOperationType GetSerializedType() const { return INVALID_SERIALIZE_OP; }
 

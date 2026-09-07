@@ -34,10 +34,10 @@
 #include "autil/legacy/exception.h"
 #include "autil/legacy/legacy_jsonizable.h"
 #include "autil/legacy/legacy_jsonizable_dec.h"
-#include "future_lite/TaskScheduler.h"
-#include "future_lite/Try.h"
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/coro/LazyHelper.h"
+#include "TaskScheduler.h"
+#include "async_simple/Try.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/base/MemoryQuotaSynchronizer.h"
@@ -150,7 +150,7 @@ Tablet::Tablet(const TabletResource& resource)
         _buildMemoryQuotaSynchronizer = std::make_unique<MemoryQuotaSynchronizer>(buildMemoryQuotaController);
     }
     if (resource.taskScheduler) {
-        _taskScheduler = std::make_unique<future_lite::NamedTaskScheduler>(resource.taskScheduler);
+        _taskScheduler = std::make_unique<async_simple::NamedTaskScheduler>(resource.taskScheduler);
     }
     if (resource.fileBlockCacheContainer) {
         _fileBlockCacheContainer = resource.fileBlockCacheContainer;
@@ -1691,7 +1691,7 @@ bool Tablet::StartIntervalTask()
                 [this, versionMerger = _versionMerger]() {
                     versionMerger->Run()
                         .via(_taskScheduler->GetTaskScheduler()->GetExecutor())
-                        .start([versionMerger = _versionMerger](future_lite::Try<std::pair<Status, versionid_t>>&&) {});
+                        .start([versionMerger = _versionMerger](async_simple::Try<std::pair<Status, versionid_t>>&&) {});
                 },
                 taskConfig.GetMergeIntervalMs())) {
             return false;
@@ -1809,7 +1809,7 @@ std::pair<Status, versionid_t> Tablet::ExecuteTask(const Version& sourceVersion,
     if (!_versionMerger) {
         RETURN2_IF_STATUS_ERROR(Status::InvalidArgs(), INVALID_VERSIONID, "version merger is nullptr");
     }
-    return future_lite::coro::syncAwait(_versionMerger.get()->ExecuteTask(sourceVersion, taskType, taskName, params));
+    return async_simple::coro::syncAwait(_versionMerger.get()->ExecuteTask(sourceVersion, taskType, taskName, params));
 }
 
 Status Tablet::ImportExternalFiles(const std::string& bulkloadId, const std::vector<std::string>& externalFiles,

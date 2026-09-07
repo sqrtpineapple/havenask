@@ -15,6 +15,7 @@
  */
 #include "indexlib/table/index_task/LocalTabletMergeController.h"
 
+#include "async_simple/coro/Collect.h"
 #include "autil/EnvUtil.h"
 #include "indexlib/base/PathUtil.h"
 #include "indexlib/config/CustomIndexTaskClassInfo.h"
@@ -65,7 +66,7 @@ Status LocalTabletMergeController::Init(InitParam param)
     return Status::OK();
 }
 
-future_lite::coro::Lazy<std::pair<Status, versionid_t>> LocalTabletMergeController::GetLastMergeTaskResult()
+async_simple::coro::Lazy<std::pair<Status, versionid_t>> LocalTabletMergeController::GetLastMergeTaskResult()
 {
     versionid_t mergeResult = INVALID_VERSIONID;
     std::string indexRoot = _initParam.partitionIndexRoot;
@@ -157,7 +158,7 @@ std::pair<Status, std::shared_ptr<Env>> LocalTabletMergeController::CloneEnv(fra
     return {Status::OK(), env};
 }
 
-future_lite::coro::Lazy<Status>
+async_simple::coro::Lazy<Status>
 LocalTabletMergeController::SubmitMergeTask(std::unique_ptr<framework::IndexTaskPlan> plan,
                                             framework::IndexTaskContext* context)
 {
@@ -197,7 +198,7 @@ LocalTabletMergeController::SubmitMergeTask(std::unique_ptr<framework::IndexTask
     if (autil::EnvUtil::getEnv("IS_TEST_MODE", false)) {
         size_t parallelNum = autil::EnvUtil::getEnv("TEST_LOCAL_ENGINE_PARALLEL_NUM", 2);
         std::vector<std::shared_ptr<Env>> envs;
-        std::vector<future_lite::coro::Lazy<Status>> tasks;
+        std::vector<async_simple::coro::Lazy<Status>> tasks;
         for (size_t i = 0; i < parallelNum; i++) {
             auto [s, env] = CloneEnv(context);
             if (!s.IsOK()) {
@@ -211,7 +212,7 @@ LocalTabletMergeController::SubmitMergeTask(std::unique_ptr<framework::IndexTask
         for (auto& env : envs) {
             tasks.push_back(env->engine->ScheduleTask(*(env->plan), env->ctx.get()));
         }
-        auto rets = co_await future_lite::coro::collectAll(std::move(tasks));
+        auto rets = co_await async_simple::coro::collectAll(std::move(tasks));
         size_t idx = 0;
         status = rets[idx].value();
         for (size_t i = 0; i < parallelNum; i++) {
@@ -267,7 +268,7 @@ LocalTabletMergeController::SubmitMergeTask(std::unique_ptr<framework::IndexTask
     co_return Status::OK();
 }
 
-future_lite::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> LocalTabletMergeController::WaitMergeResult()
+async_simple::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> LocalTabletMergeController::WaitMergeResult()
 {
     if (!GetRunningTaskStat()) {
         co_return std::make_pair(Status::InternalError(), framework::MergeTaskStatus());
@@ -291,7 +292,7 @@ std::optional<framework::ITabletMergeController::TaskStat> LocalTabletMergeContr
 
 void LocalTabletMergeController::Stop() {}
 
-future_lite::coro::Lazy<Status> LocalTabletMergeController::CancelCurrentTask() { co_return Status::OK(); }
+async_simple::coro::Lazy<Status> LocalTabletMergeController::CancelCurrentTask() { co_return Status::OK(); }
 
 Status LocalTabletMergeController::CleanTask(bool removeTempFiles)
 {

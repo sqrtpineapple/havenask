@@ -30,8 +30,8 @@
 #include "build_service/util/SwiftClientCreator.h"
 #include "build_service/workflow/RealtimeBuilderDefine.h"
 #include "fslib/fs/FileSystem.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/TaskScheduler.h"
+#include "ExecutorCreator.h"
+#include "TaskScheduler.h"
 #include "indexlib/partition/partition_group_resource.h"
 #include "kmonitor/client/MetricsReporter.h"
 #include "suez/common/InnerDef.h"
@@ -566,17 +566,17 @@ void TableManager::initIndexlibV2Resource() {
     }
     static constexpr uint32_t DEFAULT_EXECUTOR_THREAD_COUNT = 4;
     uint32_t threadCount = autil::EnvUtil::getEnv<uint32_t>("executor_thread_count", DEFAULT_EXECUTOR_THREAD_COUNT);
-    _executor = future_lite::ExecutorCreator::Create(
+    _executor = async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters().SetExecutorName("SuezWrite").SetThreadNum(threadCount));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName("SuezWrite").SetThreadNum(threadCount));
 
-    _taskScheduler = std::make_unique<future_lite::TaskScheduler>(_executor.get());
+    _taskScheduler = std::make_unique<async_simple::TaskScheduler>(_executor.get());
 
     uint32_t dumpThreadCount =
         autil::EnvUtil::getEnv<uint32_t>("dump_executor_thread_count", /*defaultValue*/ threadCount);
-    _dumpExecutor = future_lite::ExecutorCreator::Create(
+    _dumpExecutor = async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters().SetExecutorName("SuezDump").SetThreadNum(dumpThreadCount));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName("SuezDump").SetThreadNum(dumpThreadCount));
 }
 
 bool TableManager::initGlobalTableResource(const InitParam &param) {

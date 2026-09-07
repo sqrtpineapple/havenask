@@ -19,7 +19,7 @@
 
 #include "autil/TimeUtility.h"
 #include "autil/UnitUtil.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/config/BuildConfig.h"

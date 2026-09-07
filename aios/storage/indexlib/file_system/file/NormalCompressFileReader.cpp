@@ -143,7 +143,7 @@ NormalCompressFileReader::LoadBufferAsyncCoro(size_t offset, ReadOption option) 
     FL_CORETURN FSEC_OK;
 }
 
-future_lite::coro::Lazy<std::vector<ErrorCode>>
+async_simple::coro::Lazy<std::vector<ErrorCode>>
 NormalCompressFileReader::BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                                           ReadOption option) noexcept
 {

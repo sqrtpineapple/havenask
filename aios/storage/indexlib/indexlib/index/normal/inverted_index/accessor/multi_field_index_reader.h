@@ -55,7 +55,7 @@ public:
                                            PostingType type = pt_default,
                                            autil::mem_pool::Pool* sessionPool = NULL) override;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* sessionPool,
                 file_system::ReadOption option) noexcept override;
 

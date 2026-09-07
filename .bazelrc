@@ -11,7 +11,7 @@ build --define indexlib_coroutine=yes
 build --action_env=BAZEL_CXXOPTS="-fcoroutines"
 build --action_env=TURING_ENGINE_DEV_VERSION
 build --host_action_env=TURING_ENGINE_DEV_VERSION
-build --cxxopt="-std=c++17" --copt="-DGTEST_USE_OWN_TR1_TUPLE=0" --copt="-DEIGEN_MAX_CPP_VER=11"
+build --cxxopt="-std=c++20" --copt="-DGTEST_USE_OWN_TR1_TUPLE=0" --copt="-DEIGEN_MAX_CPP_VER=11"
 build --cxxopt="-Wno-stringop-overflow"
 build --cxxopt="-Wno-stringop-truncation"
 build --cxxopt="-Wno-register"
@@ -48,7 +48,14 @@ build --action_env TF_NEED_PAI_TRT="0"
 build --action_env GCC_HOST_COMPILER_PATH="/usr/bin/gcc"
 build --action_env PYTHON_BIN_PATH="/usr/bin/python3"
 build --workspace_status_command "sh ./package/git_commit/git_info.sh"
-build --cxxopt="-std=c++17" --cxxopt="-Wno-register"
+build --cxxopt="-std=c++20" --cxxopt="-Wno-register"
+# Force C++17 for grpc external dependency (grpc uses deprecated std::allocator APIs removed in C++20)
+build --per_file_copt=external/grpc/.*\.cc$@-std=c++17
+build --per_file_copt=external/grpc/.*\.cpp$@-std=c++17
+build --per_file_copt=external/boost/.*\.cc$@-std=c++17
+build --per_file_copt=external/boost/.*\.cpp$@-std=c++17
+build --per_file_copt=external/jdsearch_3rd_party_v7/.*\.cc$@-std=c++17
+build --per_file_copt=external/jdsearch_3rd_party_v7/.*\.cpp$@-std=c++17
 build --config=old_abi
 build:old_abi --copt="-D_GLIBCXX_USE_CXX11_ABI=0" --define use_abi=0
 build:clang --action_env=CC=/usr/bin/clang

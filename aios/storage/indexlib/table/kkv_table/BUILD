@@ -13,7 +13,7 @@ strict_cc_library(
     deps=[
         ':KKVMemSegment', ':KKVSchemaResolver', ':KKVTabletExporter',
         ':KKVTabletOptions', ':KKVTabletReader', ':KKVTabletSessionReader',
-        ':KKVTabletWriter', '//aios/autil:NoCopyable', '//aios/future_lite',
+        ':KKVTabletWriter', '//aios/autil:NoCopyable', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/base:Types',
         '//aios/storage/indexlib/config:TabletSchema',

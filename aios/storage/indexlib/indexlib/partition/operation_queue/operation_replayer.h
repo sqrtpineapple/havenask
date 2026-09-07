@@ -25,7 +25,7 @@
 #include "indexlib/partition/operation_queue/operation_iterator.h"
 #include "indexlib/partition/operation_queue/operation_redo_strategy.h"
 #include "indexlib/util/memory_control/SimpleMemoryQuotaController.h"
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -60,7 +60,7 @@ public:
 private:
     bool RedoOneOperation(const partition::PartitionModifierPtr& modifier, OperationBase* operation,
                           const OperationIterator& iter, const OperationRedoHint& redoHint,
-                          future_lite::Executor* executor);
+                          async_simple::Executor* executor);
 
 private:
     index_base::PartitionDataPtr mPartitionData;

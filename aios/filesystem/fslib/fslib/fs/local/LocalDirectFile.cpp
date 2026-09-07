@@ -23,8 +23,8 @@
 #include "fslib/fs/local/LocalFileSystem.h"
 #include "fslib/util/LongIntervalLog.h"
 #if (__cplusplus >= 201703L)
-#include "future_lite/Executor.h"
-#include "future_lite/IOExecutor.h"
+#include "async_simple/Executor.h"
+#include "async_simple/IOExecutor.h"
 #endif
 #include <thread>
 
@@ -357,15 +357,15 @@ void LocalDirectFile::pread(
     } else {
         controller->getExecutor()->getIOExecutor()->submitIO(
             _fd,
-            future_lite::IOCB_CMD_PREAD,
+            async_simple::IOCB_CMD_PREAD,
             buffer,
             length,
             offset,
-            [controller, callback = std::move(callback)](int32_t res) mutable {
-                if ((signed long)(res) < 0) {
-                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(res)));
+            [controller, callback = std::move(callback)](async_simple::io_event_t& ev) mutable {
+                if ((signed long)(ev.res) < 0) {
+                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(ev.res)));
                 } else {
-                    controller->setIoSize(res);
+                    controller->setIoSize(ev.res);
                     controller->setErrorCode(EC_OK);
                 }
                 callback();
@@ -380,15 +380,15 @@ void LocalDirectFile::preadv(
     } else {
         controller->getExecutor()->getIOExecutor()->submitIOV(
             _fd,
-            future_lite::IOCB_CMD_PREADV,
-            iov,
+            async_simple::IOCB_CMD_PREADV,
+            reinterpret_cast<const async_simple::iovec_t*>(iov),
             iovcnt,
             offset,
-            [controller, callback = std::move(callback)](int32_t res) mutable {
-                if ((signed long)(res) < 0) {
-                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(res)));
+            [controller, callback = std::move(callback)](async_simple::io_event_t& ev) mutable {
+                if ((signed long)(ev.res) < 0) {
+                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(ev.res)));
                 } else {
-                    controller->setIoSize(res);
+                    controller->setIoSize(ev.res);
                     controller->setErrorCode(EC_OK);
                 }
                 callback();
@@ -403,15 +403,15 @@ void LocalDirectFile::pwrite(
     } else {
         controller->getExecutor()->getIOExecutor()->submitIO(
             _fd,
-            future_lite::IOCB_CMD_PWRITE,
+            async_simple::IOCB_CMD_PWRITE,
             buffer,
             length,
             offset,
-            [controller, callback = std::move(callback)](int32_t res) mutable {
-                if ((signed long)(res) < 0) {
-                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(res)));
+            [controller, callback = std::move(callback)](async_simple::io_event_t& ev) mutable {
+                if ((signed long)(ev.res) < 0) {
+                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(ev.res)));
                 } else {
-                    controller->setIoSize(res);
+                    controller->setIoSize(ev.res);
                     controller->setErrorCode(EC_OK);
                 }
                 callback();
@@ -426,15 +426,15 @@ void LocalDirectFile::pwritev(
     } else {
         controller->getExecutor()->getIOExecutor()->submitIOV(
             _fd,
-            future_lite::IOCB_CMD_PWRITEV,
-            iov,
+            async_simple::IOCB_CMD_PWRITEV,
+            reinterpret_cast<const async_simple::iovec_t*>(iov),
             iovcnt,
             offset,
-            [controller, callback = std::move(callback)](int32_t res) mutable {
-                if ((signed long)(res) < 0) {
-                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(res)));
+            [controller, callback = std::move(callback)](async_simple::io_event_t& ev) mutable {
+                if ((signed long)(ev.res) < 0) {
+                    controller->setErrorCode(LocalFileSystem::convertErrno(-(signed long)(ev.res)));
                 } else {
-                    controller->setIoSize(res);
+                    controller->setIoSize(ev.res);
                     controller->setErrorCode(EC_OK);
                 }
                 callback();

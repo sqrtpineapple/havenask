@@ -20,8 +20,8 @@
 #include <unordered_map>
 
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Executor.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/inverted_index/InvertedIndexReader.h"
 #include "indexlib/index/inverted_index/KeyIterator.h"
 
@@ -60,7 +60,7 @@ public:
     index::Result<PostingIterator*> Lookup(const index::Term& term, uint32_t statePoolSize, PostingType type,
                                            autil::mem_pool::Pool* sessionPool) override;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* sessionPool,
                 file_system::ReadOption option) noexcept override;
 
@@ -92,7 +92,7 @@ private:
         assert(false);
         return false;
     }
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept override
     {

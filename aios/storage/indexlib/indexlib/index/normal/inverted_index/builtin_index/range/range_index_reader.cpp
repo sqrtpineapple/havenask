@@ -73,10 +73,10 @@ DocValueFilter* RangeIndexReader::CreateDocValueFilter(const index::Term& term, 
 index::Result<index::PostingIterator*> RangeIndexReader::Lookup(const Term& term, uint32_t statePoolSize,
                                                                 PostingType type, autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
 }
 
-future_lite::coro::Lazy<index::Result<index::PostingIterator*>>
+async_simple::coro::Lazy<index::Result<index::PostingIterator*>>
 RangeIndexReader::LookupAsync(const Term* term, uint32_t statePoolSize, PostingType type,
                               autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
 {
@@ -133,12 +133,12 @@ std::shared_ptr<BuildingIndexReader> RangeIndexReader::CreateBuildingIndexReader
         new BuildingRangeIndexReader(_indexFormatOption->GetPostingFormatOption()));
 }
 
-future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
 RangeIndexReader::GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                                      const DocIdRangeVector& ranges, file_system::ReadOption option) const noexcept
 {
     SegmentPostingsVec rangeSegmentPostings;
-    std::vector<future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>> tasks;
+    std::vector<async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>> tasks;
     bool needBuilding = false;
     if (ranges.empty()) {
         tasks.reserve(mSegmentReaders.size());
@@ -188,7 +188,7 @@ RangeIndexReader::GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, auti
             needBuilding = true;
         }
     }
-    auto results = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto results = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < results.size(); ++i) {
         assert(!results[i].hasError());
         if (results[i].value().Ok()) {

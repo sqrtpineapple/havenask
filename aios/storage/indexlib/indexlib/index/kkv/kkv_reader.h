@@ -19,7 +19,7 @@
 
 #include "autil/ConstString.h"
 #include "autil/mem_pool/pool_allocator.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/codegen/codegen_object.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/kkv/kkv_read_options.h"
@@ -68,7 +68,7 @@ public:
                         uint64_t timestamp, TableSearchCacheType searchCacheType = tsc_default,
                         autil::mem_pool::Pool* pool = nullptr, KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(pkeyHash, suffixKeyHashVec, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -82,7 +82,7 @@ public:
                         TableSearchCacheType searchCacheType = tsc_default, autil::mem_pool::Pool* pool = nullptr,
                         KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(pkeyHash, suffixKeyHashVec, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -95,7 +95,7 @@ public:
                         TableSearchCacheType searchCacheType = tsc_default, autil::mem_pool::Pool* pool = nullptr,
                         KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(prefixKey, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -110,7 +110,7 @@ public:
            uint64_t timestamp, TableSearchCacheType searchCacheType = tsc_default,
            autil::mem_pool::Pool* pool = nullptr, KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(prefixKey, suffixKeys, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -124,7 +124,7 @@ public:
                         uint64_t timestamp, TableSearchCacheType searchCacheType = tsc_default,
                         autil::mem_pool::Pool* pool = nullptr, KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(prefixKey, suffixKeys, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -139,7 +139,7 @@ public:
            uint64_t timestamp, TableSearchCacheType searchCacheType = tsc_default,
            autil::mem_pool::Pool* pool = nullptr, KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(pkeyHash, suffixKeys, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -153,7 +153,7 @@ public:
                         TableSearchCacheType searchCacheType = tsc_default, autil::mem_pool::Pool* pool = nullptr,
                         KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(pkeyHash, suffixKeys, timestamp, searchCacheType, pool, metricsCollector));
     }
 
@@ -165,7 +165,7 @@ public:
     KKVIterator* Lookup(PKeyType pkeyHash, uint64_t timestamp, TableSearchCacheType searchCacheType = tsc_default,
                         autil::mem_pool::Pool* pool = nullptr, KVMetricsCollector* metricsCollector = nullptr)
     {
-        return future_lite::interface::syncAwait(
+        return async_simple::interface::syncAwait(
             LookupAsync(pkeyHash, timestamp, searchCacheType, pool, metricsCollector));
     }
 

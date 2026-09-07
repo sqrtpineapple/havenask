@@ -19,16 +19,16 @@
 #include <sys/types.h>
 
 #include "autil/Log.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/fslib/FslibFileWrapper.h"
 
 namespace fslib { namespace fs {
 class File;
 }} // namespace fslib::fs
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 namespace indexlib { namespace file_system {
 class DataFlushController;
 }} // namespace indexlib::file_system
@@ -51,22 +51,22 @@ public:
     FSResult<void> Close() noexcept override;
 
 public:
-    future_lite::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
-                                                     future_lite::Executor* executor) noexcept override;
-    future_lite::Future<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
-                                                      future_lite::Executor* executor,
+    async_simple::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
+                                                     async_simple::Executor* executor) noexcept override;
+    async_simple::Future<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
+                                                      async_simple::Executor* executor,
                                                       int64_t timeout) noexcept override;
-    future_lite::coro::Lazy<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
+    async_simple::coro::Lazy<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
                                                           int64_t timeout) noexcept override;
 
 private:
     static FSResult<void> Read(fslib::fs::File* file, void* buffer, size_t length, size_t& realLength,
                                bool useDirectIO) noexcept;
     static FSResult<void> Write(fslib::fs::File* file, const void* buffer, size_t length, size_t& realLength) noexcept;
-    future_lite::Future<FSResult<size_t>> InternalPReadASync(void* buffer, size_t length, off_t offset, int advice,
-                                                             future_lite::Executor* executor) noexcept;
-    future_lite::Future<FSResult<size_t>> SinglePreadAsync(void* buffer, size_t length, off_t offset, int advice,
-                                                           future_lite::Executor* executor) noexcept;
+    async_simple::Future<FSResult<size_t>> InternalPReadASync(void* buffer, size_t length, off_t offset, int advice,
+                                                             async_simple::Executor* executor) noexcept;
+    async_simple::Future<FSResult<size_t>> SinglePreadAsync(void* buffer, size_t length, off_t offset, int advice,
+                                                           async_simple::Executor* executor) noexcept;
 
 private:
     static const size_t MIN_ALIGNMENT;

@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common/chunk/chunk_decoder.h"
 #include "indexlib/common/chunk/chunk_decoder_creator.h"
 #include "indexlib/common_define.h"

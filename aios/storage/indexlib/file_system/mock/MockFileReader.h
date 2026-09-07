@@ -43,14 +43,14 @@ public:
     MOCK_METHOD(std::shared_ptr<FileNode>, GetFileNode, (), (const, noexcept, override));
 
     // future interface
-    MOCK_METHOD(future_lite::Future<FSResult<size_t>>, ReadAsync, (void*, size_t, size_t, ReadOption),
+    MOCK_METHOD(async_simple::Future<FSResult<size_t>>, ReadAsync, (void*, size_t, size_t, ReadOption),
                 (noexcept, override));
-    MOCK_METHOD(future_lite::Future<FSResult<uint32_t>>, ReadUInt32Async, (size_t offset, ReadOption option),
+    MOCK_METHOD(async_simple::Future<FSResult<uint32_t>>, ReadUInt32Async, (size_t offset, ReadOption option),
                 (noexcept, override));
-    MOCK_METHOD(future_lite::Future<FSResult<uint32_t>>, ReadVUInt32Async, (ReadOption option), (noexcept, override));
-    MOCK_METHOD(future_lite::Future<FSResult<uint32_t>>, ReadVUInt32Async, (size_t offset, ReadOption option),
+    MOCK_METHOD(async_simple::Future<FSResult<uint32_t>>, ReadVUInt32Async, (ReadOption option), (noexcept, override));
+    MOCK_METHOD(async_simple::Future<FSResult<uint32_t>>, ReadVUInt32Async, (size_t offset, ReadOption option),
                 (noexcept, override));
-    MOCK_METHOD(future_lite::Future<FSResult<size_t>>, PrefetchAsync, (size_t length, size_t offset, ReadOption option),
+    MOCK_METHOD(async_simple::Future<FSResult<size_t>>, PrefetchAsync, (size_t length, size_t offset, ReadOption option),
                 (noexcept, override));
 
     // lazy

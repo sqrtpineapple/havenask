@@ -30,11 +30,12 @@
 #include "autil/TimeUtility.h"
 #include "autil/TimeoutTerminator.h"
 #include "fslib/common/common_type.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/FutureAwaiter.h"
-#include "future_lite/Helper.h"
-#include "future_lite/Try.h"
-#include "future_lite/Unit.h"
+#include "CoroInterface.h"
+#include "async_simple/coro/Collect.h"
+#include "async_simple/coro/FutureAwaiter.h"
+#include "Helper.h"
+#include "async_simple/Try.h"
+#include "async_simple/Unit.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FileBlockCache.h"
 #include "indexlib/file_system/FileSystemMetricsReporter.h"
@@ -43,23 +44,23 @@
 #include "indexlib/file_system/package/PackageOpenMeta.h"
 #include "indexlib/util/Exception.h"
 
-namespace future_lite {
+namespace async_simple {
 template <typename T>
 class MoveWrapper;
 template <typename T>
 class Promise;
-} // namespace future_lite
+} // namespace async_simple
 
 using namespace std;
 using namespace autil;
 
-using future_lite::Future;
-using future_lite::makeReadyFuture;
-using future_lite::MoveWrapper;
-using future_lite::Promise;
-using future_lite::Try;
-using future_lite::Unit;
-using future_lite::coro::Lazy;
+using async_simple::Future;
+using async_simple::makeReadyFuture;
+using async_simple::MoveWrapper;
+using async_simple::Promise;
+using async_simple::Try;
+using async_simple::Unit;
+using async_simple::coro::Lazy;
 
 using namespace indexlib::util;
 
@@ -209,7 +210,7 @@ size_t BlockFileAccessor::FillOneBlock(const SingleIO& io, Block* block, size_t 
     return copyed;
 }
 
-future_lite::coro::Lazy<FSResult<size_t>>
+async_simple::coro::Lazy<FSResult<size_t>>
 BlockFileAccessor::ReadFromFileWrapper(const std::vector<util::Block*>& blocks, size_t beginIdx, size_t endIdx,
                                        size_t offset, int advice, int64_t timeout) noexcept
 {
@@ -270,12 +271,15 @@ BlockFileAccessor::BatchReadBlocksFromFile(const std::vector<size_t>& blockIds, 
     subTasks.push_back(ReadFromFileWrapper(blocks, beginIdx, blockIds.size() - 1, offset, option.advice, timeout));
     batchSize.push_back(blockIds.size() - beginIdx);
     int64_t begin = autil::TimeUtility::currentTimeInMicroSeconds();
-    auto currentExecutor = co_await future_lite::CurrentExecutor();
+    auto currentExecutor = co_await async_simple::CurrentExecutor();
     vector<Try<FSResult<size_t>>> readResult;
     if (currentExecutor || !_executor) {
-        readResult = co_await future_lite::coro::collectAll(move(subTasks));
+        readResult = co_await async_simple::coro::collectAll(move(subTasks));
     } else {
-        readResult = co_await future_lite::coro::collectAll(move(subTasks)).via(_executor);
+        std::vector<async_simple::coro::RescheduleLazy<vector<Try<FSResult<size_t>>>>> ops;
+        ops.emplace_back(move(async_simple::coro::collectAll(move(subTasks)).via(_executor)));
+        auto anyResult = co_await async_simple::coro::collectAny(std::move(ops));
+        readResult = std::move(anyResult.value());
     }
 
     int64_t latency = TimeUtility::currentTimeInMicroSeconds() - begin;
@@ -449,7 +453,7 @@ Future<FSResult<size_t>> BlockFileAccessor::ReadFromBlock(const ReadContextPtr& 
 
     return FillBuffer(missBlockStartIdx, blockCount, ctx, option)
         .thenValue([this, option, ctx, startOffset, defer = std::move(deferWork)](
-                       FSResult<void>&& ret) mutable -> future_lite::Future<FSResult<size_t>> {
+                       FSResult<void>&& ret) mutable -> async_simple::Future<FSResult<size_t>> {
             if (defer) {
                 defer(ctx);
             }
@@ -507,7 +511,11 @@ FL_LAZY(FSResult<size_t>) BlockFileAccessor::ReadFromBlockCoro(const ReadContext
         }
     }
 
-    FSResult<void> ret = FL_COAWAIT FillBuffer(missBlockStartIdx, blockCount, ctx, option).toAwaiter();
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
+    FSResult<void> ret = co_await FillBuffer(missBlockStartIdx, blockCount, ctx, option);
+#else
+    FSResult<void> ret = FillBuffer(missBlockStartIdx, blockCount, ctx, option).get();
+#endif
     FL_CORETURN2_IF_FS_ERROR(ret.Code(), (ctx->curOffset - startOffset), "FillBuffer Failed");
     if (deferWork) {
         deferWork(ctx);
@@ -532,7 +540,7 @@ FSResult<size_t> BlockFileAccessor::Prefetch(size_t length, size_t offset, ReadO
 Future<FSResult<size_t>> BlockFileAccessor::PrefetchAsync(size_t length, size_t offset, ReadOption option) noexcept
 {
     if (unlikely(TEST_mDisableCache)) {
-        return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
+        return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
     }
     return ReadAsync(NULL, length, offset, option);
 }
@@ -820,8 +828,13 @@ BlockFileAccessor::DoGetBlockCoro(const blockid_t& blockID, uint64_t blockOffset
         _tagMetricReporter.ReportMiss(option.trace);
         FreeBlockWhenException freeBlockWhenException(block, _blockAllocatorPtr.get());
         try {
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
             FSResult<CacheBase::Handle*> newHandle =
-                FL_COAWAIT ReadBlockFromFileToCache(block, blockOffset, option).toAwaiter();
+                co_await ReadBlockFromFileToCache(block, blockOffset, option);
+#else
+            FSResult<CacheBase::Handle*> newHandle =
+                ReadBlockFromFileToCache(block, blockOffset, option).get();
+#endif
             if (!newHandle.OK()) {
                 FL_CORETURN FSResult<std::pair<Block*, CacheBase::Handle*>> {newHandle.Code(),
                                                                              std::make_pair(nullptr, nullptr)};

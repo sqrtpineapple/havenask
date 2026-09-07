@@ -157,7 +157,7 @@ strict_cc_library(
     name='LocalExecuteEngine',
     deps=[
         ':IIndexOperationCreator', ':IndexTaskContext', ':IndexTaskPlan',
-        '//aios/autil:NoCopyable', '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:NoCopyable', '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status'
     ]
 )

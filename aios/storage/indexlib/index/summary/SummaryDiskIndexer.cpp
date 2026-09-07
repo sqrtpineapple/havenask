@@ -133,7 +133,7 @@ std::pair<Status, bool> SummaryDiskIndexer::GetDocument(docid_t docId, const Sum
     return std::make_pair(Status::OK(), true);
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SummaryDiskIndexer::GetDocument(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                 autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                                 const SearchSummaryDocVec* docs) const noexcept
@@ -147,11 +147,11 @@ SummaryDiskIndexer::GetDocument(const std::vector<docid_t>& docIds, const Summar
         }
     }
 
-    std::vector<future_lite::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> tasks;
+    std::vector<async_simple::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> tasks;
     for (size_t i = 0; i < groupVec.size(); ++i) {
         tasks.push_back(_summaryGroups[groupVec[i]]->GetDocument(docIds, sessionPool, option, docs));
     }
-    auto taskResults = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto taskResults = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < docIds.size(); ++i) {
         ec.push_back(indexlib::index::ErrorCode::OK);
     }

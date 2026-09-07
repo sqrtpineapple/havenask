@@ -35,7 +35,7 @@ public:
                 const std::shared_ptr<indexlib::file_system::SliceFileReader>& extFileReader);
 
     inline std::pair<Status, uint64_t> GetOffset(docid_t docId) const __ALWAYS_INLINE;
-    inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetOffset(const std::vector<docid_t>& docIds, indexlib::file_system::ReadOption option,
               std::vector<uint64_t>* offsets) const noexcept;
     inline bool IsU32Offset() const __ALWAYS_INLINE;
@@ -78,7 +78,7 @@ inline std::pair<Status, uint64_t> VarLenOffsetReader::GetOffset(docid_t docId) 
     }
     return _uncompressOffsetReader.GetOffset(docId);
 }
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 VarLenOffsetReader::GetOffset(const std::vector<docid_t>& docIds, indexlib::file_system::ReadOption option,
                               std::vector<uint64_t>* offsets) const noexcept
 {

@@ -22,7 +22,7 @@ strict_cc_library(
         ':NormalTabletBuiltinIndex', ':NormalTabletDeployerHook',
         ':NormalTabletExportLoader', ':NormalTabletExporter',
         ':NormalTabletLoader', ':NormalTabletSessionReader',
-        ':NormalTabletWriter', '//aios/autil:NoCopyable', '//aios/future_lite',
+        ':NormalTabletWriter', '//aios/autil:NoCopyable', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/base:Types',
         '//aios/storage/indexlib/config:TabletSchema',

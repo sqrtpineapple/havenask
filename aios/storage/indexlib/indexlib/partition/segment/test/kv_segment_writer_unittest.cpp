@@ -1,6 +1,6 @@
 #include "indexlib/partition/segment/test/kv_segment_writer_unittest.h"
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common/field_format/pack_attribute/pack_attribute_formatter.h"
 #include "indexlib/config/index_partition_schema.h"
 #include "indexlib/config/test/schema_maker.h"
@@ -95,7 +95,7 @@ void KVSegmentWriterTest::TestUserTimestamp()
     KVIndexOptions indexOptions;
     indexOptions.ttl = mKvConfig->GetTTL();
     indexOptions.fixedValueLen = mKvConfig->GetValueConfig()->GetFixedLength();
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader.Get(&indexOptions, key, value, ts, isDeleted)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader.Get(&indexOptions, key, value, ts, isDeleted)));
     ASSERT_EQ(2, ts);
     // std::cout << "value: " << (int)*value.data() << std::endl;
 }
@@ -156,10 +156,10 @@ void KVSegmentWriterTest::TestSwapMmapFile()
     kvOptions.pool = &pool;
 
     uint32_t value;
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, kvOptions)));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, kvOptions)));
 
     collector.Reset();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, kvOptions)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, kvOptions)));
     ASSERT_EQ(11, value);
 }
 

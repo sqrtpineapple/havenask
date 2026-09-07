@@ -38,9 +38,9 @@ using namespace std;
 using namespace autil;
 using namespace autil::mem_pool;
 
-using future_lite::Try;
-using future_lite::Unit;
-using future_lite::coro::Lazy;
+using async_simple::Try;
+using async_simple::Unit;
+using async_simple::coro::Lazy;
 
 using namespace indexlib::index;
 using namespace indexlib::common;

@@ -113,9 +113,9 @@ public:
             const _KT& hash = HashTable::CuckooHash(key, hashCnt);
             uint64_t bucketId = HashTable::GetFirstBucketIdInBlock(hash, mBlockCount);
             Bucket block[HashTable::BLOCK_SIZE];
-            auto result = (FL_COAWAIT mFileReader->ReadAsyncCoro(
-                               block, sizeof(block), sizeof(HashTableHeader) + bucketId * sizeof(Bucket), option))
-                              .GetOrThrow();
+            auto readResult = FL_COAWAIT mFileReader->ReadAsyncCoro(
+                               block, sizeof(block), sizeof(HashTableHeader) + bucketId * sizeof(Bucket), option);
+            auto result = readResult.GetOrThrow();
             (void)result;
 
             for (uint32_t inBlockId = 0; inBlockId < HashTable::BLOCK_SIZE; ++inBlockId) {

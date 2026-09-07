@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/primary_key/PrimaryKeyReader.h"
 #include "indexlib/indexlib.h"
@@ -53,7 +53,7 @@ public:
         return false;
     }
 
-    virtual future_lite::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    virtual async_simple::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                      const SummaryGroupIdVec& groupVec,
                                                                      autil::mem_pool::Pool* sessionPool,
                                                                      file_system::ReadOption option,
@@ -63,7 +63,7 @@ public:
         co_return index::ErrorCodeVec();
     }
 
-    virtual future_lite::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    virtual async_simple::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                      autil::mem_pool::Pool* sessionPool,
                                                                      file_system::ReadOption option,
                                                                      const SearchSummaryDocVec* docs) const noexcept

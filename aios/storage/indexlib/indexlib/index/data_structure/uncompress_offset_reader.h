@@ -45,7 +45,7 @@ public:
 
     inline uint64_t GetOffset(docid_t docId) const __ALWAYS_INLINE;
 
-    inline future_lite::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
+    inline async_simple::coro::Lazy<index::ErrorCodeVec> GetOffset(const std::vector<docid_t>& docIds,
                                                                   file_system::ReadOption option,
                                                                   std::vector<uint64_t>* offsets) const noexcept;
 
@@ -109,7 +109,7 @@ inline uint64_t UncompressOffsetReader::GetOffset(docid_t docId) const
         }
     }
 }
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 UncompressOffsetReader::GetOffset(const std::vector<docid_t>& docIds, file_system::ReadOption option,
                                   std::vector<uint64_t>* offsets) const noexcept
 {

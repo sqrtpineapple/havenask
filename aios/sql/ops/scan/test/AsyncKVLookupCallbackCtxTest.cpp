@@ -8,7 +8,7 @@
 
 #include "autil/TimeUtility.h"
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/index/IIndexReader.h"
 #include "indexlib/index/kv/KVIndexReader.h"
 #include "navi/common.h"
@@ -53,7 +53,7 @@ TEST_F(AsyncKVLookupCallbackCtxV2Test, testOnSessionCallback) {
     ctx.preparePksForSearch();
     AsyncKVLookupCallbackCtxV2::StatusVector statusVec(_poolPtr.get());
     statusVec.emplace_back(KVResultStatus::FOUND);
-    future_lite::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
+    async_simple::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
         std::move(statusVec));
     ctx._startVersion = 1;
     ctx._callbackVersion = 0;
@@ -72,7 +72,7 @@ TEST_F(AsyncKVLookupCallbackCtxV2Test, testOnSessionCallback_HasFailedDocId) {
     statusVec.emplace_back(KVResultStatus::NOT_FOUND);
     statusVec.emplace_back(KVResultStatus::TIMEOUT);
     statusVec.emplace_back(KVResultStatus::DELETED);
-    future_lite::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
+    async_simple::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
         std::move(statusVec));
     ctx._startVersion = 1;
     ctx._callbackVersion = 0;
@@ -82,14 +82,14 @@ TEST_F(AsyncKVLookupCallbackCtxV2Test, testOnSessionCallback_HasFailedDocId) {
 }
 
 // ================= test only for coroutine mode begin ===============
-#ifdef FUTURE_LITE_USE_COROUTINES
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
 
 TEST_F(AsyncKVLookupCallbackCtxV2Test, DISABLED_testOnSessionCallback_ErrorException) {
     auto pipe = std::make_shared<navi::MockAsyncPipe>();
     AsyncKVLookupCallbackCtxV2 ctx(pipe, nullptr);
     EXPECT_CALL(*pipe, setData(_)).WillOnce(Return(navi::EC_NONE));
     AsyncKVLookupCallbackCtxV2::StatusVector statusVec(_poolPtr.get());
-    future_lite::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
+    async_simple::interface::use_try_t<AsyncKVLookupCallbackCtxV2::StatusVector> statusVecTry(
         std::move(statusVec));
     statusVecTry.setException(make_exception_ptr(std::bad_exception()));
     ctx._startVersion = 1;

@@ -20,7 +20,7 @@
 #include "autil/ConstString.h"
 #include "autil/MurmurHash.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/MoveWrapper.h"
+#include "async_simple/MoveWrapper.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/kkv/building_kkv_segment_iterator.h"
 #include "indexlib/index/kkv/building_kkv_segment_reader.h"
@@ -74,7 +74,7 @@ private:
         KKVValueFetcher valueFetcher;
         bool lastSeg = false;
         SegResult(autil::mem_pool::Pool* pool) : kkvDocs(pool) {}
-        SegResult(SegResult&& other)
+        SegResult(SegResult&& other)  noexcept
             : kkvDocs(std::move(other.kkvDocs))
             , hasPKeyDeleted(other.hasPKeyDeleted)
             , pKeyDeletedTs(other.pKeyDeletedTs)
@@ -82,8 +82,18 @@ private:
             , lastSeg(other.lastSeg)
         {
         }
+        SegResult& operator=(SegResult&& other) noexcept {
+            if (this != &other) {
+                kkvDocs = std::move(other.kkvDocs);
+                hasPKeyDeleted = other.hasPKeyDeleted;
+                pKeyDeletedTs = other.pKeyDeletedTs;
+                valueFetcher = std::move(other.valueFetcher);
+                lastSeg = other.lastSeg;
+            }
+            return *this;
+        }
     };
-    using SegResultTry = future_lite::Try<SegResult>;
+    using SegResultTry = async_simple::Try<SegResult>;
     using SKeyUnorderedSet = std::unordered_set<SKeyType, std::hash<SKeyType>, std::equal_to<SKeyType>,
                                                 autil::mem_pool::pool_allocator<SKeyType>>;
 
@@ -421,8 +431,8 @@ inline FL_LAZY(bool) KKVSearchCoroutine<SKeyType>::CollectDocsFromBuiltSegment(
     bool keepSortSeq = !ctx.indexOptions->sortParams.empty();
     bool terminated = false;
     auto skeyCountLimits = ctx.indexOptions->GetSKeyCountLimits();
-    autil::mem_pool::pool_allocator<FL_LAZY(future_lite::Unit)> alloc(pool);
-    std::vector<FL_LAZY(future_lite::Unit), autil::mem_pool::pool_allocator<FL_LAZY(future_lite::Unit)>>
+    autil::mem_pool::pool_allocator<FL_LAZY(async_simple::Unit)> alloc(pool);
+    std::vector<FL_LAZY(async_simple::Unit), autil::mem_pool::pool_allocator<FL_LAZY(async_simple::Unit)>>
         fetchValueTasks(alloc);
     for (auto iter = segResults.begin(); iter != segResults.end() && !terminated; ++iter) {
         auto& result = *iter;
@@ -463,17 +473,17 @@ inline FL_LAZY(bool) KKVSearchCoroutine<SKeyType>::CollectDocsFromBuiltSegment(
         }
         if (result.valueFetcher) {
             auto fetchValueTask = [](size_t beginDocPos, size_t endDocPos, KKVValueFetcher fetcher,
-                                     KKVDocs& kkvDocs) mutable -> FL_LAZY(future_lite::Unit) {
-                FL_COAWAIT fetcher.FetchValues(kkvDocs.begin() + beginDocPos, kkvDocs.begin() + endDocPos);
-                FL_CORETURN future_lite::Unit {};
+                                     KKVDocs& kkvDocs) mutable -> FL_LAZY(async_simple::Unit) {
+                [[maybe_unused]] auto _fetch_result = FL_COAWAIT fetcher.FetchValues(kkvDocs.begin() + beginDocPos, kkvDocs.begin() + endDocPos);
+                FL_CORETURN async_simple::Unit{};
             }(beginDocPos, kkvDocs.size(), std::move(result.valueFetcher), kkvDocs);
             fetchValueTasks.push_back(std::move(fetchValueTask));
         }
     }
-    autil::mem_pool::pool_allocator<future_lite::Try<future_lite::Unit>> outAlloc(pool);
-    auto out = FL_COAWAIT future_lite::interface::collectAll(std::move(fetchValueTasks), outAlloc);
+    autil::mem_pool::pool_allocator<async_simple::Try<async_simple::Unit>> outAlloc(pool);
+    auto out = FL_COAWAIT async_simple::interface::collectAll(std::move(fetchValueTasks), outAlloc);
     for (auto& _ : out) {
-        auto ret = future_lite::interface::getTryValue(_); // rethrow exception if error
+        auto ret = async_simple::interface::getTryValue(_); // rethrow exception if error
         (void)ret;
     }
     FL_CORETURN builtHasPKeyDeleted;
@@ -536,7 +546,7 @@ inline FL_LAZY(
                         if (docIter->HasHitLastNode()) {
                             break;
                         }
-                        FL_COAWAIT docIter->SwitchChunk();
+                        [[maybe_unused]] auto _switch_result = FL_COAWAIT docIter->SwitchChunk();
                     }
                 }
                 FL_CORETURN std::move(segResult);
@@ -549,12 +559,12 @@ inline FL_LAZY(
         }
     }
     // TODO: serialize search on pkey+skey search
-    autil::mem_pool::pool_allocator<future_lite::Try<SegResult>> outAlloc(pool);
-    auto tryRet = FL_COAWAIT future_lite::interface::collectAll(std::move(segTasks), outAlloc);
+    autil::mem_pool::pool_allocator<async_simple::Try<SegResult>> outAlloc(pool);
+    auto tryRet = FL_COAWAIT async_simple::interface::collectAll(std::move(segTasks), outAlloc);
     autil::mem_pool::pool_allocator<SegResult> retAlloc(pool);
     std::vector<SegResult, autil::mem_pool::pool_allocator<SegResult>> ret(retAlloc);
     for (auto& it : tryRet) {
-        ret.push_back(std::move(future_lite::interface::getTryValue(it)));
+        ret.push_back(std::move(async_simple::interface::getTryValue(it)));
     }
 
     FL_CORETURN make_pair(builtHasPKeyDeleted, std::move(ret));

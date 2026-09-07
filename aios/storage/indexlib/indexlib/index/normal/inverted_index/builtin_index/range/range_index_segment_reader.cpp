@@ -47,7 +47,7 @@ void RangeIndexSegmentReader::Open(const IndexConfigPtr& indexConfig, const Segm
     mMaxNumber = rangeInfo.GetMaxNumber();
 }
 
-future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
 RangeIndexSegmentReader::Lookup(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                                 file_system::ReadOption option) noexcept
 {

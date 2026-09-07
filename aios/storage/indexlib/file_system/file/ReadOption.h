@@ -21,7 +21,7 @@ namespace indexlib { namespace util {
 struct BlockAccessCounter;
 }} // namespace indexlib::util
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -33,7 +33,7 @@ namespace indexlib { namespace file_system {
 
 struct ReadOption {
     util::BlockAccessCounter* blockCounter = nullptr;
-    future_lite::Executor* executor;
+    async_simple::Executor* executor;
     autil::TimeoutTerminator* timeoutTerminator = nullptr;
     int advice = IO_ADVICE_NORMAL;
     bool trace = false;

@@ -19,7 +19,7 @@
 #include <string>
 
 #include "fslib/fs/FileSystem.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/normal/summary/building_summary_reader.h"
 #include "indexlib/index/normal/summary/local_disk_summary_segment_reader.h"
@@ -47,7 +47,7 @@ public:
     bool Open(const index_base::PartitionDataPtr& partitionData,
               const std::shared_ptr<PrimaryKeyIndexReader>& pkIndexReader, const SummaryReader* hintReader) override;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> GetDocumentAsync(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> GetDocumentAsync(const std::vector<docid_t>& docIds,
                                                                   autil::mem_pool::Pool* sessionPool,
                                                                   file_system::ReadOption readOption,
                                                                   const SearchSummaryDocVec* docs) const noexcept;
@@ -69,10 +69,10 @@ private:
     bool SetSummaryDocField(document::SearchSummaryDocument* summaryDoc, fieldid_t fieldId,
                             const std::string& value) const;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     GetDocumentFromSummaryAsync(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                                 file_system::ReadOption readOption, const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<std::vector<future_lite::Try<index::ErrorCodeVec>>>
+    async_simple::coro::Lazy<std::vector<async_simple::Try<index::ErrorCodeVec>>>
     GetBuiltSegmentTasks(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                          file_system::ReadOption readOption, const SearchSummaryDocVec* docs) const noexcept;
 

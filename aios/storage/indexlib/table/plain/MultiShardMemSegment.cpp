@@ -191,7 +191,7 @@ void MultiShardMemSegment::UpdateSegmentInfo(document::IDocumentBatch* batch)
         _segmentMeta.segmentInfo->maxTTL = batch->GetMaxTTL();
     }
 
-    _segmentMeta.segmentInfo->docCount += batch->GetAddedDocCount();
+    _segmentMeta.segmentInfo->docCount = _segmentMeta.segmentInfo->docCount + batch->GetAddedDocCount();
 }
 
 uint64_t MultiShardMemSegment::ExtractKeyHash(const std::shared_ptr<document::IDocument>& doc)

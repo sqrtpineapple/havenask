@@ -31,7 +31,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     data=glob(['testdata/**']),
     deps=[
-        '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/config:TabletSchema',
         '//aios/storage/indexlib/document:DocumentBatch',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',

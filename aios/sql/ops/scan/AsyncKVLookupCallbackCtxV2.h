@@ -24,7 +24,7 @@
 
 #include "autil/Span.h"
 #include "autil/result/Result.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/index/kv/KVIndexReader.h"
 #include "indexlib/index/kv/KVMetricsCollector.h"
 #include "indexlib/index/kv/KVReadOptions.h"
@@ -39,9 +39,9 @@ namespace kmonitor {
 class MetricsReporter;
 } // namespace kmonitor
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace navi {
 class AsyncPipe;
@@ -69,11 +69,11 @@ public:
 
 public:
     AsyncKVLookupCallbackCtxV2(const std::shared_ptr<navi::AsyncPipe> &pipe,
-                               future_lite::Executor *executor);
+                               async_simple::Executor *executor);
     virtual ~AsyncKVLookupCallbackCtxV2() = default;
 
 public: // for callback
-    void onSessionCallback(future_lite::interface::use_try_t<StatusVector> statusVecTry);
+    void onSessionCallback(async_simple::interface::use_try_t<StatusVector> statusVecTry);
 
 public:
     bool
@@ -83,7 +83,7 @@ public:
     int64_t getSeekTime() const override;
 
 private:
-    void processStatusVec(future_lite::interface::use_try_t<StatusVector> statusVecTry);
+    void processStatusVec(async_simple::interface::use_try_t<StatusVector> statusVecTry);
     void prepareReadOptions(const KVLookupOption &option);
     void doWaitTablet();
     void onWaitTabletCallback(
@@ -100,7 +100,7 @@ private:
     KVLookupOption _option;
     indexlibv2::index::KVReadOptions _readOptions;
     AsyncKVLookupMetricsCollectorV2 _metricsCollector;
-    future_lite::Executor *_executor;
+    async_simple::Executor *_executor;
     std::vector<autil::StringView> _rawResults;
     std::optional<std::string> _errorDesc;
     std::shared_ptr<indexlibv2::config::ITabletSchema> _schema;

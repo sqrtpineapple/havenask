@@ -58,7 +58,7 @@ RealtimeBuilderV2::RealtimeBuilderV2(const std::string configPath,
     if (_tablet) {
         tabletName = _tablet->GetTabletInfos()->GetTabletName();
     }
-    _tasker = std::make_unique<future_lite::NamedTaskScheduler>(builderResource.taskScheduler2);
+    _tasker = std::make_unique<async_simple::NamedTaskScheduler>(builderResource.taskScheduler2);
 }
 
 bool RealtimeBuilderV2::start(const proto::PartitionId& partitionId)

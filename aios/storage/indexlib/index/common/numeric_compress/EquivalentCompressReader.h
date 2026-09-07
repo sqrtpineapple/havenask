@@ -19,7 +19,7 @@
 
 #include "autil/LongHashValue.h"
 #include "autil/MultiValueType.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/base/Define.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/file_system/file/FileReader.h"
@@ -106,13 +106,13 @@ protected:
         return std::make_pair(Status::OK(), slotItem);
     }
 
-    inline future_lite::Future<std::pair<Status, size_t>>
+    inline async_simple::Future<std::pair<Status, size_t>>
     AsyncGetSlotItem(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream, size_t slotIdx,
                      SlotItem* slotItem, indexlib::file_system::ReadOption readOption) const __ALWAYS_INLINE
     {
         if (_slotBaseAddr) {
             *slotItem = *((SlotItem*)_slotBaseAddr + slotIdx);
-            return future_lite::makeReadyFuture(std::make_pair(Status::OK(), 0ul));
+            return async_simple::makeReadyFuture(std::make_pair(Status::OK(), 0ul));
         }
         assert(fileStream);
         return fileStream
@@ -140,13 +140,13 @@ protected:
         return std::make_pair(status, slotItem);
     }
 
-    inline future_lite::Future<std::pair<Status, size_t>>
+    inline async_simple::Future<std::pair<Status, size_t>>
     AsyncGetLongSlotItem(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream, size_t slotIdx,
                          LongSlotItem* longSlotItem, indexlib::file_system::ReadOption readOption) const __ALWAYS_INLINE
     {
         if (_slotBaseAddr) {
             *longSlotItem = *((LongSlotItem*)_slotBaseAddr + slotIdx);
-            return future_lite::makeReadyFuture(std::make_pair(Status::OK(), 0ul));
+            return async_simple::makeReadyFuture(std::make_pair(Status::OK(), 0ul));
         }
         assert(fileStream);
         return fileStream
@@ -286,7 +286,7 @@ public:
     static void InplaceUpdateDeltaArray(uint8_t* deltaArray, SlotItemType slotType, uint32_t valueIdx, UT updateDelta);
 
 private:
-    future_lite::Future<size_t> AsyncGetDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream,
+    async_simple::Future<size_t> AsyncGetDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream,
                                                    size_t slotIdx, SlotItem* slotItem, UT* baseValue,
                                                    uint8_t* deltaArray, indexlib::file_system::ReadOption readOption);
     std::pair<Status, size_t> GetDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream,
@@ -295,7 +295,7 @@ private:
     GetLongValueDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream, size_t slotIdx,
                            LongSlotItem& slotItem, LongValueArrayHeader& header, uint8_t* deltaArray);
 
-    future_lite::Future<size_t>
+    async_simple::Future<size_t>
     AsyncGetLongValueDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream, size_t slotIdx,
                                 LongSlotItem* slotItem, LongValueArrayHeader* header, uint8_t* deltaArray,
                                 indexlib::file_system::ReadOption readOption);
@@ -651,7 +651,7 @@ EquivalentCompressReader<T>::GetDeltaArray(const std::shared_ptr<indexlib::file_
 }
 
 template <typename T>
-inline future_lite::Future<size_t>
+inline async_simple::Future<size_t>
 EquivalentCompressReader<T>::AsyncGetDeltaArray(const std::shared_ptr<indexlib::file_system::FileStream>& fileStream,
                                                 size_t slotIdx, SlotItem* slotItem, UT* baseValue, uint8_t* deltaArray,
                                                 indexlib::file_system::ReadOption readOption)
@@ -690,7 +690,7 @@ inline std::pair<Status, size_t> EquivalentCompressReader<T>::GetLongValueDeltaA
 }
 
 template <typename T>
-inline future_lite::Future<size_t> EquivalentCompressReader<T>::AsyncGetLongValueDeltaArray(
+inline async_simple::Future<size_t> EquivalentCompressReader<T>::AsyncGetLongValueDeltaArray(
     const std::shared_ptr<indexlib::file_system::FileStream>& fileStream, size_t slotIdx, LongSlotItem* slotItem,
     LongValueArrayHeader* header, uint8_t* deltaArray, indexlib::file_system::ReadOption readOption)
 {
@@ -704,7 +704,7 @@ inline future_lite::Future<size_t> EquivalentCompressReader<T>::AsyncGetLongValu
                 EquivalentCompressFileFormat::GetDeltaArraySizeByDeltaType(header->deltaType, slotSize);
             return fileStream->ReadAsync(deltaArray, deltaArraySize, valueOffset, readOption)
                 .thenValue(
-                    [headerSize](size_t size) { return future_lite::makeReadyFuture(size_t(size + headerSize)); });
+                    [headerSize](size_t size) { return async_simple::makeReadyFuture(size_t(size + headerSize)); });
         });
 }
 

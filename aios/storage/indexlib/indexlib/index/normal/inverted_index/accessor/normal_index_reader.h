@@ -17,8 +17,8 @@
 
 #include <memory>
 
-#include "future_lite/Executor.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Executor.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/common/DictHasher.h"
 #include "indexlib/index/inverted_index/KeyIteratorTyped.h"
@@ -66,7 +66,7 @@ public:
                                            PostingType type = pt_default,
                                            autil::mem_pool::Pool* sessionPool = NULL) override;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override;
 
@@ -84,7 +84,7 @@ public:
 
     bool GetSegmentPosting(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            InvertedIndexSearchTracer* tracer = nullptr) override;
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option,
                            InvertedIndexSearchTracer* tracer = nullptr) noexcept override;
@@ -99,7 +99,7 @@ public:
                               bool needBuildingSegment);
 
     // only main chain and no section reader
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     CreateMainPostingIteratorAsync(index::DictKeyInfo key, uint32_t statePoolSize, autil::mem_pool::Pool* sessionPool,
                                    bool needBuildingSegment, file_system::ReadOption option,
                                    InvertedIndexSearchTracer* tracer = nullptr) noexcept;
@@ -107,11 +107,11 @@ public:
     size_t GetTotalPostingFileLength() const;
 
 protected:
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     CreatePostingIteratorAsync(const index::Term* term, const DocIdRangeVector& ranges, uint32_t statePoolSize,
                                autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     CreatePostingIteratorByHashKey(const index::Term* term, index::DictKeyInfo termHashKey,
                                    const DocIdRangeVector& ranges, uint32_t statePoolSize,
                                    autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept;
@@ -148,15 +148,15 @@ protected:
     // virtual bool FillSegmentPosting(const index::Term& term, const index::DictKeyInfo& key, uint32_t segmentIdx,
     //                                 SegmentPosting& segPosting);
 
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     FillSegmentPostingAsync(const index::Term* term, const index::DictKeyInfo& key, uint32_t segmentIdx,
                             SegmentPosting& segPosting, file_system::ReadOption option) noexcept;
 
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     FillTruncSegmentPosting(const index::Term& term, const index::DictKeyInfo& key, uint32_t segmentIdx,
                             SegmentPosting& segPosting, file_system::ReadOption option) noexcept;
 
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingFromTruncIndex(const index::Term& term, const index::DictKeyInfo& key, uint32_t segmentIdx,
                                     file_system::ReadOption option, SegmentPosting& segPosting) noexcept;
 
@@ -174,13 +174,13 @@ protected:
     DocIdRangeVector MergeDocIdRanges(int32_t hintValues, const DocIdRangeVector& ranges) const;
 
 private:
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     DoLookupAsync(const index::Term* term, const DocIdRangeVector& ranges, uint32_t statePoolSize, PostingType type,
                   autil::mem_pool::Pool* pool, file_system::ReadOption option) noexcept;
 
     void FillRangeByBuiltSegments(const index::Term* term, const index::DictKeyInfo& termHashKey,
                                   const DocIdRangeVector& ranges,
-                                  std::vector<future_lite::coro::Lazy<index::Result<bool>>>& tasks,
+                                  std::vector<async_simple::coro::Lazy<index::Result<bool>>>& tasks,
                                   SegmentPostingVector& segPostings, bool& needBuildingSegment,
                                   file_system::ReadOption option) noexcept;
     DocIdRangeVector IntersectDocIdRange(const DocIdRangeVector& currentRange, const DocIdRangeVector& range) const;
@@ -197,7 +197,7 @@ protected:
 
     std::shared_ptr<BuildingIndexReader> mBuildingIndexReader;
 
-    future_lite::Executor* mExecutor;
+    async_simple::Executor* mExecutor;
     bool mIndexSupportNull;
     IndexMetrics* mIndexMetrics;
     index_base::TemperatureDocInfoPtr mTemperatureDocInfo;
@@ -218,7 +218,7 @@ inline bool NormalIndexReader::GetSegmentPosting(const index::DictKeyInfo& key, 
     return mSegmentReaders[segmentIdx]->GetSegmentPosting(key, 0, segPosting, NULL);
 }
 
-inline future_lite::coro::Lazy<index::Result<bool>>
+inline async_simple::coro::Lazy<index::Result<bool>>
 NormalIndexReader::GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx,
                                           SegmentPosting& segPosting, file_system::ReadOption option,
                                           InvertedIndexSearchTracer* tracer) noexcept

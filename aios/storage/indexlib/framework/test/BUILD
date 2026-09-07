@@ -38,7 +38,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     deps=[
         ':FakeTablet', ':FakeTabletReader',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/kmonitor:kmonitor_client_cpp',
         '//aios/storage/indexlib/base:NoExceptionWrapper',
         '//aios/storage/indexlib/file_system',

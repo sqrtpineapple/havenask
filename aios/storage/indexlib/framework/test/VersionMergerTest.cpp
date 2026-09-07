@@ -11,6 +11,7 @@
 #include "indexlib/framework/index_task/IndexTaskContext.h"
 #include "indexlib/framework/index_task/IndexTaskPlan.h"
 #include "unittest/unittest.h"
+#include "async_simple/coro/SyncAwait.h"
 
 namespace indexlibv2::framework {
 
@@ -68,8 +69,8 @@ public:
     }
 
 public:
-    future_lite::coro::Lazy<Status> Recover() override { co_return Status::OK(); }
-    future_lite::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() override
+    async_simple::coro::Lazy<Status> Recover() override { co_return Status::OK(); }
+    async_simple::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() override
     {
         co_return std::make_pair(Status::OK(), INVALID_VERSIONID);
     }
@@ -88,7 +89,7 @@ public:
     {
         return std::make_unique<IndexTaskContext>();
     }
-    future_lite::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
+    async_simple::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
                                                     IndexTaskContext* context) override
     {
         auto targetVersionId = Version::MERGED_VERSION_ID_MASK | (++_lastMergedVersionId);
@@ -101,7 +102,7 @@ public:
         _taskStatus = std::make_unique<MergeTaskStatus>(taskStatus);
         co_return Status::OK();
     }
-    future_lite::coro::Lazy<std::pair<Status, MergeTaskStatus>> WaitMergeResult() override
+    async_simple::coro::Lazy<std::pair<Status, MergeTaskStatus>> WaitMergeResult() override
     {
         auto taskStatus = *_taskStatus;
         co_return std::make_pair(Status::OK(), taskStatus);
@@ -113,7 +114,7 @@ public:
         return Status::OK();
     }
     void SetBaseVersionId(versionid_t versionId) { _baseVersionId = versionId; }
-    future_lite::coro::Lazy<Status> CancelCurrentTask() override
+    async_simple::coro::Lazy<Status> CancelCurrentTask() override
     {
         _taskStatus.reset();
         co_return Status::OK();
@@ -157,7 +158,7 @@ TEST_F(VersionMergerTest, testSimple)
 
     merger.UpdateVersion(baseVersion);
 
-    future_lite::coro::syncAwait(merger.Run());
+    async_simple::coro::syncAwait(merger.Run());
     auto info = merger.GetMergedVersionInfo();
     ASSERT_TRUE(info);
     ASSERT_EQ(baseVersion.GetVersionId(), info->baseVersion.GetVersionId());
@@ -208,7 +209,7 @@ TEST_F(VersionMergerTest, testRecover)
             taskStatus.baseVersion = Version(runningVersion);
             controller->_taskStatus = std::make_unique<MergeTaskStatus>(taskStatus);
             taskStatus.code = MergeTaskStatus::DONE;
-            auto recoverStat = future_lite::coro::syncAwait(merger.EnsureRecovered());
+            auto recoverStat = async_simple::coro::syncAwait(merger.EnsureRecovered());
             ASSERT_TRUE(recoverStat.IsOK());
         }
         auto taskStat = merger.GetRunningTaskStat();

@@ -62,7 +62,7 @@ protected:
     index::Result<bool> InnerLookup(dictkey_t key, file_system::ReadOption option,
                                     dictvalue_t& value) noexcept override;
 
-    future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
+    async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>>
     InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept override;
 
 private:
@@ -164,7 +164,7 @@ inline index::Result<bool> TieredDictionaryReaderTyped<KeyType>::InnerLookup(dic
 }
 
 template <typename KeyType>
-future_lite::coro::Lazy<index::Result<DictionaryReader::LookupResult>> inline TieredDictionaryReaderTyped<
+async_simple::coro::Lazy<index::Result<DictionaryReader::LookupResult>> inline TieredDictionaryReaderTyped<
     KeyType>::InnerLookupAsync(dictkey_t key, file_system::ReadOption option) noexcept
 {
     dictvalue_t value;

@@ -1,7 +1,7 @@
 #include "indexlib/index/kv/test/hash_table_fix_segment_reader_unittest.h"
 
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/common/hash_table/dense_hash_table_traits.h"
 #include "indexlib/config/test/schema_maker.h"
 #include "indexlib/partition/partition_data_creator.h"
@@ -49,23 +49,23 @@ void HashTableFixSegmentReaderTest::TestValueWithTs()
     autil::StringView value;
     uint64_t ts = 0;
     bool isDeleted = false;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     KVIndexOptions indexOptions;
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 1, value, ts, isDeleted, NULL), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 1, value, ts, isDeleted, NULL), &ex));
     ASSERT_EQ((uint64_t)1, *(uint64_t*)value.data());
     ASSERT_FALSE(isDeleted);
     ASSERT_EQ((uint64_t)10, ts);
 
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 2, value, ts, isDeleted, NULL), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 2, value, ts, isDeleted, NULL), &ex));
     ASSERT_TRUE(isDeleted);
     ASSERT_EQ((uint64_t)30, ts);
 
-    ASSERT_FALSE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 3, value, ts, isDeleted, NULL), &ex));
+    ASSERT_FALSE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 3, value, ts, isDeleted, NULL), &ex));
 }
 
 void HashTableFixSegmentReaderTest::TestValueWithoutTs()
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     KVIndexOptions indexOptions;
     mSchema->SetEnableTTL(false);
     IndexPartitionOptions options;
@@ -80,15 +80,15 @@ void HashTableFixSegmentReaderTest::TestValueWithoutTs()
     autil::StringView value;
     uint64_t ts = 0;
     bool isDeleted = false;
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 1, value, ts, isDeleted, NULL), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 1, value, ts, isDeleted, NULL), &ex));
     ASSERT_EQ((uint64_t)1, *(uint64_t*)value.data());
     ASSERT_FALSE(isDeleted);
     ASSERT_EQ((uint64_t)0, ts);
 
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 2, value, ts, isDeleted, NULL), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 2, value, ts, isDeleted, NULL), &ex));
     ASSERT_TRUE(isDeleted);
     ASSERT_EQ((uint64_t)0, ts);
 
-    ASSERT_FALSE(future_lite::interface::syncAwait(reader.Get(&indexOptions, 3, value, ts, isDeleted, NULL), &ex));
+    ASSERT_FALSE(async_simple::interface::syncAwait(reader.Get(&indexOptions, 3, value, ts, isDeleted, NULL), &ex));
 }
 }} // namespace indexlib::index

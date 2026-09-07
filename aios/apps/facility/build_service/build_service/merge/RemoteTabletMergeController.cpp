@@ -37,9 +37,9 @@
 #include "build_service/config/ResourceReader.h"
 #include "build_service/proto/GeneralTaskInfo.h"
 #include "build_service/proto/ProtoUtil.h"
-#include "future_lite/coro/CoAwait.h"
-#include "future_lite/coro/Sleep.h"
-#include "future_lite/experimental/coroutine.h"
+#include "async_simple/coro/ViaCoroutine.h"
+#include "async_simple/coro/Sleep.h"
+#include "async_simple/experimental/coroutine.h"
 #include "indexlib/base/PathUtil.h"
 #include "indexlib/config/ITabletSchema.h"
 #include "indexlib/config/TabletOptions.h"
@@ -201,7 +201,7 @@ RemoteTabletMergeController::CreateTaskContext(indexlibv2::versionid_t baseVersi
     return context;
 }
 
-future_lite::coro::Lazy<indexlib::Status>
+async_simple::coro::Lazy<indexlib::Status>
 RemoteTabletMergeController::SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan, IndexTaskContext* context)
 {
     int64_t taskId = 0;
@@ -223,7 +223,7 @@ RemoteTabletMergeController::SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan
         auto r = co_await SubmitTask(std::move(copiedPlan), context, &response);
         if (!r) {
             BS_LOG(WARN, "submit task rpc may fail, task epoch[%s]", context->GetTaskEpochId().c_str());
-            co_await future_lite::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
+            co_await async_simple::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
             continue;
         }
         if (!response.has_errorcode() || response.errorcode() == proto::ADMIN_ERROR_NONE ||
@@ -239,7 +239,7 @@ RemoteTabletMergeController::SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan
     co_return Status::OK();
 }
 
-future_lite::coro::Lazy<std::pair<indexlib::Status, MergeTaskStatus>> RemoteTabletMergeController::WaitMergeResult()
+async_simple::coro::Lazy<std::pair<indexlib::Status, MergeTaskStatus>> RemoteTabletMergeController::WaitMergeResult()
 {
     MergeTaskStatus taskStatus;
     if (!GetRunningTaskStat()) {
@@ -320,7 +320,7 @@ future_lite::coro::Lazy<std::pair<indexlib::Status, MergeTaskStatus>> RemoteTabl
                 assert(false);
             }
         }
-        co_await future_lite::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
+        co_await async_simple::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
     }
     if (taskStatus.code == MergeTaskStatus::ERROR) {
         co_await StopTask(taskDesc.taskId);
@@ -433,7 +433,7 @@ void RemoteTabletMergeController::fillPlan(const IndexTaskPlan& plan, proto::Ope
     }
 }
 
-future_lite::coro::Lazy<bool> RemoteTabletMergeController::SubmitTask(std::unique_ptr<IndexTaskPlan> plan,
+async_simple::coro::Lazy<bool> RemoteTabletMergeController::SubmitTask(std::unique_ptr<IndexTaskPlan> plan,
                                                                       IndexTaskContext* context,
                                                                       proto::InformResponse* response)
 {
@@ -484,7 +484,7 @@ future_lite::coro::Lazy<bool> RemoteTabletMergeController::SubmitTask(std::uniqu
     co_return ret;
 }
 
-future_lite::coro::Lazy<bool> RemoteTabletMergeController::GetTaskInfo(int64_t taskId,
+async_simple::coro::Lazy<bool> RemoteTabletMergeController::GetTaskInfo(int64_t taskId,
                                                                        proto::TaskInfoResponse* response)
 {
     proto::TaskInfoRequest request;
@@ -501,7 +501,7 @@ future_lite::coro::Lazy<bool> RemoteTabletMergeController::GetTaskInfo(int64_t t
     co_return !awaiter->controller->Failed();
 }
 
-future_lite::coro::Lazy<bool> RemoteTabletMergeController::StopTask(int64_t taskId)
+async_simple::coro::Lazy<bool> RemoteTabletMergeController::StopTask(int64_t taskId)
 {
     std::lock_guard<std::mutex> guard(_taskMutex);
     proto::StopTaskRequest request;
@@ -519,7 +519,7 @@ future_lite::coro::Lazy<bool> RemoteTabletMergeController::StopTask(int64_t task
     co_return !awaiter->controller->Failed();
 }
 
-future_lite::coro::Lazy<bool> RemoteTabletMergeController::StopBuild()
+async_simple::coro::Lazy<bool> RemoteTabletMergeController::StopBuild()
 {
     proto::StopBuildRequest request;
     proto::InformResponse response;
@@ -536,7 +536,7 @@ future_lite::coro::Lazy<bool> RemoteTabletMergeController::StopBuild()
     co_return !awaiter->controller->Failed();
 }
 
-future_lite::coro::Lazy<bool> RemoteTabletMergeController::GetGenerationInfo(proto::GenerationInfo* generationInfo)
+async_simple::coro::Lazy<bool> RemoteTabletMergeController::GetGenerationInfo(proto::GenerationInfo* generationInfo)
 {
     proto::ServiceInfoRequest request;
     FillBuildId(request.mutable_buildid());
@@ -592,7 +592,7 @@ indexlib::Status RemoteTabletMergeController::CleanTask(bool removeTempFiles)
     return ret;
 }
 
-future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
 RemoteTabletMergeController::GetRunningMergeTaskResult(proto::GenerationInfo generationInfo)
 {
     for (const auto& taskInfo : generationInfo.activetaskinfos()) {
@@ -635,7 +635,7 @@ RemoteTabletMergeController::GetRunningMergeTaskResult(proto::GenerationInfo gen
     co_return std::make_pair(Status::OK(), indexlibv2::INVALID_VERSIONID);
 }
 
-future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
 RemoteTabletMergeController::GetFinishedMergeTaskResult(proto::GenerationInfo generationInfo) const
 {
     int32_t maxTaskEpochId = -1;
@@ -686,7 +686,7 @@ RemoteTabletMergeController::GetFinishedMergeTaskResult(proto::GenerationInfo ge
     co_return std::make_pair(Status::OK(), finishedMergeResult);
 }
 
-future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
 RemoteTabletMergeController::GetLastMergeTaskResult()
 {
     for (;;) {
@@ -694,11 +694,11 @@ RemoteTabletMergeController::GetLastMergeTaskResult()
         if (status.IsOK()) {
             co_return std::make_pair(status, versionId);
         }
-        co_await future_lite::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
+        co_await async_simple::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
     }
 }
 
-future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
 RemoteTabletMergeController::DoGetLastMergeTaskResult()
 {
     proto::GenerationInfo generationInfo;
@@ -722,7 +722,7 @@ RemoteTabletMergeController::DoGetLastMergeTaskResult()
     co_return co_await GetFinishedMergeTaskResult(generationInfo);
 }
 
-future_lite::coro::Lazy<Status> RemoteTabletMergeController::Recover()
+async_simple::coro::Lazy<Status> RemoteTabletMergeController::Recover()
 {
     if (!_recovered) {
         for (;;) {
@@ -733,14 +733,14 @@ future_lite::coro::Lazy<Status> RemoteTabletMergeController::Recover()
             if (status.IsOK()) {
                 co_return status;
             }
-            co_await future_lite::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
+            co_await async_simple::coro::sleep(std::chrono::milliseconds(GetBackoffWindow()));
         }
     }
     _recovered = true;
     co_return Status::OK();
 }
 
-future_lite::coro::Lazy<Status> RemoteTabletMergeController::DoRecover()
+async_simple::coro::Lazy<Status> RemoteTabletMergeController::DoRecover()
 {
     proto::GenerationInfo generationInfo;
     auto r = co_await GetGenerationInfo(&generationInfo);
@@ -869,7 +869,7 @@ void RemoteTabletMergeController::FillBuildId(proto::BuildId* buildId) const
     buildId->set_appname(appName);
 }
 
-future_lite::coro::Lazy<Status> RemoteTabletMergeController::CancelCurrentTask()
+async_simple::coro::Lazy<Status> RemoteTabletMergeController::CancelCurrentTask()
 {
     auto taskDesc = GetTaskDescription();
     if (taskDesc.taskId != -1) {

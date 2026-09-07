@@ -28,7 +28,7 @@
 #include "build_service/workflow/RealtimeBuilderDefine.h"
 #include "build_service/workflow/RealtimeBuilderImplV2.h"
 #include "build_service/workflow/RealtimeErrorDefine.h"
-#include "future_lite/NamedTaskScheduler.h"
+#include "NamedTaskScheduler.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/framework/ITablet.h"
 #include "indexlib/framework/VersionMeta.h"
@@ -81,7 +81,7 @@ private:
     std::string _configPath;
     std::shared_ptr<indexlibv2::framework::ITablet> _tablet;
     RealtimeBuilderResource _builderResource;
-    std::unique_ptr<future_lite::NamedTaskScheduler> _tasker;
+    std::unique_ptr<async_simple::NamedTaskScheduler> _tasker;
 
     mutable std::mutex _implLock;
     std::unique_ptr<RealtimeBuilderImplV2> _impl;

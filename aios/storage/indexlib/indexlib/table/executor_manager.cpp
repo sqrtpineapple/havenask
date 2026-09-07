@@ -20,7 +20,7 @@
 #include <utility>
 
 #include "alog/Logger.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/table/executor_provider.h"
 
 using namespace std;
@@ -32,7 +32,7 @@ ExecutorManager::ExecutorManager() {}
 
 ExecutorManager::~ExecutorManager() { mExecutors.clear(); }
 
-std::shared_ptr<future_lite::Executor>
+std::shared_ptr<async_simple::Executor>
 ExecutorManager::RegisterExecutor(const std::shared_ptr<ExecutorProvider>& provider)
 {
     const string& executorName = provider->GetExecutorName();
@@ -42,12 +42,12 @@ ExecutorManager::RegisterExecutor(const std::shared_ptr<ExecutorProvider>& provi
     }
     {
         autil::ScopedLock lock(mMapLock);
-        future_lite::Executor* executor = provider->CreateExecutor();
+        async_simple::Executor* executor = provider->CreateExecutor();
         if (!executor) {
-            IE_LOG(ERROR, "create future_lite::executor[%s] failed", executorName.c_str());
+            IE_LOG(ERROR, "create async_simple::executor[%s] failed", executorName.c_str());
             return nullptr;
         }
-        auto it = mExecutors.insert(make_pair(executorName, std::shared_ptr<future_lite::Executor>(executor))).first;
+        auto it = mExecutors.insert(make_pair(executorName, std::shared_ptr<async_simple::Executor>(executor))).first;
         return it->second;
     }
 }

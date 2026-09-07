@@ -59,7 +59,7 @@ void DateIndexSegmentReader::NormalizeTerms(uint64_t minTime, uint64_t maxTime, 
     }
 }
 
-future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
 DateIndexSegmentReader::Lookup(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                                file_system::ReadOption option) noexcept
 {
@@ -84,7 +84,7 @@ DateIndexSegmentReader::Lookup(uint64_t leftTerm, uint64_t rightTerm, autil::mem
     co_return result;
 }
 
-future_lite::coro::Lazy<index::Result<SegmentPosting>>
+async_simple::coro::Lazy<index::Result<SegmentPosting>>
 DateIndexSegmentReader::FillOneSegment(dictvalue_t value, autil::mem_pool::Pool* sessionPool,
                                        file_system::ReadOption option) noexcept
 {
@@ -96,7 +96,7 @@ DateIndexSegmentReader::FillOneSegment(dictvalue_t value, autil::mem_pool::Pool*
     co_return result;
 }
 
-future_lite::coro::Lazy<index::ErrorCode>
+async_simple::coro::Lazy<index::ErrorCode>
 DateIndexSegmentReader::FillSegmentPostings(const DateTerm::Ranges& ranges,
                                             const shared_ptr<SegmentPostings>& dateSegmentPostings,
                                             autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
@@ -114,7 +114,7 @@ DateIndexSegmentReader::FillSegmentPostings(const DateTerm::Ranges& ranges,
     }
     std::shared_ptr<DictionaryIterator> iter = mDictReader->CreateIterator();
     assert(iter);
-    std::vector<future_lite::coro::Lazy<index::Result<SegmentPosting>>> tasks;
+    std::vector<async_simple::coro::Lazy<index::Result<SegmentPosting>>> tasks;
     for (size_t i = 0; i < ranges.size(); i++) {
         auto seekEc = co_await iter->SeekAsync((dictkey_t)ranges[i].first, option);
         if (seekEc != index::ErrorCode::OK) {
@@ -136,7 +136,7 @@ DateIndexSegmentReader::FillSegmentPostings(const DateTerm::Ranges& ranges,
             tasks.push_back(FillOneSegment(value, sessionPool, option));
         }
     }
-    auto taskResult = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto taskResult = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < taskResult.size(); ++i) {
         assert(!taskResult[i].hasError());
         if (taskResult[i].value().Ok()) {

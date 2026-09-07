@@ -25,10 +25,10 @@ namespace kmonitor {
 class MetricsReporter;
 }
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace indexlib::util {
 class SearchCache;
@@ -59,7 +59,7 @@ public:
 
 public:
     TabletCreator& SetTabletId(const indexlib::framework::TabletId& tid);
-    TabletCreator& SetExecutor(future_lite::Executor* dumpExecutor, future_lite::TaskScheduler* taskScheduler);
+    TabletCreator& SetExecutor(async_simple::Executor* dumpExecutor, async_simple::TaskScheduler* taskScheduler);
     TabletCreator& SetMemoryQuotaController(const std::shared_ptr<MemoryQuotaController>& memoryQuotaController,
                                             const std::shared_ptr<MemoryQuotaController>& buildMemoryQuotaController);
     TabletCreator& SetMetricsReporter(const std::shared_ptr<kmonitor::MetricsReporter>& metricsReporter);

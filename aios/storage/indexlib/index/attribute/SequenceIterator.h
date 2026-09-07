@@ -41,7 +41,7 @@ public:
 
 public:
     void Reset() override { _currentSegmentIdx = 0; }
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
                                                                      indexlib::file_system::ReadOption readOption,
                                                                      std::vector<std::string>* values) noexcept override
     {

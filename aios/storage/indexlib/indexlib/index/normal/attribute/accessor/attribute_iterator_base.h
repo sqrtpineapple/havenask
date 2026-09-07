@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/common_define.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/common/ErrorCode.h"
@@ -38,7 +38,7 @@ public:
      * Reset iterator to begin state
      */
     virtual void Reset() = 0;
-    virtual future_lite::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
+    virtual async_simple::coro::Lazy<index::ErrorCodeVec> BatchSeek(const std::vector<docid_t>& docIds,
                                                                    file_system::ReadOption readOption,
                                                                    std::vector<std::string>* values) noexcept = 0;
 

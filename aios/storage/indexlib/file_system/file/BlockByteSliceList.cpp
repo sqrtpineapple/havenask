@@ -187,7 +187,7 @@ BlockDataRetriever* BlockByteSliceList::CreateCompressBlockDataRetriever(
     return nullptr;
 }
 
-future_lite::coro::Lazy<bool> BlockByteSliceList::Prefetch(size_t length) noexcept
+async_simple::coro::Lazy<bool> BlockByteSliceList::Prefetch(size_t length) noexcept
 {
     if (!_head) {
         co_return false;

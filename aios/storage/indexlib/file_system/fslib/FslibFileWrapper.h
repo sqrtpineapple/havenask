@@ -24,18 +24,18 @@
 
 #include "autil/Log.h"
 #include "fslib/common/common_type.h"
-#include "future_lite/Future.h"
-#include "future_lite/Helper.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Future.h"
+#include "Helper.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FSResult.h"
 
 namespace fslib { namespace fs {
 class File;
 }} // namespace fslib::fs
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 struct iovec;
 
 namespace indexlib { namespace file_system {
@@ -58,16 +58,16 @@ public:
     virtual FSResult<void> Close() noexcept;
 
 public:
-    virtual future_lite::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
-                                                             future_lite::Executor* executor) noexcept;
-    virtual future_lite::Future<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
-                                                              future_lite::Executor* executor,
+    virtual async_simple::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
+                                                             async_simple::Executor* executor) noexcept;
+    virtual async_simple::Future<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice,
+                                                              async_simple::Executor* executor,
                                                               int64_t timeout) noexcept;
 
     /*will call PReadVAsync on default*/
-    virtual future_lite::coro::Lazy<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
+    virtual async_simple::coro::Lazy<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
                                                                  int64_t timeout) noexcept;
-    virtual future_lite::coro::Lazy<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
+    virtual async_simple::coro::Lazy<FSResult<size_t>> PReadVAsync(const iovec* iov, int iovcnt, off_t offset,
                                                                   int advice, int64_t timeout) noexcept;
 
 public:

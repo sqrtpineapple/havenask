@@ -27,11 +27,11 @@
 #include "indexlib/index/kv/kv_reader.h"
 #include "sql/ops/scan/AsyncKVLookupCallbackCtx.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 template <typename T>
 class Try;
-} // namespace future_lite
+} // namespace async_simple
 namespace indexlibv2 {
 namespace config {
 class ITabletSchema;
@@ -68,12 +68,12 @@ public:
 
 public:
     AsyncKVLookupCallbackCtxV1(const std::shared_ptr<navi::AsyncPipe> &pipe,
-                               future_lite::Executor *executor);
+                               async_simple::Executor *executor);
 
     virtual ~AsyncKVLookupCallbackCtxV1() = default;
 
 public: // for callback
-    void onSessionCallback(future_lite::Try<BoolVector> &boolVecTry);
+    void onSessionCallback(async_simple::Try<BoolVector> &boolVecTry);
 
 public:
     bool
@@ -94,7 +94,7 @@ private:
     indexlib::index::KVReadOptions _readOptions;
     std::vector<autil::StringView> _rawResults;
     AsyncKVLookupMetricsCollectorV1 _metricsCollector;
-    future_lite::Executor *_executor;
+    async_simple::Executor *_executor;
 };
 
 } // namespace sql

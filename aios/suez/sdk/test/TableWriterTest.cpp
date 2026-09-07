@@ -7,7 +7,7 @@
 #include "build_service/reader/RawDocumentBuilder.h"
 #include "build_service/reader/SwiftFieldFilterRawDocumentParser.h"
 #include "build_service/util/SwiftClientCreator.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/document/document_factory_wrapper.h"
 #include "indexlib/document/raw_document/raw_document_define.h"
 #include "indexlib/document/raw_document_parser.h"
@@ -39,7 +39,7 @@ public:
 
         std::string executorType = GetParam();
         if (executorType == "simple") {
-            _executor.reset(new future_lite::executors::SimpleExecutor(4));
+            _executor.reset(new async_simple::executors::SimpleExecutor(4));
         }
     }
     void tearDown() override { _pid.Clear(); }
@@ -86,7 +86,7 @@ protected:
     std::shared_ptr<kmonitor::MetricsReporter> _metricsReporter;
     std::string _format;
     std::unique_ptr<TableWriter> _tableWriter;
-    std::unique_ptr<future_lite::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _executor;
 };
 
 INSTANTIATE_TEST_CASE_P(TestWithExecutor, TableWriterTest, testing::Values("", "simple"));

@@ -158,7 +158,7 @@ Status KVTabletReader::QueryAttrWithPk(
     // 对多个 attr 的查询只取一次 doc Value
     index::KVReadOptions options;
     options.pool = &pool;
-    auto ret = future_lite::interface::syncAwait(kvReader->GetAsync(pk, value, options));
+    auto ret = async_simple::interface::syncAwait(kvReader->GetAsync(pk, value, options));
     switch (ret) {
     case index::KVResultStatus::NOT_FOUND:
         return Status::NotFound("no record found, [NOT_FOUND]");

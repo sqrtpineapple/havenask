@@ -42,13 +42,13 @@ public:
         , mValueDecoder(std::move(valueDecoder))
         , mReadOption(readOption) {};
 
-    KKVValueFetcher(KKVValueFetcher&& other)
+    KKVValueFetcher(KKVValueFetcher&& other) noexcept
         : mCompressReader(std::move(other.mCompressReader))
         , mValueDecoder(std::move(other.mValueDecoder))
         , mReadOption(other.mReadOption)
     {
     }
-    KKVValueFetcher& operator=(KKVValueFetcher&& other)
+    KKVValueFetcher& operator=(KKVValueFetcher&& other) noexcept
     {
         if (this != &other) {
             mCompressReader = std::move(other.mCompressReader);
@@ -61,11 +61,11 @@ public:
     operator bool() const { return mValueDecoder.get(); }
 
 public:
-    FL_LAZY(future_lite::Unit)
+    FL_LAZY(async_simple::Unit)
     FetchValues(typename KKVDocs::iterator beginIter, typename KKVDocs::iterator endIter)
     {
         if (!mValueDecoder) {
-            FL_CORETURN future_lite::Unit {};
+            FL_CORETURN async_simple::Unit{};
         }
 
         util::PooledUniquePtr<common::ChunkDecoder> chunk;
@@ -90,7 +90,7 @@ public:
             typedChunk->ReadRecord(value);
             doc.SetValue(value);
         }
-        FL_CORETURN future_lite::Unit {};
+        FL_CORETURN async_simple::Unit{};
     }
 
 private:

@@ -446,7 +446,7 @@ void SpatialIndexInteTest::TestLookupAsync()
     Pool* poolPtr = &pool;
 
     auto iter =
-        future_lite::coro::syncAwait(indexReader->LookupAsync(&term, 1000, pt_default, poolPtr, nullptr).via(executor))
+        async_simple::coro::syncAwait(indexReader->LookupAsync(&term, 1000, pt_default, poolPtr, nullptr).via(executor))
             .ValueOrThrow();
     SeekAndFilterIterator* sfIter = dynamic_cast<SeekAndFilterIterator*>(iter);
     ASSERT_TRUE(sfIter);

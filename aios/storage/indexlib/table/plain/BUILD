@@ -4,7 +4,7 @@ strict_cc_library(
     name='PlainMemSegment',
     deps=[
         ':SegmentMetricsDumpItem', '//aios/autil:NoCopyable',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/base:Types',
         '//aios/storage/indexlib/config:TabletSchema',
         '//aios/storage/indexlib/document:DocumentBatch',

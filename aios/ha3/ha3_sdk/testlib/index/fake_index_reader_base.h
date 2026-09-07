@@ -37,7 +37,7 @@ public:
                                             autil::mem_pool::Pool *sessionPool = NULL) {
         return NULL;
     }
-    future_lite::coro::Lazy<index::Result<PostingIterator *>>
+    async_simple::coro::Lazy<index::Result<PostingIterator *>>
     LookupAsync(const index::Term *term,
                 uint32_t statePoolSize,
                 PostingType type,

@@ -36,10 +36,10 @@
 #include "suez/table/TodoList.h"
 #include "suez/table/TodoListExecutor.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace suez {
 
@@ -139,9 +139,9 @@ protected:
     std::unique_ptr<SuezPartitionFactory> _partitionFactory;
 
     // resource for indexlibv2
-    std::unique_ptr<future_lite::Executor> _executor;
-    std::unique_ptr<future_lite::Executor> _dumpExecutor;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _dumpExecutor;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler;
 
     std::string _localIndexRoot;
     std::string _localTableConfigBaseDir;

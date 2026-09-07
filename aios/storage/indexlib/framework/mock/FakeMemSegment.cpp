@@ -43,7 +43,8 @@ Status FakeMemSegment::Build(document::IDocumentBatch* batch)
             return status;
         }
     }
-    _segmentMeta.segmentInfo->docCount += batch->GetAddedDocCount();
+    auto addedDocCount = batch->GetAddedDocCount();
+    _segmentMeta.segmentInfo->docCount = _segmentMeta.segmentInfo->docCount + addedDocCount;
     _isDirty = true;
     return Status::OK();
 }

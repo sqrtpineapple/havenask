@@ -92,7 +92,7 @@ TEST_F(BlockFileStreamTest, TestBatchRead)
     {
         // normal case
         file_system::BatchIO batchIO({{buffer[0], 30, 0}, {buffer[1], 50, 3}});
-        auto result = future_lite::coro::syncAwait(stream->BatchRead(batchIO, file_system::ReadOption()));
+        auto result = async_simple::coro::syncAwait(stream->BatchRead(batchIO, file_system::ReadOption()));
         ASSERT_EQ(batchIO.size(), result.size());
         for (size_t i = 0; i < batchIO.size(); ++i) {
             ASSERT_EQ(batchIO[i].len, result[i].GetOrThrow());
@@ -102,7 +102,7 @@ TEST_F(BlockFileStreamTest, TestBatchRead)
     {
         // unsorted offset
         file_system::BatchIO batchIO({{buffer[0], 30, 10}, {buffer[1], 50, 3}});
-        auto result = future_lite::coro::syncAwait(stream->BatchRead(batchIO, file_system::ReadOption()));
+        auto result = async_simple::coro::syncAwait(stream->BatchRead(batchIO, file_system::ReadOption()));
         ASSERT_EQ(batchIO.size(), result.size());
         for (size_t i = 0; i < batchIO.size(); ++i) {
             ASSERT_EQ(batchIO[i].len, result[i].GetOrThrow());

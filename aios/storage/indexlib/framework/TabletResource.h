@@ -20,10 +20,10 @@
 
 #include "indexlib/framework/TabletId.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace autil {
 class ThreadPool;
@@ -52,8 +52,8 @@ class IdGenerator;
 
 struct TabletResource {
     // executors
-    future_lite::Executor* dumpExecutor = nullptr;
-    future_lite::TaskScheduler* taskScheduler = nullptr;
+    async_simple::Executor* dumpExecutor = nullptr;
+    async_simple::TaskScheduler* taskScheduler = nullptr;
 
     std::shared_ptr<autil::ThreadPool> consistentModeBuildThreadPool = nullptr;
     std::shared_ptr<autil::ThreadPool> inconsistentModeBuildThreadPool = nullptr;

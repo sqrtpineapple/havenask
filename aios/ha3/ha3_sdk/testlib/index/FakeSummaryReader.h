@@ -81,7 +81,7 @@ public:
 
         return false;
     }
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t> &docIds,
                 autil::mem_pool::Pool *sessionPool,
                 file_system::ReadOption option,
@@ -117,7 +117,7 @@ public:
         }
         return false;
     }
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t> &docIds,
                 const indexlib::index::SummaryGroupIdVec &groupVec,
                 autil::mem_pool::Pool *sessionPool,

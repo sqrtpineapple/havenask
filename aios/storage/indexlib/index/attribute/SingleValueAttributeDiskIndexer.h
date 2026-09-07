@@ -24,7 +24,7 @@
 #include "autil/StringUtil.h"
 #include "autil/TimeUtility.h"
 #include "fslib/fslib.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Define.h"
 #include "indexlib/config/SortDescription.h"
 #include "indexlib/file_system/Directory.h"
@@ -114,7 +114,7 @@ public:
     inline ReadContext CreateReadContext(autil::mem_pool::Pool* sessionPool) const __ALWAYS_INLINE;
 
 public:
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx, indexlib::file_system::ReadOption readOption,
               typename std::vector<T>* values, std::vector<bool>* isNullVec) const noexcept;
     bool Read(docid_t docId, const std::shared_ptr<ReadContextBase>& ctx, uint8_t* buf, uint32_t bufLen,
@@ -277,7 +277,7 @@ inline bool SingleValueAttributeDiskIndexer<T>::Read(docid_t docId, T& value, bo
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeDiskIndexer<T>::BatchRead(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeDiskIndexer<T>::BatchRead(
     const std::vector<docid_t>& docIds, ReadContext& ctx, indexlib::file_system::ReadOption readOption,
     typename std::vector<T>* values, std::vector<bool>* isNulls) const noexcept
 {

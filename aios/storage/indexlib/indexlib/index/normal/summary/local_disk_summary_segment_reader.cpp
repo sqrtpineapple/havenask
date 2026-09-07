@@ -80,7 +80,7 @@ bool LocalDiskSummarySegmentReader::GetDocument(docid_t localDocId, SearchSummar
     return false;
 }
 
-future_lite::coro::Lazy<vector<index::ErrorCode>>
+async_simple::coro::Lazy<vector<index::ErrorCode>>
 LocalDiskSummarySegmentReader::GetDocument(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                                            file_system::ReadOption readOption, const SearchSummaryDocVec* docs) noexcept
 {

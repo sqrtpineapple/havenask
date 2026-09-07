@@ -83,13 +83,13 @@ public:
         }
     }
 
-    future_lite::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption) noexcept override
+    async_simple::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption) noexcept override
     {
         Seek(key);
         co_return index::ErrorCode::OK;
     }
 
-    future_lite::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption,
+    async_simple::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption,
                                                         dictvalue_t& value) noexcept override
     {
         Next(key, value);

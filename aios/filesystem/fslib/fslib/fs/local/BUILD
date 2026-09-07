@@ -13,5 +13,5 @@ cc_library(
         '//aios/filesystem/fslib/fslib/util:util',
         '//aios/filesystem/fslib/fslib:common', '//aios/autil:log',
         '//aios/autil:lock'
-    ] + fslib_enable_async(['//aios/future_lite:future_lite']))
+    ] + fslib_enable_async(['//aios/ylt:async_simple']))
 )

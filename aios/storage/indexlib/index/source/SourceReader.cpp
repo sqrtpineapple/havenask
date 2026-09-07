@@ -15,6 +15,9 @@
  */
 #include "indexlib/index/source/SourceReader.h"
 
+#include "async_simple/coro/Collect.h"
+#include "async_simple/coro/SyncAwait.h"
+
 #include "indexlib/document/normal/SerializedSourceDocument.h"
 #include "indexlib/document/normal/SourceDocument.h"
 #include "indexlib/document/normal/SourceFormatter.h"
@@ -79,7 +82,7 @@ Status SourceReader::Open(const std::shared_ptr<config::IIndexConfig>& indexConf
     return Status::OK();
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SourceReader::GetDocumentAsync(const std::vector<docid_t>& docIds,
                                const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                                autil::mem_pool::PoolBase* sessionPool, indexlib::file_system::ReadOption option,
@@ -106,7 +109,7 @@ SourceReader::GetDocumentAsync(const std::vector<docid_t>& docIds,
     co_return ret;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SourceReader::GetDocumentAsync(const std::vector<docid_t>& docIds,
                                const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                                autil::mem_pool::PoolBase* sessionPool, indexlib::file_system::ReadOption option,
@@ -116,7 +119,7 @@ SourceReader::GetDocumentAsync(const std::vector<docid_t>& docIds,
     indexlib::index::ErrorCodeVec ecVec;
     ecVec.reserve(docIds.size());
     // ecVec.assign(docIds.size(), indexlib::index::ErrorCode::OK);
-    std::vector<future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>> subTasks;
+    std::vector<async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>> subTasks;
     size_t docidIdx = 0;
     // get from disk indexer
     docid_t currentSegmentEndDocId = 0;
@@ -142,7 +145,7 @@ SourceReader::GetDocumentAsync(const std::vector<docid_t>& docIds,
                                                              option, &segmentDocs.back()));
         }
     }
-    auto result = co_await future_lite::coro::collectAll(std::move(subTasks));
+    auto result = co_await async_simple::coro::collectAll(std::move(subTasks));
     for (auto& segmentEcs : result) {
         assert(!segmentEcs.hasError());
         for (auto& ec : segmentEcs.value()) {
@@ -177,7 +180,7 @@ Status SourceReader::GetDocument(docid_t docId, const std::vector<index::sourceg
                                  indexlib::document::SourceDocument* sourceDocument) const
 {
     std::vector<indexlib::document::SourceDocument*> sourceDocs = {sourceDocument};
-    auto ecVec = future_lite::coro::syncAwait(GetDocumentAsync({docId}, requiredGroupdIds, sourceDocument->GetPool(),
+    auto ecVec = async_simple::coro::syncAwait(GetDocumentAsync({docId}, requiredGroupdIds, sourceDocument->GetPool(),
                                                                indexlib::file_system::ReadOption(), &sourceDocs));
     assert(ecVec.size() == 1);
     if (ecVec[0] != indexlib::index::ErrorCode::OK) {

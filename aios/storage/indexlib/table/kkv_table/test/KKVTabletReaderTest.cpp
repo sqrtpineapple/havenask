@@ -1,6 +1,6 @@
 #include "autil/HashAlgorithm.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/config/TabletOptions.h"

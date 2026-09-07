@@ -70,7 +70,7 @@ void NormalCompressBlockDataRetriever::ReleaseBuffer() noexcept
     }
     _addrVec.clear();
 }
-future_lite::coro::Lazy<ErrorCode> NormalCompressBlockDataRetriever::Prefetch(size_t fileOffset, size_t length) noexcept
+async_simple::coro::Lazy<ErrorCode> NormalCompressBlockDataRetriever::Prefetch(size_t fileOffset, size_t length) noexcept
 {
     size_t beginCompressBlockIdx = _compressAddrMapper->OffsetToBlockIdx(fileOffset);
     size_t endCompressBlockIdx = _compressAddrMapper->OffsetToBlockIdx(fileOffset + length - 1);

@@ -142,7 +142,7 @@ Status MultiShardInvertedIndexReader::DoOpen(const std::shared_ptr<InvertedIndex
     return Status::OK();
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 MultiShardInvertedIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                                            autil::mem_pool::Pool* pool, file_system::ReadOption option) noexcept
 {
@@ -218,7 +218,7 @@ std::vector<std::shared_ptr<DictionaryReader>> MultiShardInvertedIndexReader::Ge
     return dictReaders;
 }
 
-future_lite::coro::Lazy<indexlib::index::Result<PostingIterator*>>
+async_simple::coro::Lazy<indexlib::index::Result<PostingIterator*>>
 MultiShardInvertedIndexReader::CreateMainPostingIteratorAsync(const index::DictKeyInfo key, uint32_t statePoolSize,
                                                               autil::mem_pool::Pool* sessionPool,
                                                               bool needBuildingSegment,

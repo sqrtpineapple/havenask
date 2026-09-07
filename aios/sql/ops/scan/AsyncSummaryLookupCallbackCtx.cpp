@@ -25,9 +25,9 @@
 #include "autil/Lock.h"
 #include "autil/StringUtil.h"
 #include "autil/TimeUtility.h"
-#include "future_lite/Try.h"
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/coro/LazyHelper.h"
+#include "async_simple/Try.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/coro/SyncAwait.h"
 #include "kmonitor/client/MetricLevel.h"
 #include "kmonitor/client/MetricMacro.h"
 #include "kmonitor/client/MetricsReporter.h"
@@ -76,7 +76,7 @@ AsyncSummaryLookupCallbackCtx::AsyncSummaryLookupCallbackCtx(
     const std::shared_ptr<isearch::search::IndexPartitionReaderWrapper> &indexPRW,
     indexlib::index::SummaryReaderPtr summaryReader,
     autil::mem_pool::PoolPtr pool,
-    future_lite::Executor *executor)
+    async_simple::Executor *executor)
     : _asyncPipe(pipe)
     , _indexPRW(indexPRW)
     , _summaryReader(summaryReader)
@@ -97,7 +97,7 @@ void AsyncSummaryLookupCallbackCtx::start(std::vector<docid_t> docIds,
     _terminator.reset(new TimeoutTerminator(timeout));
     if (_asyncPipe->getAsyncPipe() == nullptr) {
         NAVI_LOG(DEBUG, "async pipe is nullptr, use sync await");
-        auto result = future_lite::coro::syncAwait(_summaryReader->GetDocument(
+        auto result = async_simple::coro::syncAwait(_summaryReader->GetDocument(
             _docIds, _poolPtr.get(), _terminator.get(), &_summaryDocVec));
         processErrorCodes(result);
         _metricsCollector.lookupTime = incCallbackVersion();
@@ -107,7 +107,7 @@ void AsyncSummaryLookupCallbackCtx::start(std::vector<docid_t> docIds,
         _summaryReader->GetDocument(_docIds, _poolPtr.get(), _terminator.get(), &_summaryDocVec)
             .via(_executor)
             .start([ctx = shared_from_this()](
-                       future_lite::Try<indexlib::index::ErrorCodeVec> errorCodeTry) {
+                       async_simple::Try<indexlib::index::ErrorCodeVec> errorCodeTry) {
                 ctx->onSessionCallback(errorCodeTry);
             });
     }
@@ -146,7 +146,7 @@ void AsyncSummaryLookupCallbackCtx::processErrorCodes(
 }
 
 void AsyncSummaryLookupCallbackCtx::onSessionCallback(
-    const future_lite::Try<indexlib::index::ErrorCodeVec> &errorCodeTry) {
+    const async_simple::Try<indexlib::index::ErrorCodeVec> &errorCodeTry) {
     _metricsCollector.lookupTime = incCallbackVersion();
 
     if (errorCodeTry.hasError()) {

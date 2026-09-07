@@ -53,7 +53,7 @@ public:
 
 public:
     docid_t Find(Key key) __ALWAYS_INLINE;
-    future_lite::coro::Lazy<index::Result<docid_t>> FindAsync(Key key, future_lite::Executor* executor) noexcept;
+    async_simple::coro::Lazy<index::Result<docid_t>> FindAsync(Key key, async_simple::Executor* executor) noexcept;
 
     // Load data from file, should called once before you call method @Find
     bool Load(const file_system::FileReaderPtr& fileReader, const file_system::DirectoryPtr& directory);
@@ -202,13 +202,13 @@ bool BlockPrimaryKeyFormatter<Key>::InnerLoad(const file_system::FileReaderPtr& 
 template <typename Key>
 inline docid_t BlockPrimaryKeyFormatter<Key>::Find(Key key)
 {
-    auto retWithEc = future_lite::coro::syncAwait(FindAsync(key, nullptr));
+    auto retWithEc = async_simple::coro::syncAwait(FindAsync(key, nullptr));
     return retWithEc.ValueOrThrow();
 }
 
 template <typename Key>
-inline future_lite::coro::Lazy<index::Result<docid_t>>
-BlockPrimaryKeyFormatter<Key>::FindAsync(Key key, future_lite::Executor* executor) noexcept
+inline async_simple::coro::Lazy<index::Result<docid_t>>
+BlockPrimaryKeyFormatter<Key>::FindAsync(Key key, async_simple::Executor* executor) noexcept
 {
     file_system::ReadOption readOption;
     readOption.executor = executor;

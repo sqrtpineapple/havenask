@@ -18,7 +18,7 @@ public:
         : mBaseDocId(baseDocId)
         , mDocIds(docids)
     {
-        for_each(values.begin(), values.end(), [=](int i) {
+        for_each(values.begin(), values.end(), [=, this](int i) {
             matchvalue_t value;
             value.SetInt32(i);
             mValues.push_back(value);

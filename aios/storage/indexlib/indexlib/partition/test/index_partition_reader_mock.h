@@ -54,7 +54,7 @@ public:
 
     docid_t Lookup(const std::string& pkStr) const { return INVALID_DOCID; }
 
-    docid_t LookupWithPKHash(const autil::uint128_t& pkHash, future_lite::Executor* executor) const
+    docid_t LookupWithPKHash(const autil::uint128_t& pkHash, async_simple::Executor* executor) const
     {
         return INVALID_DOCID;
     }

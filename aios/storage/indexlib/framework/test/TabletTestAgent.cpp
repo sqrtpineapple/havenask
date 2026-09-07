@@ -26,7 +26,7 @@ TabletReaderContainer* TabletTestAgent::TEST_GetTabletReaderContainer() const
 {
     return _tablet->_tabletReaderContainer.get();
 }
-future_lite::NamedTaskScheduler* TabletTestAgent::TEST_GetTaskScheduler() const
+async_simple::NamedTaskScheduler* TabletTestAgent::TEST_GetTaskScheduler() const
 {
     return _tablet->_taskScheduler.get();
 }

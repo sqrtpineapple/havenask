@@ -41,10 +41,10 @@ MultiFieldIndexReader::MultiFieldIndexReader(IndexMetrics* indexMetrics)
 index::Result<PostingIterator*> MultiFieldIndexReader::Lookup(const Term& term, uint32_t statePoolSize,
                                                               PostingType type, autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 MultiFieldIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                                    autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
 {

@@ -1,5 +1,5 @@
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/config/TabletOptions.h"
@@ -149,7 +149,7 @@ TEST_F(KVTabletCacheReaderTest, TestGet)
 void KVTabletCacheReaderTest::CompareQueryResult(const KVIndexReaderPtr& kvIndexReader, const string& keyStr,
                                                  uint64_t ts, bool exist, const string& expectedValue)
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     autil::StringView key(keyStr);
     vector<autil::StringView> keys = {key};
     autil::StringView value;
@@ -160,20 +160,20 @@ void KVTabletCacheReaderTest::CompareQueryResult(const KVIndexReaderPtr& kvIndex
     readOptions.pool = _pool;
     readOptions.metricsCollector = &collector;
     if (exist) {
-        auto result = future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, readOptions), &ex);
+        auto result = async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, readOptions), &ex);
         ASSERT_EQ(result.status, KVResultStatus::FOUND);
         auto packValue = result.valueExtractor.GetPackValue();
         ASSERT_GT(packValue.size(), expectedValue.length());
         ASSERT_NE(packValue.to_string().find(expectedValue), std::string::npos);
 
-        auto resultVec = future_lite::interface::syncAwait(kvIndexReader->BatchGetAsync(keys, readOptions), &ex);
+        auto resultVec = async_simple::interface::syncAwait(kvIndexReader->BatchGetAsync(keys, readOptions), &ex);
         ASSERT_EQ(1, resultVec.size());
-        ASSERT_EQ(future_lite::interface::getTryValue(resultVec[0]).status, KVResultStatus::FOUND);
-        packValue = future_lite::interface::getTryValue(resultVec[0]).valueExtractor.GetPackValue();
+        ASSERT_EQ(async_simple::interface::getTryValue(resultVec[0]).status, KVResultStatus::FOUND);
+        packValue = async_simple::interface::getTryValue(resultVec[0]).valueExtractor.GetPackValue();
         ASSERT_GT(packValue.size(), expectedValue.length());
         ASSERT_NE(packValue.to_string().find(expectedValue), std::string::npos);
     } else {
-        ASSERT_EQ(future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex),
+        ASSERT_EQ(async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex),
                   KVResultStatus::NOT_FOUND);
     }
 }

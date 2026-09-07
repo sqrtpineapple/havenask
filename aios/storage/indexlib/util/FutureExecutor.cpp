@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #include "autil/EnvUtil.h"
-#include "future_lite/ExecutorCreator.h"
+#include "ExecutorCreator.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/util/metrics/Metric.h"
 #include "indexlib/util/metrics/MetricProvider.h"
@@ -31,35 +31,35 @@
 
 using namespace std;
 
-// CHECK_FUTURE_LITE_EXECUTOR(async_io);
+// CHECK_ASYNC_SIMPLE_EXECUTOR(async_io);
 
 namespace indexlib { namespace util {
 AUTIL_LOG_SETUP(indexlib.util, FutureExecutor);
 
 std::once_flag FutureExecutor::internalExecutorFlag;
-future_lite::Executor* FutureExecutor::internalExecutor = nullptr;
+async_simple::Executor* FutureExecutor::internalExecutor = nullptr;
 std::once_flag FutureExecutor::internalBuildExecutorFlag;
-future_lite::Executor* FutureExecutor::internalBuildExecutor = nullptr;
+async_simple::Executor* FutureExecutor::internalBuildExecutor = nullptr;
 std::thread FutureExecutor::reportMetricsThread;
 
-future_lite::Executor* FutureExecutor::CreateExecutor(int threadNum, int maxAio)
+async_simple::Executor* FutureExecutor::CreateExecutor(int threadNum, int maxAio)
 {
     static int32_t idx = 0;
-    auto params = future_lite::ExecutorCreator::Parameters()
+    auto params = async_simple::ExecutorCreator::Parameters()
                       .SetExecutorName("async_io_thread_pool_" + std::to_string(idx++))
                       .SetThreadNum(threadNum)
                       .Set<uint32_t>("max_aio", maxAio);
-    auto executor = future_lite::ExecutorCreator::Create(/*type*/ "async_io", params);
+    auto executor = async_simple::ExecutorCreator::Create(/*type*/ "async_io", params);
     AUTIL_LOG(INFO, "pool created[%p], threadNum[%d], max_aio [%d]", executor.get(), threadNum, maxAio);
     return executor.release();
 }
-void FutureExecutor::DestroyExecutor(future_lite::Executor* executor)
+void FutureExecutor::DestroyExecutor(async_simple::Executor* executor)
 {
     if (executor) {
         delete executor;
     }
 }
-future_lite::Executor* FutureExecutor::GetInternalBuildExecutor()
+async_simple::Executor* FutureExecutor::GetInternalBuildExecutor()
 {
     std::call_once(internalBuildExecutorFlag, []() {
         int threadNum = autil::EnvUtil::getEnv("INDEXLIB_INTERNAL_BUILD_THREADNUM", 1);
@@ -75,7 +75,7 @@ future_lite::Executor* FutureExecutor::GetInternalBuildExecutor()
     return internalBuildExecutor;
 }
 
-future_lite::Executor* FutureExecutor::GetInternalExecutor()
+async_simple::Executor* FutureExecutor::GetInternalExecutor()
 {
     std::call_once(internalExecutorFlag, []() {
         int threadNum = autil::EnvUtil::getEnv("INDEXLIB_INTERNAL_THREADNUM", -1);
@@ -92,7 +92,7 @@ future_lite::Executor* FutureExecutor::GetInternalExecutor()
     return internalExecutor;
 }
 
-void FutureExecutor::SetInternalExecutor(future_lite::Executor* executor)
+void FutureExecutor::SetInternalExecutor(async_simple::Executor* executor)
 {
     std::call_once(internalExecutorFlag, [executor]() {
         if (executor) {
@@ -104,7 +104,7 @@ void FutureExecutor::SetInternalExecutor(future_lite::Executor* executor)
     });
 }
 
-void FutureExecutor::SetInternalBuildExecutor(future_lite::Executor* executor)
+void FutureExecutor::SetInternalBuildExecutor(async_simple::Executor* executor)
 {
     std::call_once(internalBuildExecutorFlag, [executor]() {
         if (executor) {

@@ -22,7 +22,7 @@ public:
     MOCK_METHOD(bool, Load, (autil::mem_pool::Pool * pool, char*& cursor), (override));
     MOCK_METHOD(bool, Process,
                 (const partition::PartitionModifierPtr& modifier, const OperationRedoHint& redoHint,
-                 future_lite::Executor* executor),
+                 async_simple::Executor* executor),
                 (override));
     MOCK_METHOD(size_t, Serialize, (char* buffer, size_t bufferLen), (const, override));
     MOCK_METHOD(size_t, GetMemoryUse, (), (const, override));

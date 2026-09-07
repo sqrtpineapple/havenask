@@ -138,7 +138,7 @@ OnDiskKKVSegmentIterator<SKeyType>::GetIterator(Pool* pool, const std::shared_pt
     _pkeyTableIter->Get(key, offset);
 
     // TODO(xinfei.sxf) retry when io exception?
-    auto [status, iterator] = future_lite::interface::syncAwait(_iteratorFactory->Create(offset, pool, nullptr));
+    auto [status, iterator] = async_simple::interface::syncAwait(_iteratorFactory->Create(offset, pool, nullptr));
     return iterator;
 }
 

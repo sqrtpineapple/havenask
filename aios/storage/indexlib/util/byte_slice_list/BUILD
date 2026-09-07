@@ -5,7 +5,7 @@ strict_cc_library(
     srcs=['ByteSliceList.cpp', 'ByteSliceListIterator.cpp'],
     hdrs=['ByteSliceList.h', 'ByteSliceListIterator.h'],
     deps=[
-        '//aios/autil:mem_pool_base', '//aios/future_lite',
+        '//aios/autil:mem_pool_base', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/util:DeVirtual',
         '//aios/storage/indexlib/util:Exception'
     ]

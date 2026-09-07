@@ -13,7 +13,7 @@
 #include "indexlib/framework/index_task/Constant.h"
 #include "indexlib/framework/index_task/MergeTaskDefine.h"
 
-namespace future_lite {
+namespace async_simple {
 class NamedTaskScheduler;
 }
 
@@ -147,13 +147,13 @@ public:
     const std::shared_ptr<framework::Tablet>& GetTablet() const;
     std::shared_ptr<indexlibv2::config::ITabletSchema> GetSchema() const;
     const framework::Version& GetCurrentVersion() const;
-    future_lite::NamedTaskScheduler* GetTaskScheduler() const;
+    async_simple::NamedTaskScheduler* GetTaskScheduler() const;
     framework::TabletResource* GetTabletResource();
     std::shared_ptr<indexlib::file_system::Directory> GetRootDirectory() const;
 
 public:
     // optional, need execute before Open
-    TableTestHelper& SetExecutor(future_lite::Executor* dumpExecutor, future_lite::TaskScheduler* taskScheduler);
+    TableTestHelper& SetExecutor(async_simple::Executor* dumpExecutor, async_simple::TaskScheduler* taskScheduler);
     TableTestHelper& SetMemoryQuotaController(const std::shared_ptr<MemoryQuotaController>& memoryQuotaController,
                                               const std::shared_ptr<MemoryQuotaController>& buildMemoryQuotaController);
     TableTestHelper& SetFileBlockCacheContainer(

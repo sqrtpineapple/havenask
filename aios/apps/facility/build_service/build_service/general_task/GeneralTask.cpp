@@ -40,9 +40,10 @@
 #include "build_service/reader/SourceFieldExtractorDocIterator.h"
 #include "build_service/util/MemUtil.h"
 #include "build_service/util/Monitor.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/Try.h"
-#include "future_lite/coro/Lazy.h"
+#include "Executor.h"
+#include "ExecutorCreator.h"
+#include "async_simple/Try.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/analyzer/IAnalyzerFactory.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/MemoryQuotaController.h"
@@ -67,7 +68,7 @@
 #include "indexlib/util/metrics/MetricProvider.h"
 #include "kmonitor/client/MetricType.h"
 
-CHECK_FUTURE_LITE_EXECUTOR(async_io);
+CHECK_ASYNC_SIMPLE_EXECUTOR(async_io);
 
 namespace build_service::task_base {
 
@@ -336,9 +337,9 @@ GeneralTask::getCustomOperationCreator(const indexlibv2::config::CustomIndexTask
 bool GeneralTask::initEngine()
 {
     auto executorType = autil::EnvUtil::getEnv("bs_general_task_executor_type", std::string("async_io"));
-    _executor = future_lite::ExecutorCreator::Create(
+    _executor = async_simple::ExecutorCreator::Create(
         executorType,
-        future_lite::ExecutorCreator::Parameters().SetExecutorName("op_execute_engine").SetThreadNum(_threadNum));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName("op_execute_engine").SetThreadNum(_threadNum));
     if (!_executor) {
         BS_LOG(ERROR, "create executor[%s] failed", executorType.c_str());
         return false;
@@ -589,7 +590,7 @@ void GeneralTask::workLoop()
         }
         auto contextRawPtr = context.get();
         _engine->Schedule(opDetail->desc, contextRawPtr)
-            .start([this, opDetail, context = std::move(context)](future_lite::Try<indexlib::Status>&& statusTry) {
+            .start([this, opDetail, context = std::move(context)](async_simple::Try<indexlib::Status>&& statusTry) {
                 assert(!statusTry.hasError());
                 auto& status = statusTry.value();
                 if (status.IsOK()) {

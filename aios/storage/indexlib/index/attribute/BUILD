@@ -317,7 +317,7 @@ strict_cc_library(
     deps=[
         'AttributeDataInfo', ':AttributeFactory',
         ':MultiValueAttributeMemReader', ':SingleValueAttributeMemReader',
-        '//aios/autil:NoCopyable', '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:NoCopyable', '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/kmonitor:kmonitor_client_cpp',
         '//aios/storage/indexlib/base:NoExceptionWrapper',
         '//aios/storage/indexlib/base:Status',
@@ -351,7 +351,7 @@ strict_cc_library(
         ':DefaultValueAttributeMemReader', ':MultiSliceAttributeDiskIndexer',
         ':RangeDescription', ':SequenceIterator',
         ':UniqEncodeSequenceIteratorTyped', '//aios/autil:NoCopyable',
-        '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/framework:TabletData',
@@ -370,7 +370,7 @@ strict_cc_library(
     srcs=[],
     deps=[
         ':AttributeMetrics', ':SingleValueAttributeReaderBase',
-        '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:NoExceptionWrapper',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
@@ -382,7 +382,7 @@ strict_cc_library(
     srcs=[],
     deps=[
         ':SingleValueAttributeReaderBase', '//aios/autil:log',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/index/attribute/format:SingleValueAttributeReadOnlyFormatter',
         '//aios/storage/indexlib/index/attribute/format:SingleValueAttributeUpdatableFormatter',
@@ -393,7 +393,7 @@ strict_cc_library(
     name='SingleValueAttributeMemReader',
     srcs=[],
     deps=[
-        ':AttributeMemReader', '//aios/autil:log', '//aios/future_lite',
+        ':AttributeMemReader', '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/index/attribute/format:SingleValueAttributeMemFormatter',
@@ -406,7 +406,7 @@ strict_cc_library(
     name='MultiValueAttributeMemReader',
     srcs=[],
     deps=[
-        ':AttributeMemReader', '//aios/autil:log', '//aios/future_lite',
+        ':AttributeMemReader', '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/index/common:data_structure',

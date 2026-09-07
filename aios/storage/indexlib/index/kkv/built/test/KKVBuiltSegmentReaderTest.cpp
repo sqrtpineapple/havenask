@@ -133,13 +133,13 @@ TEST_F(KKVBuiltSegmentReaderTest, TestSimpleProcess)
     }
     // Found key
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get()));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get()));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
     }
     // Not exist key
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(999, _pool.get()));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(999, _pool.get()));
         ASSERT_TRUE(status.IsOK());
         ASSERT_FALSE(iter);
     }

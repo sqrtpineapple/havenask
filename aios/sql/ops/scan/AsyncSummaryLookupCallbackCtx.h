@@ -38,11 +38,11 @@ namespace kmonitor {
 class MetricsReporter;
 } // namespace kmonitor
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 template <typename T>
 class Try;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace isearch {
 namespace search {
@@ -87,13 +87,13 @@ public:
         const std::shared_ptr<isearch::search::IndexPartitionReaderWrapper> &indexPRW,
         indexlib::index::SummaryReaderPtr summaryReader,
         autil::mem_pool::PoolPtr pool,
-        future_lite::Executor *executor);
+        async_simple::Executor *executor);
     virtual ~AsyncSummaryLookupCallbackCtx();
     AsyncSummaryLookupCallbackCtx(const AsyncSummaryLookupCallbackCtx &) = delete;
     AsyncSummaryLookupCallbackCtx &operator=(const AsyncSummaryLookupCallbackCtx &) = delete;
 
 public: // for callback
-    void onSessionCallback(const future_lite::Try<indexlib::index::ErrorCodeVec> &errorCodeTry);
+    void onSessionCallback(const async_simple::Try<indexlib::index::ErrorCodeVec> &errorCodeTry);
 
 public: // for kernel && scan
     virtual void start(std::vector<docid_t> docIds, size_t fieldCount, int64_t timeout);
@@ -117,7 +117,7 @@ private:
     std::vector<docid_t> _errorDocIds;
     autil::TimeoutTerminatorPtr _terminator;
     autil::mem_pool::PoolPtr _poolPtr;
-    future_lite::Executor *_executor = nullptr;
+    async_simple::Executor *_executor = nullptr;
     AsyncSummaryLookupMetricsCollector _metricsCollector;
     bool _hasError = false;
 };

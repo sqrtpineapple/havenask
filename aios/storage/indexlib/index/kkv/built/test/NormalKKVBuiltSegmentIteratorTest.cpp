@@ -65,7 +65,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestSimpleProcess)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
     // check value
@@ -103,7 +103,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestDuplicatedSKey)
         ASSERT_TRUE(status.IsOK()) << status.ToString();
     }
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
     // check value
@@ -144,7 +144,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestSkeyDeleted)
 
     {
         auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 
@@ -206,7 +206,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestExpireTime)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 
@@ -255,7 +255,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestFoundKeys)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 
@@ -291,7 +291,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestFillBuffer)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 
@@ -335,7 +335,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestBatchGet)
 
     // Test reach limit
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 
@@ -356,7 +356,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestBatchGet)
     }
     // Test buffer full
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 
@@ -380,7 +380,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestBatchGet)
     }
     // Test normal finish
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 
@@ -402,7 +402,7 @@ TEST_F(NormalKKVBuiltSegmentIteratorTest, TestBatchGet)
     }
     // Test required skey
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 

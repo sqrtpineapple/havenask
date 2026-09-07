@@ -25,7 +25,7 @@
 #include "indexlib/framework/index_task/LocalExecuteEngine.h"
 #include "indexlib/util/Clock.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -54,7 +54,7 @@ class LocalTabletMergeController : public framework::ITabletMergeController
 
 public:
     struct InitParam {
-        future_lite::Executor* executor = nullptr;
+        async_simple::Executor* executor = nullptr;
         std::shared_ptr<config::ITabletSchema> schema;
         std::shared_ptr<config::TabletOptions> options;
         std::shared_ptr<MemoryQuotaController> memoryQuotaController;
@@ -72,16 +72,16 @@ public:
     Status Init(InitParam param);
 
 public:
-    future_lite::coro::Lazy<Status> Recover() override { co_return Status::OK(); }
+    async_simple::coro::Lazy<Status> Recover() override { co_return Status::OK(); }
     std::optional<TaskStat> GetRunningTaskStat() const override;
-    future_lite::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() override;
+    async_simple::coro::Lazy<std::pair<Status, versionid_t>> GetLastMergeTaskResult() override;
     std::unique_ptr<framework::IndexTaskContext>
     CreateTaskContext(versionid_t baseVersionId, const std::string& taskType, const std::string& taskName,
                       const std::string& taskTraceId, const std::map<std::string, std::string>& params) override;
-    future_lite::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<framework::IndexTaskPlan> plan,
+    async_simple::coro::Lazy<Status> SubmitMergeTask(std::unique_ptr<framework::IndexTaskPlan> plan,
                                                     framework::IndexTaskContext* context) override;
-    future_lite::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> WaitMergeResult() override;
-    future_lite::coro::Lazy<Status> CancelCurrentTask() override;
+    async_simple::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> WaitMergeResult() override;
+    async_simple::coro::Lazy<Status> CancelCurrentTask() override;
     void Stop() override;
     Status CleanTask(bool removeTempFiles) override;
     void TEST_SetClock(const std::shared_ptr<util::Clock>& clock);

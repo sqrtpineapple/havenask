@@ -31,8 +31,8 @@
 #include "build_service/proto/BasicDefs.pb.h"
 #include "build_service/proto/Heartbeat.pb.h"
 #include "build_service/util/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Executor.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -62,7 +62,7 @@ private:
 
 public:
     struct InitParam {
-        future_lite::Executor* executor = nullptr;
+        async_simple::Executor* executor = nullptr;
         std::shared_ptr<indexlibv2::config::ITabletSchema> schema;
         std::shared_ptr<indexlibv2::config::TabletOptions> options;
         std::string remotePartitionIndexRoot;
@@ -87,18 +87,18 @@ public:
     static std::string GetOriginalAppName(const std::string& appName);
 
 public:
-    future_lite::coro::Lazy<indexlib::Status> Recover() override;
+    async_simple::coro::Lazy<indexlib::Status> Recover() override;
     std::optional<TaskStat> GetRunningTaskStat() const override;
-    future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>> GetLastMergeTaskResult() override;
+    async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>> GetLastMergeTaskResult() override;
     std::unique_ptr<IndexTaskContext> CreateTaskContext(indexlibv2::versionid_t baseVersionId,
                                                         const std::string& taskType, const std::string& taskName,
                                                         const std::string& taskTraceId,
                                                         const std::map<std::string, std::string>& params) override;
-    future_lite::coro::Lazy<indexlib::Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
+    async_simple::coro::Lazy<indexlib::Status> SubmitMergeTask(std::unique_ptr<IndexTaskPlan> plan,
                                                               IndexTaskContext* context) override;
-    future_lite::coro::Lazy<std::pair<indexlib::Status, MergeTaskStatus>> WaitMergeResult() override;
+    async_simple::coro::Lazy<std::pair<indexlib::Status, MergeTaskStatus>> WaitMergeResult() override;
     indexlib::Status CleanTask(bool removeTempFiles) override;
-    future_lite::coro::Lazy<indexlib::Status> CancelCurrentTask() override;
+    async_simple::coro::Lazy<indexlib::Status> CancelCurrentTask() override;
     void Stop() override;
 
 protected:
@@ -108,12 +108,12 @@ protected:
 
 protected:
     // virtual for test
-    virtual future_lite::coro::Lazy<bool> SubmitTask(std::unique_ptr<IndexTaskPlan> plan, IndexTaskContext* context,
+    virtual async_simple::coro::Lazy<bool> SubmitTask(std::unique_ptr<IndexTaskPlan> plan, IndexTaskContext* context,
                                                      proto::InformResponse* response);
-    virtual future_lite::coro::Lazy<bool> GetTaskInfo(int64_t taskId, proto::TaskInfoResponse* response);
-    virtual future_lite::coro::Lazy<bool> StopTask(int64_t taskId);
-    virtual future_lite::coro::Lazy<bool> StopBuild();
-    virtual future_lite::coro::Lazy<bool> GetGenerationInfo(proto::GenerationInfo* generationInfo);
+    virtual async_simple::coro::Lazy<bool> GetTaskInfo(int64_t taskId, proto::TaskInfoResponse* response);
+    virtual async_simple::coro::Lazy<bool> StopTask(int64_t taskId);
+    virtual async_simple::coro::Lazy<bool> StopBuild();
+    virtual async_simple::coro::Lazy<bool> GetGenerationInfo(proto::GenerationInfo* generationInfo);
 
 private:
     struct TaskDescription {
@@ -135,12 +135,12 @@ private:
     TaskDescription GetTaskDescription() const;
     void UpdateTaskDescription(int64_t finishedOpCount, int64_t totalOpCount);
     size_t GetBackoffWindow() const;
-    future_lite::coro::Lazy<indexlib::Status> DoRecover();
-    future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>> DoGetLastMergeTaskResult();
+    async_simple::coro::Lazy<indexlib::Status> DoRecover();
+    async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>> DoGetLastMergeTaskResult();
     void FillBuildId(proto::BuildId* buildId) const;
-    future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+    async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
     GetRunningMergeTaskResult(proto::GenerationInfo generationInfo);
-    future_lite::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
+    async_simple::coro::Lazy<std::pair<indexlib::Status, indexlibv2::versionid_t>>
     GetFinishedMergeTaskResult(proto::GenerationInfo generationInfo) const;
     std::string GetSourceRoot() const
     {

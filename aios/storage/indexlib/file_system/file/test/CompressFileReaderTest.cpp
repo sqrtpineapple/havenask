@@ -130,7 +130,7 @@ void CompressFileReaderTest::InnerTest(string loadConfig)
         BatchIO batchIO;
         batchIO.push_back(SingleIO(buffer[0], 4096, 0));
         batchIO.push_back(SingleIO(buffer[1], 4096, 4096));
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(2, result.size());
         ASSERT_TRUE(result[0].OK());
         ASSERT_EQ(4096, result[0].GetOrThrow());
@@ -148,7 +148,7 @@ void CompressFileReaderTest::InnerTest(string loadConfig)
         batchIO.push_back(SingleIO(buffer[0], 1, fileLen - 1));
         // offset > fileLength
         batchIO.push_back(SingleIO(buffer[1], 200, fileLen - 1));
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(2, result.size());
         ASSERT_FALSE(result[0].OK());
         ASSERT_FALSE(result[1].OK());
@@ -160,7 +160,7 @@ void CompressFileReaderTest::InnerTest(string loadConfig)
         // test read out of bounds
         batchIO.push_back(SingleIO(buffer[0], 10, fileLen - 10));
         batchIO.push_back(SingleIO(buffer[1], 10, fileLen - 10));
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(2, result.size());
         ASSERT_TRUE(result[0].OK());
         ASSERT_TRUE(result[1].OK());
@@ -174,7 +174,7 @@ void CompressFileReaderTest::InnerTest(string loadConfig)
         BatchIO batchIO;
         batchIO.push_back(SingleIO(buffer[0], 4096, 0));
         batchIO.push_back(SingleIO(buffer[1], 4096, 4096));
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_EQ(2, result.size());
         ASSERT_TRUE(result[0].OK());
         ASSERT_EQ(4096, result[0].GetOrThrow());
@@ -271,7 +271,7 @@ void CompressFileReaderTest::TestNoUselessDecompress()
         util::BlockAccessCounter counter;
         ReadOption option;
         option.blockCounter = &counter;
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, option));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, option));
         ASSERT_EQ(100, result[0].GetOrThrow());
         ASSERT_EQ(200, result[1].GetOrThrow());
         CheckData(oriData, batchIO[0].buffer, batchIO[0].len, batchIO[0].offset);
@@ -284,7 +284,7 @@ void CompressFileReaderTest::TestNoUselessDecompress()
         util::BlockAccessCounter counter;
         ReadOption option;
         option.blockCounter = &counter;
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, option));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, option));
         ASSERT_EQ(100, result[0].GetOrThrow());
         ASSERT_EQ(200, result[1].GetOrThrow());
         CheckData(oriData, batchIO[0].buffer, batchIO[0].len, batchIO[0].offset);
@@ -298,7 +298,7 @@ void CompressFileReaderTest::TestNoUselessDecompress()
             util::BlockAccessCounter counter;
             ReadOption option;
             option.blockCounter = &counter;
-            auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, option));
+            auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, option));
 
             ASSERT_EQ(100, result[0].GetOrThrow());
             CheckData(oriData, batchIO[0].buffer, batchIO[0].len, batchIO[0].offset);
@@ -309,7 +309,7 @@ void CompressFileReaderTest::TestNoUselessDecompress()
             util::BlockAccessCounter counter;
             ReadOption option;
             option.blockCounter = &counter;
-            auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, option));
+            auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, option));
             ASSERT_EQ(100, result[0].GetOrThrow());
             CheckData(oriData, batchIO[0].buffer, batchIO[0].len, batchIO[0].offset);
             ASSERT_EQ(0, counter.blockCacheHitCount + counter.blockCacheMissCount);
@@ -319,7 +319,7 @@ void CompressFileReaderTest::TestNoUselessDecompress()
             util::BlockAccessCounter counter;
             ReadOption option;
             option.blockCounter = &counter;
-            auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, option));
+            auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, option));
             ASSERT_EQ(100, result[0].GetOrThrow());
             CheckData(oriData, batchIO[0].buffer, batchIO[0].len, batchIO[0].offset);
             ASSERT_EQ(0, counter.blockCacheHitCount + counter.blockCacheMissCount);
@@ -372,7 +372,7 @@ void CompressFileReaderTest::TestException()
     auto fileReader = dir->CreateFileReader(filePath, ReaderOption::SupportCompress(FSOT_LOAD_CONFIG));
     {
         BatchIO batchIO({{buffer[0], 1024, 0}, {buffer[1], 1024, 0}});
-        auto result = future_lite::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
+        auto result = async_simple::coro::syncAwait(fileReader->BatchRead(batchIO, ReadOption()));
         ASSERT_FALSE(result[0].OK());
         ASSERT_FALSE(result[1].OK());
     }

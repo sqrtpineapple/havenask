@@ -42,7 +42,7 @@
 #include "build_service/util/Monitor.h"
 #include "build_service/util/RangeUtil.h"
 #include "fslib/util/FileUtil.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Progress.h"
 #include "indexlib/config/ITabletSchema.h"

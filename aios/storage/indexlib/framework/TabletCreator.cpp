@@ -17,8 +17,8 @@
 
 #include <iosfwd>
 
-#include "future_lite/Executor.h"
-#include "future_lite/TaskScheduler.h"
+#include "async_simple/Executor.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/framework/ITabletMergeController.h"
 #include "indexlib/framework/IdGenerator.h"
@@ -37,8 +37,8 @@ TabletCreator::TabletCreator() : _tabletResource(new TabletResource) {}
 
 TabletCreator::~TabletCreator() {}
 
-TabletCreator& TabletCreator::SetExecutor(future_lite::Executor* dumpExecutor,
-                                          future_lite::TaskScheduler* taskScheduler)
+TabletCreator& TabletCreator::SetExecutor(async_simple::Executor* dumpExecutor,
+                                          async_simple::TaskScheduler* taskScheduler)
 {
     _tabletResource->dumpExecutor = dumpExecutor;
     _tabletResource->taskScheduler = taskScheduler;

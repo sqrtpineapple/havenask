@@ -9,7 +9,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     shard_count=1,
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/config:schema',
         '//aios/storage/indexlib/document',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',

@@ -46,10 +46,10 @@ namespace indexlibv2 {
 class MemoryQuotaController;
 }
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace suez {
 
@@ -82,9 +82,9 @@ struct TableResource {
     bool allowLoadUtilRtRecovered = true;
 
     // for Tablet
-    future_lite::Executor *executor = nullptr;
-    future_lite::Executor *dumpExecutor = nullptr;
-    future_lite::TaskScheduler *taskScheduler = nullptr;
+    async_simple::Executor *executor = nullptr;
+    async_simple::Executor *dumpExecutor = nullptr;
+    async_simple::TaskScheduler *taskScheduler = nullptr;
 };
 
 template <typename StatusType>

@@ -25,9 +25,9 @@
 #include "autil/Log.h"
 #include "autil/mem_pool/Pool.h"
 #include "autil/mem_pool/PoolBase.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
-#include "future_lite/Unit.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
+#include "async_simple/Unit.h"
 #include "indexlib/file_system/FileSystemDefine.h"
 #include "indexlib/file_system/file/CompressFileAddressMapper.h"
 #include "indexlib/file_system/file/CompressFileInfo.h"
@@ -73,11 +73,11 @@ public:
     FSResult<size_t> Read(void* buffer, size_t length, size_t offset, ReadOption option) noexcept override;
     FSResult<size_t> Read(void* buffer, size_t length, ReadOption option) noexcept override;
     util::ByteSliceList* ReadToByteSliceList(size_t length, size_t offset, ReadOption option) noexcept override;
-    future_lite::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
+    async_simple::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
                                                     ReadOption option) noexcept override;
-    future_lite::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept override;
-    future_lite::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
-    future_lite::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
+    async_simple::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept override;
+    async_simple::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
+    async_simple::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
                                                                             ReadOption option) noexcept override;
     void* GetBaseAddress() const noexcept override { return NULL; }
     size_t GetLength() const noexcept override
@@ -176,7 +176,7 @@ protected:
     virtual void LoadBufferFromMemory(size_t offset, uint8_t* buffer, uint32_t bufLen,
                                       bool enableTrace) noexcept(false) = 0;
     // blockInfo: pair<blockIdx, BufferCompressor*>
-    virtual future_lite::coro::Lazy<std::vector<ErrorCode>>
+    virtual async_simple::coro::Lazy<std::vector<ErrorCode>>
     BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                     ReadOption option) noexcept(false) = 0;
 
@@ -200,7 +200,7 @@ protected:
 
 private:
     FSResult<void> PrefetchData(size_t length, size_t offset, ReadOption option) noexcept;
-    future_lite::Future<future_lite::Unit> PrefetchDataAsync(size_t length, size_t offset,
+    async_simple::Future<async_simple::Unit> PrefetchDataAsync(size_t length, size_t offset,
                                                              ReadOption option) noexcept(false);
     FL_LAZY(FSResult<void>)
     PrefetchDataAsyncCoro(size_t length, size_t offset, ReadOption option) noexcept;

@@ -19,7 +19,7 @@ cc_library(
         'MockRawDocumentReader.h', 'MockSwiftClient.h',
         'MockSwiftClientCreator.h'
     ] + []),
-    copts=['-std=c++17'],
+    copts=['-std=c++20'],
     include_prefix='build_service/reader/test',
     visibility=['//visibility:public'],
     deps=([

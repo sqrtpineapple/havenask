@@ -5,7 +5,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     data=[],
     deps=[
-        '//aios/autil:thread', '//aios/future_lite',
+        '//aios/autil:thread', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/framework/mem_reclaimer:EpochBasedMemReclaimer',
         '//aios/storage/indexlib/util/testutil:unittest'
     ]

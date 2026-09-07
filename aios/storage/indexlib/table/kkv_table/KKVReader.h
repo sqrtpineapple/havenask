@@ -21,8 +21,8 @@
 #include "autil/ConstString.h"
 #include "autil/mem_pool/PoolVector.h"
 #include "autil/mem_pool/pool_allocator.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/coro/Lazy.h"
+#include "CoroInterface.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/IIndexReader.h"
 #include "indexlib/index/kkv/config/KKVIndexConfig.h"
 #include "indexlib/index/kkv/search/KKVIterator.h"
@@ -36,7 +36,7 @@ class BatchKKVResult
 {
 public:
     template <typename T>
-    using use_try_t = future_lite::interface::use_try_t<T>;
+    using use_try_t = async_simple::interface::use_try_t<T>;
 
     using AllocatorType = autil::mem_pool::pool_allocator<use_try_t<index::KKVIterator*>>;
     using KKVIteratorVectorType = std::vector<use_try_t<index::KKVIterator*>, AllocatorType>;
@@ -142,12 +142,12 @@ public:
     // =================  sync interface api  =================
     index::KKVIterator* Lookup(index::PKeyType pkeyHash, const SKeyHashVec<>& skeyHashVec, KKVReadOptions& readOptions)
     {
-        return future_lite::interface::syncAwait(LookupAsync(pkeyHash, skeyHashVec, readOptions));
+        return async_simple::interface::syncAwait(LookupAsync(pkeyHash, skeyHashVec, readOptions));
     }
     index::KKVIterator* Lookup(autil::StringView pkey, const SKeyStringVec<>& skeyStringVec,
                                KKVReadOptions& readOptions)
     {
-        return future_lite::interface::syncAwait(LookupAsync(pkey, skeyStringVec, readOptions));
+        return async_simple::interface::syncAwait(LookupAsync(pkey, skeyStringVec, readOptions));
     }
 
     // =================  async interface api  =================
@@ -222,7 +222,7 @@ inline FL_LAZY(BatchKKVResult*) KKVReader::BatchLookupAsync(const PKeyIter& pkey
             pkeyPos++;
         }
         assert(skeyIter == skeyEnd);
-        auto kkvIterators = FL_COAWAIT future_lite::interface::collectAll(
+        auto kkvIterators = FL_COAWAIT async_simple::interface::collectAll(
             std::move(queryGroups), BatchKKVResult::AllocatorType(readOptions.pool));
         batchResult->SetKKVIterators(std::move(kkvIterators));
         FL_CORETURN batchResult;
@@ -234,7 +234,7 @@ inline FL_LAZY(BatchKKVResult*) KKVReader::BatchLookupAsync(const PKeyIter& pkey
             skeyIter++;
         }
         assert(skeyIter == skeyEnd);
-        auto kkvIterators = FL_COAWAIT future_lite::interface::collectAll(
+        auto kkvIterators = FL_COAWAIT async_simple::interface::collectAll(
             std::move(queryGroups), BatchKKVResult::AllocatorType(readOptions.pool));
         BatchKKVResult* batchResult = POOL_COMPATIBLE_NEW_CLASS(readOptions.pool, BatchKKVResult, readOptions);
         batchResult->SetKKVIterators(std::move(kkvIterators));

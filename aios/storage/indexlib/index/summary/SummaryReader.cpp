@@ -259,7 +259,7 @@ SummaryReader::GetDocumentFromBuildingSegments(docid_t docId, const SummaryGroup
     return std::make_pair(Status::OK(), false);
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SummaryReader::GetDocument(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                            autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                            const SummaryReader::SearchSummaryDocVec* docs) const noexcept
@@ -271,9 +271,12 @@ SummaryReader::GetDocument(const std::vector<docid_t>& docIds, const SummaryGrou
 
     assert(docIds.size() == docs->size());
     indexlib::index::ErrorCodeVec ec;
-    auto executor = co_await future_lite::CurrentExecutor();
+    auto executor = co_await async_simple::CurrentExecutor();
     if (_executor) {
-        ec = co_await InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs).via(_executor);
+        std::vector<async_simple::coro::RescheduleLazy<indexlib::index::ErrorCodeVec>> ops;
+        ops.push_back(InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs).via(_executor));
+        auto anyResult = co_await async_simple::coro::collectAny(std::move(ops));
+        ec = anyResult.value();
     } else if (executor) {
         ec = co_await InnerGetDocumentAsync(docIds, groupVec, sessionPool, option, docs);
     } else {
@@ -296,7 +299,7 @@ SummaryReader::GetDocument(const std::vector<docid_t>& docIds, const SummaryGrou
     co_return ec;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SummaryReader::InnerGetDocumentAsync(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                      autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                                      const SummaryReader::SearchSummaryDocVec* docs) const noexcept
@@ -335,12 +338,12 @@ SummaryReader::InnerGetDocumentAsync(const std::vector<docid_t>& docIds, const S
     co_return result;
 }
 
-future_lite::coro::Lazy<std::vector<future_lite::Try<indexlib::index::ErrorCodeVec>>>
+async_simple::coro::Lazy<std::vector<async_simple::Try<indexlib::index::ErrorCodeVec>>>
 SummaryReader::GetBuiltSegmentTasks(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                     autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
                                     const SummaryReader::SearchSummaryDocVec* docs) const noexcept
 {
-    std::vector<future_lite::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> segmentTasks;
+    std::vector<async_simple::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> segmentTasks;
 
     // get value from built segment async
     docid_t currentSegDocIdEnd = 0;
@@ -366,10 +369,10 @@ SummaryReader::GetBuiltSegmentTasks(const std::vector<docid_t>& docIds, const Su
                                                                  &segmentDocs[idx]));
         }
     }
-    co_return co_await future_lite::coro::collectAll(std::move(segmentTasks));
+    co_return co_await async_simple::coro::collectAll(std::move(segmentTasks));
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::InnerGetDocumentAsyncOrdered(
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::InnerGetDocumentAsyncOrdered(
     const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec, autil::mem_pool::Pool* sessionPool,
     indexlib::file_system::ReadOption readOption, const SummaryReader::SearchSummaryDocVec* docs) const noexcept
 {
@@ -378,7 +381,7 @@ future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::InnerGetDo
     }
 
     std::vector<indexlib::index::ErrorCode> result(docIds.size(), indexlib::index::ErrorCode::OK);
-    std::vector<future_lite::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> subTasks;
+    std::vector<async_simple::coro::Lazy<std::vector<indexlib::index::ErrorCode>>> subTasks;
     subTasks.push_back(GetDocumentFromSummaryAsync(docIds, groupVec, sessionPool, readOption, docs));
 
     // TODO: support pack attribute
@@ -407,7 +410,7 @@ future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::InnerGetDo
         }
     }
 
-    auto taskResult = co_await future_lite::coro::collectAll(std::move(subTasks));
+    auto taskResult = co_await async_simple::coro::collectAll(std::move(subTasks));
 
     for (size_t docIdx = 0; docIdx < docIds.size(); ++docIdx) {
         assert(!taskResult[0].hasError());
@@ -463,7 +466,7 @@ future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::InnerGetDo
     co_return result;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::GetDocumentFromSummaryAsync(
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::GetDocumentFromSummaryAsync(
     const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec, autil::mem_pool::Pool* sessionPool,
     indexlib::file_system::ReadOption readOption, const SearchSummaryDocVec* docs) const noexcept
 {
@@ -499,7 +502,7 @@ future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::GetDocumen
     co_return ret;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::GetDocumentFromSourceAsync(
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SummaryReader::GetDocumentFromSourceAsync(
     const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec, autil::mem_pool::Pool* sessionPool,
     indexlib::file_system::ReadOption readOption, const SearchSummaryDocVec* docs) const
 {
@@ -559,7 +562,7 @@ bool SummaryReader::GetDocumentFromSource(docid_t docId, const SummaryGroupIdVec
     SearchSummaryDocVec docs;
     docs.push_back(summaryDoc);
 
-    auto ret = future_lite::coro::syncAwait(
+    auto ret = async_simple::coro::syncAwait(
         GetDocumentFromSourceAsync(docIds, groupVec, (autil::mem_pool::Pool*)summaryDoc->getPool(), nullptr, &docs));
     return ret[0] == indexlib::index::ErrorCode::OK;
 }

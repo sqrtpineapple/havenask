@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/config/index_partition_options.h"
 #include "indexlib/misc/common.h"
 #include "indexlib/misc/log.h"
@@ -39,7 +39,7 @@ public:
     bool Init(const config::IndexPartitionSchemaPtr& schema, const config::IndexPartitionOptions& options);
     virtual bool DoInit() = 0;
     virtual std::string GetExecutorName() const = 0;
-    virtual future_lite::Executor* CreateExecutor() const = 0;
+    virtual async_simple::Executor* CreateExecutor() const = 0;
 
 protected:
     config::IndexPartitionSchemaPtr mSchema;

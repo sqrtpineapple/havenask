@@ -31,10 +31,10 @@
 #include "indexlib/util/metrics/MetricProvider.h"
 #include "kmonitor/client/MetricsReporter.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace indexlib { namespace util {
 typedef std::shared_ptr<MetricProvider> MetricProviderPtr;
@@ -105,8 +105,8 @@ public:
     std::string rawIndexRoot;
     BuildFlowThreadResource buildFlowThreadResource;
     RealtimeInfoWrapper realtimeInfo;
-    future_lite::Executor* executor;
-    future_lite::TaskScheduler* taskScheduler2;
+    async_simple::Executor* executor;
+    async_simple::TaskScheduler* taskScheduler2;
 
 public:
     RealtimeBuilderResource(kmonitor::MetricsReporterPtr reporter_, indexlib::util::TaskSchedulerPtr taskScheduler_,

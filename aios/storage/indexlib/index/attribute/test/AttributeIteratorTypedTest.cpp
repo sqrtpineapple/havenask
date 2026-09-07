@@ -18,7 +18,7 @@ public:
         value = _dataVector[docId];
         return true;
     }
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds,
                                                                      FakeInt32SegmentReadContext& ctx,
                                                                      indexlib::file_system::ReadOption readOption,
                                                                      typename std::vector<int32_t>* values,
@@ -472,7 +472,7 @@ void AttributeIteratorTypedTest::CheckSequentialSeek(std::shared_ptr<Int32AttrIt
             docIds.push_back((docid_t)i);
         }
         std::vector<bool> nullValues;
-        auto result = future_lite::coro::syncAwait(
+        auto result = async_simple::coro::syncAwait(
             iterator->BatchSeek(docIds, indexlib::file_system::ReadOption(), &values, &nullValues));
         ASSERT_EQ(expectedData.size(), result.size());
         ASSERT_EQ(expectedData.size(), values.size());

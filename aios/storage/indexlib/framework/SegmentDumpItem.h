@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/config/TabletOptions.h"

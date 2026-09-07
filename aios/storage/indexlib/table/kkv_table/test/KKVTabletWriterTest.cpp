@@ -1,8 +1,8 @@
 #include "indexlib/table/kkv_table/KKVTabletWriter.h"
 
 #include "autil/TimeUtility.h"
-#include "future_lite/TaskScheduler.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "TaskScheduler.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/document/DocumentBatch.h"
 #include "indexlib/document/IDocumentBatch.h"
 #include "indexlib/document/test/KVDocumentBatchMaker.h"

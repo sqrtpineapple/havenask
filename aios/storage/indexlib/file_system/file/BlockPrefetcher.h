@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/util/cache/BlockHandle.h"
@@ -43,7 +43,7 @@ class BlockPrefetcher
 public:
     explicit BlockPrefetcher(BlockFileAccessor* accessor, ReadOption option);
     ~BlockPrefetcher() {}
-    future_lite::coro::Lazy<ErrorCode> Prefetch(size_t offset, size_t length);
+    async_simple::coro::Lazy<ErrorCode> Prefetch(size_t offset, size_t length);
     void Reset();
 
 private:

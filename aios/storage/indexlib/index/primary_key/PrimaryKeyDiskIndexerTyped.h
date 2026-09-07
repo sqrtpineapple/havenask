@@ -17,7 +17,7 @@
 
 #include "autil/BloomFilter.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/IDirectory.h"
 #include "indexlib/file_system/file/NormalFileReader.h"

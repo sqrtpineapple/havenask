@@ -1,7 +1,7 @@
 
 #include "indexlib/index/kkv/test/kkv_reader_unittest.h"
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/test/region_schema_maker.h"
 #include "indexlib/config/test/schema_maker.h"
 #include "indexlib/file_system/test/LoadConfigListCreator.h"
@@ -63,7 +63,7 @@ void KKVReaderTest::TestBlockCache()
     ASSERT_TRUE(psm.Transfer(BUILD_FULL_NO_MERGE, docString, "", ""));
 
     auto kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     KVMetricsCollector collector;
     PackAttributeFormatterPtr packAttrFormatter(new PackAttributeFormatter);
     auto valueConfig = DYNAMIC_POINTER_CAST(KKVIndexConfig, psm.GetIndexPartition()
@@ -78,7 +78,7 @@ void KKVReaderTest::TestBlockCache()
     uint32_t value;
 
     {
-        auto kkvDocIter = future_lite::interface::syncAwait(
+        auto kkvDocIter = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), vector<StringView>({StringView("1")}), 0, tsc_default, &mPool,
                                    &collector),
             &ex);
@@ -106,7 +106,7 @@ void KKVReaderTest::TestBlockCache()
 
     collector.Reset();
     {
-        auto kkvDocIter = future_lite::interface::syncAwait(
+        auto kkvDocIter = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), 0, tsc_default, &mPool, &collector), &ex);
 
         ASSERT_TRUE(kkvDocIter->IsValid());
@@ -124,7 +124,7 @@ void KKVReaderTest::TestBlockCache()
 
     {
         // accumulate metrics collector
-        auto kkvDocIter = future_lite::interface::syncAwait(
+        auto kkvDocIter = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), 0, tsc_default, &mPool, &collector), &ex);
 
         ASSERT_TRUE(kkvDocIter->IsValid());
@@ -160,7 +160,7 @@ void KKVReaderTest::TestSearchCache()
     ASSERT_TRUE(psm.Transfer(BUILD_FULL_NO_MERGE, docString, "pkey1", "skey=1,value=1;skey=2,value=2"));
 
     auto kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     KVMetricsCollector collector;
 
     PackAttributeFormatterPtr packAttrFormatter(new PackAttributeFormatter);
@@ -170,7 +170,7 @@ void KKVReaderTest::TestSearchCache()
     StringView rawValue;
     uint32_t value;
     {
-        auto kkvIterator = future_lite::interface::syncAwait(
+        auto kkvIterator = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), vector<StringView>({StringView("1")}), 0, tsc_default, &mPool,
                                    &collector),
             &ex);
@@ -203,7 +203,7 @@ void KKVReaderTest::TestSearchCache()
     kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
     collector.Reset();
     {
-        auto kkvIterator = future_lite::interface::syncAwait(
+        auto kkvIterator = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), 0, tsc_default, &mPool, &collector), &ex);
         ASSERT_TRUE(kkvIterator->IsValid());
         ASSERT_EQ(3, kkvIterator->GetCurrentSkey());
@@ -229,7 +229,7 @@ void KKVReaderTest::TestSearchCache()
 
     // accumulate metrics collector
     {
-        auto kkvIterator = future_lite::interface::syncAwait(
+        auto kkvIterator = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), 0, tsc_default, &mPool, &collector), &ex);
 
         ASSERT_TRUE(kkvIterator->IsValid());
@@ -372,9 +372,9 @@ void KKVReaderTest::TestTableTypeWithCuckoo()
     auto* valueRef = packAttrFormatter->GetAttributeReferenceTyped<uint32_t>("value");
     StringView rawValue;
     uint32_t value;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     {
-        auto kkvIterator = future_lite::interface::syncAwait(
+        auto kkvIterator = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), vector<StringView>({StringView("1")}), 0, tsc_default, &mPool,
                                    &collector),
             &ex);
@@ -416,7 +416,7 @@ void KKVReaderTest::TestTableTypeWithCuckoo()
 
     collector.Reset();
     {
-        auto kkvIterator = future_lite::interface::syncAwait(
+        auto kkvIterator = async_simple::interface::syncAwait(
             kkvReader->LookupAsync(StringView("pkey1"), 0, tsc_default, &mPool, &collector), &ex);
 
         ASSERT_TRUE(kkvIterator->IsValid());
@@ -526,10 +526,10 @@ void KKVReaderTest::CheckResult(const KKVReaderPtr& kkvReader, const string& key
     vector<vector<uint64_t>> resultInfos;
     StringUtil::fromString(valueResult, resultInfos, ",", ";");
 
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     Pool pool;
     StringView pkeyStr(key.data(), key.size());
-    auto iter = future_lite::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, tsc_default, &pool, nullptr), &ex);
+    auto iter = async_simple::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, tsc_default, &pool, nullptr), &ex);
     size_t cursor = 0;
     while (iter->IsValid()) {
         assert(resultInfos[cursor].size() == 2);

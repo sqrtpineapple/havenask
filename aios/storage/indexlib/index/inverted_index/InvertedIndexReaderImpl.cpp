@@ -266,10 +266,10 @@ std::shared_ptr<BuildingIndexReader> InvertedIndexReaderImpl::CreateBuildingInde
 Result<PostingIterator*> InvertedIndexReaderImpl::Lookup(const Term& term, uint32_t statePoolSize, PostingType type,
                                                          autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(DoLookupAsync(&term, {}, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(DoLookupAsync(&term, {}, statePoolSize, type, sessionPool, nullptr));
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 InvertedIndexReaderImpl::DoLookupAsync(const Term* term, const DocIdRangeVector& ranges, uint32_t statePoolSize,
                                        PostingType type, autil::mem_pool::Pool* sessionPool,
                                        file_system::ReadOption option) noexcept
@@ -318,7 +318,7 @@ InvertedIndexReaderImpl::DoLookupAsync(const Term* term, const DocIdRangeVector&
     }
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 InvertedIndexReaderImpl::CreateDynamicPostingIteratorAsync(const Term* term, const DocIdRangeVector& ranges,
                                                            uint32_t statePoolSize, autil::mem_pool::Pool* sessionPool,
                                                            file_system::ReadOption option) noexcept
@@ -351,7 +351,7 @@ InvertedIndexReaderImpl::CreateDynamicPostingIteratorAsync(const Term* term, con
     }
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 InvertedIndexReaderImpl::CreatePostingIteratorAsync(const Term* term, const DocIdRangeVector& ranges,
                                                     uint32_t statePoolSize, autil::mem_pool::Pool* sessionPool,
                                                     file_system::ReadOption option) noexcept
@@ -373,13 +373,13 @@ InvertedIndexReaderImpl::CreatePostingIteratorAsync(const Term* term, const DocI
     co_return co_await CreatePostingIteratorByHashKey(term, key, ranges, statePoolSize, sessionPool, option);
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>> InvertedIndexReaderImpl::CreatePostingIteratorByHashKey(
+async_simple::coro::Lazy<Result<PostingIterator*>> InvertedIndexReaderImpl::CreatePostingIteratorByHashKey(
     const Term* term, DictKeyInfo termHashKey, const DocIdRangeVector& ranges, uint32_t statePoolSize,
     autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
 {
     auto tracer = util::MakePooledUniquePtr<InvertedIndexSearchTracer>(sessionPool);
 
-    std::vector<future_lite::coro::Lazy<Result<bool>>> tasks;
+    std::vector<async_simple::coro::Lazy<Result<bool>>> tasks;
     SegmentPostingVector segmentPostings;
     bool needBuildingSegment = true;
     if (!ranges.empty()) {
@@ -394,9 +394,9 @@ future_lite::coro::Lazy<Result<PostingIterator*>> InvertedIndexReaderImpl::Creat
                 FillSegmentPostingAsync(term, termHashKey, i, segmentPostings.back(), option, tracer.get()));
         }
     }
-    std::vector<future_lite::Try<index::Result<bool>>> results;
+    std::vector<async_simple::Try<index::Result<bool>>> results;
     if (_executor) {
-        results = co_await future_lite::coro::collectAll(std::move(tasks));
+        results = co_await async_simple::coro::collectAll(std::move(tasks));
     } else {
         for (size_t i = 0; i < tasks.size(); ++i) {
             results.emplace_back(co_await tasks[i]);
@@ -505,7 +505,7 @@ DocIdRangeVector InvertedIndexReaderImpl::MergeDocIdRanges(int32_t hintValues, c
     return ranges;
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 InvertedIndexReaderImpl::LookupAsync(const Term* term, uint32_t statePoolSize, PostingType type,
                                      autil::mem_pool::Pool* pool, file_system::ReadOption option) noexcept
 {
@@ -516,7 +516,7 @@ Result<PostingIterator*> InvertedIndexReaderImpl::PartialLookup(const Term& term
                                                                 uint32_t statePoolSize, PostingType type,
                                                                 autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(DoLookupAsync(&term, ranges, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(DoLookupAsync(&term, ranges, statePoolSize, type, sessionPool, nullptr));
 }
 
 const SectionAttributeReader* InvertedIndexReaderImpl::GetSectionReader(const std::string& indexName) const
@@ -541,7 +541,7 @@ std::vector<std::shared_ptr<DictionaryReader>> InvertedIndexReaderImpl::GetDictR
     return dictReaders;
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 InvertedIndexReaderImpl::CreateMainPostingIteratorAsync(DictKeyInfo key, uint32_t statePoolSize,
                                                         autil::mem_pool::Pool* sessionPool, bool needBuildingSegment,
                                                         file_system::ReadOption option) noexcept
@@ -586,12 +586,12 @@ InvertedIndexReaderImpl::CreateMainPostingIteratorAsync(DictKeyInfo key, uint32_
     co_return nullptr;
 }
 
-std::tuple<std::vector<future_lite::coro::Lazy<index::Result<bool>>>, SegmentPostingVector, bool>
+std::tuple<std::vector<async_simple::coro::Lazy<index::Result<bool>>>, SegmentPostingVector, bool>
 InvertedIndexReaderImpl::FillRangeByBuiltSegments(const Term* term, const DictKeyInfo& termHashKey,
                                                   const DocIdRangeVector& ranges, file_system::ReadOption option,
                                                   InvertedIndexSearchTracer* tracer) noexcept
 {
-    std::vector<future_lite::coro::Lazy<index::Result<bool>>> tasks;
+    std::vector<async_simple::coro::Lazy<index::Result<bool>>> tasks;
     tasks.reserve(_segmentReaders.size());
     SegmentPostingVector segmentPostings;
     segmentPostings.reserve(_segmentReaders.size() + 1); // for building segments
@@ -633,7 +633,7 @@ InvertedIndexReaderImpl::FillRangeByBuiltSegments(const Term* term, const DictKe
     return {std::move(tasks), std::move(segmentPostings), needBuildingSegment};
 }
 
-future_lite::coro::Lazy<Result<bool>>
+async_simple::coro::Lazy<Result<bool>>
 InvertedIndexReaderImpl::FillSegmentPostingAsync(const Term* term, const DictKeyInfo& key, uint32_t segmentIdx,
                                                  SegmentPosting& segPosting, file_system::ReadOption option,
                                                  InvertedIndexSearchTracer* tracer) noexcept
@@ -644,7 +644,7 @@ InvertedIndexReaderImpl::FillSegmentPostingAsync(const Term* term, const DictKey
     co_return co_await GetSegmentPostingAsync(key, segmentIdx, segPosting, option, tracer);
 }
 
-future_lite::coro::Lazy<Result<bool>>
+async_simple::coro::Lazy<Result<bool>>
 InvertedIndexReaderImpl::FillTruncSegmentPosting(const Term& term, const DictKeyInfo& key, uint32_t segmentIdx,
                                                  SegmentPosting& segPosting, file_system::ReadOption option,
                                                  InvertedIndexSearchTracer* tracer) noexcept
@@ -745,7 +745,7 @@ InvertedIndexReaderImpl::CreateDefaultDiskIndexer(const std::shared_ptr<Segment>
     return {Status::OK(), diskIndexer};
 }
 
-future_lite::coro::Lazy<Result<bool>>
+async_simple::coro::Lazy<Result<bool>>
 InvertedIndexReaderImpl::GetSegmentPostingFromTruncIndex(const Term& term, const DictKeyInfo& key, uint32_t segmentIdx,
                                                          file_system::ReadOption option, SegmentPosting& segPosting,
                                                          InvertedIndexSearchTracer* tracer) noexcept

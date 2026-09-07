@@ -37,7 +37,7 @@ public:
     ~SingleValueNullAttributeReadOnlyFormatter() = default;
 
     Status Get(docid_t docId, indexlib::file_system::FileStream* fileStream, T& value, bool& isNull) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> BatchGet(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> BatchGet(const std::vector<docid_t>& docIds,
                                                                     indexlib::file_system::FileStream* fileStream,
                                                                     indexlib::file_system::ReadOption readOption,
                                                                     std::vector<T>* values,
@@ -156,7 +156,7 @@ inline void SingleValueNullAttributeReadOnlyFormatter<T>::Set(docid_t docId, uin
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueNullAttributeReadOnlyFormatter<T>::BatchGet(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueNullAttributeReadOnlyFormatter<T>::BatchGet(
     const std::vector<docid_t>& docIds, indexlib::file_system::FileStream* fileStream,
     indexlib::file_system::ReadOption readOption, std::vector<T>* valuesPtr,
     std::vector<bool>* isNullVecPtr) const noexcept
@@ -218,7 +218,7 @@ inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueNullAtt
 }
 
 template <>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SingleValueNullAttributeReadOnlyFormatter<float>::BatchGet(const std::vector<docid_t>& docIds,
                                                            indexlib::file_system::FileStream* fileStream,
                                                            indexlib::file_system::ReadOption readOption,

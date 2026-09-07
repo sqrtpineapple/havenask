@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/config/index_partition_options.h"
@@ -89,7 +89,7 @@ public:
 
 public:
     bool Init(const config::IndexPartitionSchemaPtr& schema, const config::IndexPartitionOptions& options,
-              future_lite::Executor* executor, const util::MetricProviderPtr& metricProvider);
+              async_simple::Executor* executor, const util::MetricProviderPtr& metricProvider);
 
     virtual bool DoInit();
 
@@ -138,7 +138,7 @@ protected:
     config::IndexPartitionOptions mOptions;
     // interfaceid_t mInterfaceId;
     std::pair<int64_t, int64_t> mForceSeekInfo;
-    future_lite::Executor* mExecutor;
+    async_simple::Executor* mExecutor;
     util::MetricProviderPtr mMetricProvider;
 
 private:

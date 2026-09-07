@@ -39,8 +39,8 @@
 #include "build_service/proto/DataDescription.h"
 #include "build_service/util/IndexPathConstructor.h"
 #include "build_service/util/ParallelIdGenerator.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/coro/LazyHelper.h"
+#include "ExecutorCreator.h"
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Progress.h"
 #include "indexlib/file_system/Directory.h"
@@ -253,11 +253,11 @@ bool BuildTask::createFileBlockCacheContainer()
     return true;
 }
 
-std::unique_ptr<future_lite::Executor> BuildTask::createExecutor(const std::string& executorName, uint32_t threadCount)
+std::unique_ptr<async_simple::Executor> BuildTask::createExecutor(const std::string& executorName, uint32_t threadCount)
 {
-    return future_lite::ExecutorCreator::Create(
+    return async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
 }
 
 std::shared_ptr<indexlibv2::framework::IdGenerator> BuildTask::getIdGenerator() const
@@ -324,7 +324,7 @@ bool BuildTask::prepareResource()
     }
     if (!_executor) {
         _executor = createExecutor("builder_executor", executorThreadCount);
-        _taskScheduler = std::make_unique<future_lite::TaskScheduler>(_executor.get());
+        _taskScheduler = std::make_unique<async_simple::TaskScheduler>(_executor.get());
     }
     if (!_totalMemoryController || !_buildMemoryController) {
         if (!createQuotaController(buildTotalMemory)) {
@@ -422,7 +422,7 @@ indexlib::Status BuildTask::prepareTablet(const std::shared_ptr<BuildTaskTarget>
     indexlibv2::framework::VersionCoord finalVersionCoord = versionCoord;
     if (_buildStep == config::BUILD_STEP_FULL_STR && (_buildMode & proto::PUBLISH)) {
         // try to recover merge result
-        auto [status, manualMergeResult] = future_lite::coro::syncAwait(mergeController->GetLastMergeTaskResult());
+        auto [status, manualMergeResult] = async_simple::coro::syncAwait(mergeController->GetLastMergeTaskResult());
         if (status.IsOK() && manualMergeResult != indexlibv2::INVALID_VERSIONID) {
             _current->markManualMergeFinished();
             finalRoot = getPartitionIndexRoot();
@@ -433,7 +433,7 @@ indexlib::Status BuildTask::prepareTablet(const std::shared_ptr<BuildTaskTarget>
     if (target->isBatchBuild() && (_buildMode & proto::PUBLISH)) {
         int32_t batchId = target->getBatchId();
         // try to recover batch merge result
-        auto [status, manualMergeResult] = future_lite::coro::syncAwait(mergeController->GetLastMergeTaskResult());
+        auto [status, manualMergeResult] = async_simple::coro::syncAwait(mergeController->GetLastMergeTaskResult());
         if (status.IsOK() && manualMergeResult != indexlibv2::INVALID_VERSIONID) {
             auto [status, batchIdMatch] = isVersionMatchBatchId(manualMergeResult, batchId);
             if (status.IsOK() && batchIdMatch) {

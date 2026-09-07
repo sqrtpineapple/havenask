@@ -1,7 +1,7 @@
 #include "indexlib/testlib/fake_partition_reader_snapshot_creator.h"
 
 #include "autil/StringUtil.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/TabletSchema.h"
 #include "indexlib/config/index_partition_schema.h"
 #include "indexlib/config/index_partition_schema_maker.h"
@@ -158,8 +158,8 @@ FakePartitionReaderSnapshotCreator::GetDefaultTablet(const std::shared_ptr<index
     indexlibv2::framework::TabletResource resource;
     resource.metricsReporter = std::make_shared<kmonitor::MetricsReporter>("", metricsTags, "");
 
-    auto executor = std::make_unique<future_lite::executors::SimpleExecutor>(1);
-    auto taskScheduler = std::make_unique<future_lite::TaskScheduler>(executor.get());
+    auto executor = std::make_unique<async_simple::executors::SimpleExecutor>(1);
+    auto taskScheduler = std::make_unique<async_simple::TaskScheduler>(executor.get());
 
     resource.dumpExecutor = executor.get();
     resource.taskScheduler = taskScheduler.get();

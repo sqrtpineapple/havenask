@@ -10,7 +10,7 @@
 
 #include "autil/MultiValueType.h"
 #include "autil/legacy/json.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/framework/ITablet.h"
 #include "indexlib/partition/index_application.h"
 #include "indexlib/partition/index_partition.h"
@@ -249,8 +249,8 @@ public:
     std::vector<std::pair<navi::DataPtr, bool>> _outputs;
     autil::legacy::json::JsonMap _attributeMap;
     std::shared_ptr<build_service::config::ResourceReader> _resourceReader;
-    std::unique_ptr<future_lite::Executor> _asyncInterExecutor = nullptr;
-    std::unique_ptr<future_lite::Executor> _asyncIntraExecutor = nullptr;
+    std::unique_ptr<async_simple::Executor> _asyncInterExecutor = nullptr;
+    std::unique_ptr<async_simple::Executor> _asyncIntraExecutor = nullptr;
 };
 
 #define CHECK_TRACE_COUNT(expectNums, filter, traces)                                              \

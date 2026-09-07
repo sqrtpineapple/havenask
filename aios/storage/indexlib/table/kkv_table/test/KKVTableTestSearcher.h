@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "autil/Log.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/table/kkv_table/KKVReader.h"
 #include "indexlib/table/test/Result.h"
 
@@ -48,7 +48,7 @@ private:
     std::string GetSKeyValueStr(uint64_t skey);
 
 private:
-    future_lite::executors::SimpleExecutor _executor = {1};
+    async_simple::executors::SimpleExecutor _executor{1};
     std::shared_ptr<indexlibv2::table::KKVReader> _kkvReader;
     std::shared_ptr<indexlibv2::config::KKVIndexConfig> _indexConfig;
     std::shared_ptr<indexlibv2::config::ValueConfig> _valueConfig;

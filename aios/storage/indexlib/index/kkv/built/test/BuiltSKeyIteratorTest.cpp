@@ -175,7 +175,7 @@ void BuiltSKeyIteratorTest::DoTest()
     }
 
     OnDiskPKeyOffset firstSkeyOffset(0, 0);
-    status = future_lite::interface::syncAwait(skeyIterator->Init(skeyFileReader.get(), false, firstSkeyOffset));
+    status = async_simple::interface::syncAwait(skeyIterator->Init(skeyFileReader.get(), false, firstSkeyOffset));
     ASSERT_TRUE(status.IsOK());
     size_t i = 0;
     if constexpr (hasPkeyDeleted) {
@@ -368,7 +368,7 @@ TEST_F(BuiltSKeyIteratorTest, TestLargeChunkOffset)
     // 4312642662 > uint32_t max
     uint64_t chunkOffset = 4312642662;
     OnDiskPKeyOffset firstSkeyOffset(chunkOffset, 0);
-    status = future_lite::interface::syncAwait(skeyIterator->Init(&skeyFileReaderWrapper, false, firstSkeyOffset));
+    status = async_simple::interface::syncAwait(skeyIterator->Init(&skeyFileReaderWrapper, false, firstSkeyOffset));
     ASSERT_TRUE(status.IsOK());
     ASSERT_EQ(chunkOffset + sizeof(ChunkMeta), skeyFileReaderWrapper.GetLastReadOffset());
 }

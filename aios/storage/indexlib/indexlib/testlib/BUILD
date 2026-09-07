@@ -6,7 +6,7 @@ cc_library(
     include_prefix='indexlib/testlib',
     visibility=['//aios/storage/indexlib/indexlib:indexlibV1'],
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/indexlib',
         '//aios/storage/indexlib/indexlib:indexlib_h',
         '//aios/storage/indexlib/indexlib:indexlib_misc',
@@ -50,7 +50,7 @@ cc_library(
     include_prefix='indexlib/testlib',
     visibility=['//aios/storage/indexlib/indexlib:__subpackages__'],
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/framework:tablet_schema_loader',
         '//aios/storage/indexlib/indexlib/index',
         '//aios/storage/indexlib/indexlib/index/normal/framework:index_framework',

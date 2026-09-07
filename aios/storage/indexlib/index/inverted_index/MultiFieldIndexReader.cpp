@@ -15,6 +15,7 @@
  */
 #include "indexlib/index/inverted_index/MultiFieldIndexReader.h"
 
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/index/inverted_index/IndexAccessoryReader.h"
 #include "indexlib/index/inverted_index/config/InvertedIndexConfig.h"
 #include "indexlib/util/counter/AccumulativeCounter.h"
@@ -36,10 +37,10 @@ MultiFieldIndexReader::MultiFieldIndexReader(
 index::Result<PostingIterator*> MultiFieldIndexReader::Lookup(const index::Term& term, uint32_t statePoolSize,
                                                               PostingType type, autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 MultiFieldIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                                    autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
 {

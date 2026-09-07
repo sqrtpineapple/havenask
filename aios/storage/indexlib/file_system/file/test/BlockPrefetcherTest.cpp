@@ -63,7 +63,7 @@ void BlockPrefetcherTest::TestSimpleProcess()
     BlockPrefetcher prefetcher(accessor, ReadOption());
     auto CheckPrefetch = [&accessor](BlockPrefetcher& prefetcher, size_t offset, size_t length, string content) {
         ASSERT_EQ(length, content.length());
-        ASSERT_EQ(ErrorCode::FSEC_OK, future_lite::coro::syncAwait(prefetcher.Prefetch(offset, length)));
+        ASSERT_EQ(ErrorCode::FSEC_OK, async_simple::coro::syncAwait(prefetcher.Prefetch(offset, length)));
         util::BlockAccessCounter counter;
         ReadOption option;
         option.blockCounter = &counter;

@@ -58,7 +58,7 @@ public:
     void GetFromStream(docid_t docId, const std::shared_ptr<file_system::FileStream>& fileStream, T& value,
                        bool& isNull) const;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     BatchGetFromStream(const std::vector<docid_t>& docIds, const std::shared_ptr<file_system::FileStream>& fileStream,
                        file_system::ReadOption, typename std::vector<T>* values,
                        std::vector<bool>* isNullVec) const noexcept;
@@ -219,7 +219,7 @@ inline void SingleValueAttributeFormatter<T>::GetFromStream(docid_t docId,
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<index::ErrorCodeVec> SingleValueAttributeFormatter<T>::BatchGetFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> SingleValueAttributeFormatter<T>::BatchGetFromStream(
     const std::vector<docid_t>& docIds, const std::shared_ptr<file_system::FileStream>& fileStream,
     file_system::ReadOption readOption, typename std::vector<T>* values, std::vector<bool>* isNullVec) const noexcept
 {

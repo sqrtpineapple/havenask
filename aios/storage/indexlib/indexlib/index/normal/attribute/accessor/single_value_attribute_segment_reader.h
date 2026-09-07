@@ -82,7 +82,7 @@ public:
     {
         return ReadContextBasePtr(new ReadContext(CreateReadContext(pool)));
     }
-    future_lite::coro::Lazy<ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx,
+    async_simple::coro::Lazy<ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx,
                                                     file_system::ReadOption readOption, typename std::vector<T>* values,
                                                     std::vector<bool>* isNullVec) const noexcept;
     bool Read(docid_t docId, const ReadContextBasePtr& ctx, uint8_t* buf, uint32_t bufLen, bool& isNull) override;
@@ -354,7 +354,7 @@ inline bool SingleValueAttributeSegmentReader<T>::Read(docid_t docId, const Read
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<ErrorCodeVec>
+inline async_simple::coro::Lazy<ErrorCodeVec>
 SingleValueAttributeSegmentReader<T>::BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx,
                                                 file_system::ReadOption readOption, typename std::vector<T>* values,
                                                 std::vector<bool>* isNullVec) const noexcept

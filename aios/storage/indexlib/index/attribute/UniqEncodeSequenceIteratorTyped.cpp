@@ -38,7 +38,7 @@ public:
     size_t GetLockedMemoryUse() const override { return _content.size(); }
 
 private:
-    future_lite::coro::Lazy<std::vector<indexlib::file_system::FSResult<size_t>>>
+    async_simple::coro::Lazy<std::vector<indexlib::file_system::FSResult<size_t>>>
     BatchRead(indexlib::file_system::BatchIO& batchIO, indexlib::file_system::ReadOption option) noexcept override
     {
         assert(false);
@@ -46,12 +46,12 @@ private:
         co_return ret;
     }
 
-    future_lite::Future<indexlib::file_system::FSResult<size_t>>
+    async_simple::Future<indexlib::file_system::FSResult<size_t>>
     ReadAsync(void* buffer, size_t length, size_t offset, indexlib::file_system::ReadOption option) override
     {
         assert(false);
         using namespace indexlib::file_system;
-        return future_lite::makeReadyFuture(FSResult<size_t> {FSEC_ERROR, 0});
+        return async_simple::makeReadyFuture(FSResult<size_t> {FSEC_ERROR, 0});
     }
     std::shared_ptr<indexlib::file_system::FileStream> CreateSessionStream(autil::mem_pool::Pool* pool) const override
     {

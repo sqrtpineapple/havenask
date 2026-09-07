@@ -60,7 +60,7 @@ public:
                 const framework::TabletData* tabletData) override;
 
 public:
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        indexlib::file_system::ReadOption option,
                                                                        const SearchSummaryDocVec* docs) const noexcept
@@ -71,7 +71,7 @@ public:
     {
         return GetDocument(docId, _allGroupIds, summaryDoc);
     }
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                        const SummaryGroupIdVec& groupVec,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        indexlib::file_system::ReadOption option,
@@ -124,23 +124,23 @@ private:
                                     indexlib::document::SearchSummaryDocument* summaryDoc) const;
 
 private:
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     InnerGetDocumentAsync(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                           autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                           const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     InnerGetDocumentAsyncOrdered(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                  autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                                  const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<std::vector<future_lite::Try<indexlib::index::ErrorCodeVec>>>
+    async_simple::coro::Lazy<std::vector<async_simple::Try<indexlib::index::ErrorCodeVec>>>
     GetBuiltSegmentTasks(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                          autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
                          const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocumentFromSummaryAsync(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                 autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
                                 const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocumentFromSourceAsync(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
                                const SearchSummaryDocVec* docs) const;
@@ -162,7 +162,7 @@ private:
     std::vector<std::shared_ptr<std::string>> _allGroupFieldName2SummaryFieldIdMapHolder;
     std::vector<std::map<autil::StringView, indexlib::index::summaryfieldid_t>> _groupFieldName2SummaryFieldIdMap;
 
-    future_lite::Executor* _executor;
+    async_simple::Executor* _executor;
     bool _needStoreSummary;
 
 private:

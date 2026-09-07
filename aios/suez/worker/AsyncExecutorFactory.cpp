@@ -17,17 +17,17 @@
 
 #include "alog/Logger.h"
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/ExecutorCreator.h"
+#include "async_simple/Executor.h"
+#include "ExecutorCreator.h"
 
 namespace suez {
 
 AUTIL_DECLARE_AND_SETUP_LOGGER(suez, AsyncExecutorFactory);
 
-std::unique_ptr<future_lite::Executor>
+std::unique_ptr<async_simple::Executor>
 AsyncExecutorFactory::createAsyncExecutor(const std::string &name, size_t threadNum, const std::string &typeStr) {
-    auto executor = future_lite::ExecutorCreator::Create(
-        typeStr, future_lite::ExecutorCreator::Parameters().SetExecutorName(name).SetThreadNum(threadNum));
+    auto executor = async_simple::ExecutorCreator::Create(
+        typeStr, async_simple::ExecutorCreator::Parameters().SetExecutorName(name).SetThreadNum(threadNum));
 
     if (!executor) {
         AUTIL_LOG(ERROR, "not support async executor type: %s", typeStr.c_str());

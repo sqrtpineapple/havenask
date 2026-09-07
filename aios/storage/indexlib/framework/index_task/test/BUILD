@@ -18,7 +18,7 @@ strict_cc_fast_test(
     copts=['-fno-access-control'],
     deps=[
         ':FakeResource',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/framework:TabletLoader',
         '//aios/storage/indexlib/framework:TabletReader',
         '//aios/storage/indexlib/framework:TabletWriter',

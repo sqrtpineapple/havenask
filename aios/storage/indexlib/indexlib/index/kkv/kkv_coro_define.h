@@ -19,7 +19,7 @@
 
 #include "autil/mem_pool/Pool.h"
 #include "autil/mem_pool/pool_allocator.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/index/kkv/cached_kkv_iterator_impl.h"
 #include "indexlib/index/kkv/kkv_define.h"
 #include "indexlib/index/kkv/kkv_index_options.h"

@@ -1,6 +1,6 @@
 #include "FakeSegmentReader.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/config/TabletOptions.h"
@@ -54,14 +54,14 @@ AUTIL_LOG_SETUP(indexlib.index, KVReaderTest);
 
 TEST_F(KVReaderTest, TestGet)
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     {
         KVReaderImpl reader(DEFAULT_SCHEMAID);
         reader._hasTTL = true;
         reader._ttl = 1;
         PrepareSegmentReader("1,1,false,1", reader);
         autil::StringView value;
-        auto status = future_lite::interface::syncAwait(reader.GetAsync(1, value, KVReadOptions()), &ex);
+        auto status = async_simple::interface::syncAwait(reader.GetAsync(1, value, KVReadOptions()), &ex);
         ASSERT_EQ(status, KVResultStatus::FOUND);
         ASSERT_EQ("1", value.to_string());
         std::string key("xx");
@@ -75,7 +75,7 @@ TEST_F(KVReaderTest, TestGet)
         reader._ttl = 1;
         PrepareSegmentReader("1,1,false,1", reader);
         autil::StringView value;
-        auto status = future_lite::interface::syncAwait(reader.GetAsync(1, value, KVReadOptions()), &ex);
+        auto status = async_simple::interface::syncAwait(reader.GetAsync(1, value, KVReadOptions()), &ex);
         ASSERT_EQ(status, KVResultStatus::FOUND);
         ASSERT_EQ("1", value.to_string());
     }
@@ -118,10 +118,10 @@ void KVReaderTest::BatchGet(bool hasMetricsCollector)
         vector<uint64_t> keys = {0, 1, 2};
         vector<StringView> values;
 
-        auto res = future_lite::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
-        ASSERT_EQ(future_lite::interface::getTryValue(res[0]), KVResultStatus::FOUND);
-        ASSERT_EQ(future_lite::interface::getTryValue(res[1]), KVResultStatus::FOUND);
-        ASSERT_EQ(future_lite::interface::getTryValue(res[2]), KVResultStatus::DELETED); // deleted
+        auto res = async_simple::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
+        ASSERT_EQ(async_simple::interface::getTryValue(res[0]), KVResultStatus::FOUND);
+        ASSERT_EQ(async_simple::interface::getTryValue(res[1]), KVResultStatus::FOUND);
+        ASSERT_EQ(async_simple::interface::getTryValue(res[2]), KVResultStatus::DELETED); // deleted
         ASSERT_EQ("0", values[0]);
         ASSERT_EQ("1", values[1]);
     }
@@ -134,9 +134,9 @@ void KVReaderTest::BatchGet(bool hasMetricsCollector)
         vector<uint64_t> keys = {0, 3};
         vector<StringView> values;
 
-        auto res = future_lite::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
-        ASSERT_EQ(future_lite::interface::getTryValue(res[0]), KVResultStatus::FOUND);
-        ASSERT_EQ(future_lite::interface::getTryValue(res[1]), KVResultStatus::NOT_FOUND); // not exist
+        auto res = async_simple::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
+        ASSERT_EQ(async_simple::interface::getTryValue(res[0]), KVResultStatus::FOUND);
+        ASSERT_EQ(async_simple::interface::getTryValue(res[1]), KVResultStatus::NOT_FOUND); // not exist
         ASSERT_EQ("0", values[0]);
     }
     // same key in two segment
@@ -148,8 +148,8 @@ void KVReaderTest::BatchGet(bool hasMetricsCollector)
         vector<uint64_t> keys = {0, 1};
         vector<StringView> values;
 
-        auto res = future_lite::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
-        ASSERT_EQ(future_lite::interface::getTryValue(res[0]), KVResultStatus::FOUND);
+        auto res = async_simple::interface::syncAwait(reader.BatchGetAsync(keys, values, options));
+        ASSERT_EQ(async_simple::interface::getTryValue(res[0]), KVResultStatus::FOUND);
         ASSERT_EQ("0", values[0]);
     }
 }

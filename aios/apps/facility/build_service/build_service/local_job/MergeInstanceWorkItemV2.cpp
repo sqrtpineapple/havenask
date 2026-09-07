@@ -35,7 +35,7 @@
 #include "build_service/util/IndexPathConstructor.h"
 #include "build_service/util/ParallelIdGenerator.h"
 #include "fslib/common/common_type.h"
-#include "future_lite/ExecutorCreator.h"
+#include "ExecutorCreator.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/file_system/Directory.h"
@@ -146,12 +146,12 @@ indexlib::Status MergeInstanceWorkItemV2::getLatestVersion(indexlibv2::framework
     return indexlib::Status::OK();
 }
 
-std::unique_ptr<future_lite::Executor> MergeInstanceWorkItemV2::createExecutor(const std::string& executorName,
+std::unique_ptr<async_simple::Executor> MergeInstanceWorkItemV2::createExecutor(const std::string& executorName,
                                                                                uint32_t threadCount) const
 {
-    return future_lite::ExecutorCreator::Create(
+    return async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
 }
 
 int64_t MergeInstanceWorkItemV2::getMachineTotalMemoryMb() const
@@ -218,7 +218,7 @@ bool MergeInstanceWorkItemV2::prepareResource()
     }
     if (!_executor) {
         _executor = createExecutor("builder_executor", executorThreadCount);
-        _taskScheduler = std::make_unique<future_lite::TaskScheduler>(_executor.get());
+        _taskScheduler = std::make_unique<async_simple::TaskScheduler>(_executor.get());
     }
     if (!_totalMemoryController || !_buildMemoryController) {
         if (!createQuotaController(buildTotalMemory)) {

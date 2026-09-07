@@ -40,7 +40,7 @@ public:
     uint32_t GetDataLengthFromStream(const std::shared_ptr<file_system::FileStream>& stream, size_t offset,
                                      bool& isNull) const;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     BatchGetDataLenghFromStream(const std::shared_ptr<file_system::FileStream>& stream,
                                 const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                 file_system::ReadOption readOption, std::vector<size_t>* dataLength) const noexcept;
@@ -53,11 +53,11 @@ private:
     uint32_t GetNormalAttrDataLengthFromStream(const std::shared_ptr<file_system::FileStream>& stream, size_t offset,
                                                bool& isNull) const;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     BatchGetNormalLengthFromStream(const std::shared_ptr<file_system::FileStream>& stream,
                                    const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                    file_system::ReadOption readOption, std::vector<size_t>* dataLength) const noexcept;
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     BatchGetStringLengthFromStream(const std::shared_ptr<file_system::FileStream>& stream,
                                    const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                    file_system::ReadOption readOption, std::vector<size_t>* dataLength) const noexcept;
@@ -206,7 +206,7 @@ inline uint32_t VarNumAttributeDataFormatter::GetMultiStringAttrDataLengthFromSt
     return lastItemOffset + lastItemCountLen + lastItemLen;
 }
 
-inline future_lite::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetStringLengthFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetStringLengthFromStream(
     const std::shared_ptr<file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, file_system::ReadOption readOption,
     std::vector<size_t>* dataLengthsPtr) const noexcept
@@ -307,7 +307,7 @@ inline future_lite::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter
     IE_POOL_COMPATIBLE_DELETE_VECTOR(sessionPool, buffer, 8 * offsets.size());
     co_return ec;
 }
-inline future_lite::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetNormalLengthFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetNormalLengthFromStream(
     const std::shared_ptr<file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, file_system::ReadOption readOption,
     std::vector<size_t>* dataLengthsPtr) const noexcept
@@ -347,7 +347,7 @@ inline future_lite::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter
     }
     co_return ec;
 }
-inline future_lite::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetDataLenghFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> VarNumAttributeDataFormatter::BatchGetDataLenghFromStream(
     const std::shared_ptr<file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, file_system::ReadOption readOption,
     std::vector<size_t>* dataLengths) const noexcept

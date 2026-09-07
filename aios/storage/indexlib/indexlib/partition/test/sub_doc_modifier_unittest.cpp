@@ -46,7 +46,7 @@ public:
 class MockPrimaryKeyIndexReader : public indexlibv2::index::UInt64PrimaryKeyReader
 {
 public:
-    MOCK_METHOD(docid64_t, Lookup, (const std::string& pkString, future_lite::Executor* executor), (const, override));
+    MOCK_METHOD(docid64_t, Lookup, (const std::string& pkString, async_simple::Executor* executor), (const, override));
 };
 DEFINE_SHARED_PTR(MockPrimaryKeyIndexReader);
 

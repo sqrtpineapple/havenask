@@ -1,7 +1,7 @@
 
 #include "indexlib/index/kkv/search/KKVSearchCoroutine.h"
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/ITabletSchema.h"
 #include "indexlib/document/raw_document/test/RawDocumentMaker.h"
 #include "indexlib/document/test/KVDocumentBatchMaker.h"
@@ -52,7 +52,7 @@ private:
     base::Progress GetProgress(uint32_t from, uint32_t to, int64_t ts) { return {from, to, {ts, 0}}; }
 
 private:
-    future_lite::executors::SimpleExecutor _executor = {1};
+    async_simple::executors::SimpleExecutor _executor{1};
     std::shared_ptr<config::ITabletSchema> _schema;
     std::shared_ptr<indexlibv2::config::KKVIndexConfig> _indexConfig;
     std::shared_ptr<autil::mem_pool::Pool> _pool;
@@ -219,7 +219,7 @@ TEST_F(KKVSearchCoroutineTest, TestSimple)
         ASSERT_EQ(searchContext.seekRtSegmentCount, 0);
         ASSERT_EQ(searchContext.seekSegmentCount, 0);
 
-        status = future_lite::interface::syncAwait(KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs),
+        status = async_simple::interface::syncAwait(KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs),
                                                    &_executor);
         ASSERT_TRUE(status.IsOK());
         // we have one duplicated skey
@@ -272,7 +272,7 @@ TEST_F(KKVSearchCoroutineTest, TestSimple)
         ASSERT_EQ(searchContext.seekRtSegmentCount, 0);
         ASSERT_EQ(searchContext.seekSegmentCount, 0);
 
-        status = future_lite::interface::syncAwait(KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs),
+        status = async_simple::interface::syncAwait(KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs),
                                                    &_executor);
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(searchContext.hasPKeyDeleted);
@@ -323,7 +323,7 @@ TEST_F(KKVSearchCoroutineTest, TestSKeyCountLimits)
         SearchContext searchContext(_pool.get(), _indexConfig.get(), pkey, _buildingSegReaders, _builtSegReaders,
                                     currentTsInSecond, keepSortSeq, skeyCountLimits, metricsCollector);
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
         ASSERT_EQ(kkvDocs.size(), 1);
@@ -337,7 +337,7 @@ TEST_F(KKVSearchCoroutineTest, TestSKeyCountLimits)
         SearchContext searchContext(_pool.get(), _indexConfig.get(), pkey, _buildingSegReaders, _builtSegReaders,
                                     currentTsInSecond, keepSortSeq, skeyCountLimits, metricsCollector);
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
         ASSERT_EQ(kkvDocs.size(), 2);
@@ -368,7 +368,7 @@ TEST_F(KKVSearchCoroutineTest, TestMinLocator)
         searchContext.minLocator = &minLocator;
 
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
 
@@ -391,7 +391,7 @@ TEST_F(KKVSearchCoroutineTest, TestMinLocator)
         searchContext.minLocator = &minLocator;
 
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
 
@@ -415,7 +415,7 @@ TEST_F(KKVSearchCoroutineTest, TestMinLocator)
         searchContext.minLocator = &minLocator;
 
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
 
@@ -441,7 +441,7 @@ TEST_F(KKVSearchCoroutineTest, TestMinLocator)
         searchContext.minLocator = &minLocator;
 
         KKVDocs kkvDocs(_pool.get());
-        auto status = future_lite::interface::syncAwait(
+        auto status = async_simple::interface::syncAwait(
             KKVSearchCoroutine<SKeyType>::SearchBuilt(searchContext, kkvDocs), &_executor);
         ASSERT_TRUE(status.IsOK());
 

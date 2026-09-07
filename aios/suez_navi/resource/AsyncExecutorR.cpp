@@ -24,8 +24,8 @@ AsyncExecutorR::AsyncExecutorR()
 {
 }
 
-AsyncExecutorR::AsyncExecutorR(future_lite::Executor *asyncInterExecutor,
-                               future_lite::Executor *asyncIntraExecutor)
+AsyncExecutorR::AsyncExecutorR(async_simple::Executor *asyncInterExecutor,
+                               async_simple::Executor *asyncIntraExecutor)
     : navi::RootResource(RESOURCE_ID)
     , _asyncInterExecutor(asyncInterExecutor)
     , _asyncIntraExecutor(asyncIntraExecutor)
@@ -38,4 +38,3 @@ AsyncExecutorR::~AsyncExecutorR() {
 REGISTER_RESOURCE(AsyncExecutorR);
 
 }
-

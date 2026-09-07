@@ -25,8 +25,8 @@
 #include <utility>
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/coro/Mutex.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/coro/Mutex.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -58,21 +58,21 @@ public:
     const std::shared_ptr<MergedVersionInfo>& GetMergedVersionInfo() const;
     std::optional<ITabletMergeController::TaskStat> GetRunningTaskStat() const;
     bool NeedCommit() const;
-    future_lite::coro::Lazy<std::pair<Status, versionid_t>>
+    async_simple::coro::Lazy<std::pair<Status, versionid_t>>
     ExecuteTask(const Version& sourceVersion, const std::string& taskType, const std::string& taskName,
                 const std::map<std::string, std::string>& params);
-    future_lite::coro::Lazy<std::pair<Status, versionid_t>> Run();
+    async_simple::coro::Lazy<std::pair<Status, versionid_t>> Run();
     void WaitStop();
 
     void UpdateMetrics(TabletData* tabletData);
     void FillMetricsInfo(std::map<std::string, std::string>& infoMap);
 
 private:
-    future_lite::coro::Lazy<Status> EnsureRecovered();
-    future_lite::coro::Lazy<std::pair<Status, versionid_t>>
+    async_simple::coro::Lazy<Status> EnsureRecovered();
+    async_simple::coro::Lazy<std::pair<Status, versionid_t>>
     InnerExecuteTask(const Version& sourceVersion, const std::string& taskType, const std::string& taskName,
                      const std::map<std::string, std::string>& params);
-    future_lite::coro::Lazy<Status> SubmitTask(IndexTaskContext* context);
+    async_simple::coro::Lazy<Status> SubmitTask(IndexTaskContext* context);
     std::pair<Status, Version> LoadVersion(versionid_t versionId) const;
     void FinishTask(versionid_t baseVersionId, bool removeTempFiles);
     Status FillMergedVersionInfo(const MergeTaskStatus& mergeTaskStatus);
@@ -82,7 +82,7 @@ private:
 
 private:
     std::string _tabletName;
-    future_lite::coro::Mutex _runMutex;
+    async_simple::coro::Mutex _runMutex;
     std::string _indexRoot;
     std::shared_ptr<ITabletMergeController> _controller;
     std::unique_ptr<IIndexTaskPlanCreator> _planCreator;

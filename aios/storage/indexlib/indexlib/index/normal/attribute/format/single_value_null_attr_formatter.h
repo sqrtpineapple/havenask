@@ -102,7 +102,7 @@ private:
                                          int64_t& groupId, docid_t& docId, float& value, bool& isNull) const;
     inline T GetEncodedNullValue() const { return mEncodedNullValue; }
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     BatchGetFromStream(const std::vector<docid_t>& docIds, const std::shared_ptr<file_system::FileStream>& fileStream,
                        file_system::ReadOption readOption, std::vector<T>* values,
                        std::vector<bool>* isNullVec) const noexcept;
@@ -381,7 +381,7 @@ inline void SingleValueNullAttrFormatter<float>::Get(docid_t docId, const uint8_
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<index::ErrorCodeVec> SingleValueNullAttrFormatter<T>::BatchGetFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> SingleValueNullAttrFormatter<T>::BatchGetFromStream(
     const std::vector<docid_t>& docIds, const std::shared_ptr<file_system::FileStream>& fileStream,
     file_system::ReadOption readOption, std::vector<T>* valuesPtr, std::vector<bool>* isNullVecPtr) const noexcept
 {
@@ -442,7 +442,7 @@ inline future_lite::coro::Lazy<index::ErrorCodeVec> SingleValueNullAttrFormatter
 }
 
 template <>
-inline future_lite::coro::Lazy<index::ErrorCodeVec> SingleValueNullAttrFormatter<float>::BatchGetFromStream(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> SingleValueNullAttrFormatter<float>::BatchGetFromStream(
     const std::vector<docid_t>& docIds, const std::shared_ptr<file_system::FileStream>& fileStream,
     file_system::ReadOption readOption, std::vector<float>* valuesPtr, std::vector<bool>* isNullVecPtr) const noexcept
 {

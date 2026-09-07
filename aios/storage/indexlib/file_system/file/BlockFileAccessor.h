@@ -28,10 +28,10 @@
 #include "autil/EnvUtil.h"
 #include "autil/Log.h"
 #include "autil/cache/cache.h"
-#include "future_lite/Common.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Common.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/FileSystemDefine.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/file_system/fslib/FslibFileWrapper.h"
@@ -42,10 +42,10 @@
 #include "indexlib/util/cache/BlockCache.h"
 #include "indexlib/util/cache/BlockHandle.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 struct Unit;
-} // namespace future_lite
+} // namespace async_simple
 namespace indexlib { namespace file_system {
 class PackageOpenMeta;
 class FileSystemMetricsReporter;
@@ -57,7 +57,7 @@ class BlockFileAccessor
 {
 private:
     template <typename T>
-    using Future = future_lite::Future<T>;
+    using Future = async_simple::Future<T>;
 
 private:
     struct ReadContext {
@@ -134,16 +134,16 @@ public:
     FL_LAZY(FSResult<size_t>)
     ReadAsyncCoro(void* buffer, size_t length, size_t offset, ReadOption option) noexcept;
 
-    future_lite::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
+    async_simple::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
                                                                             ReadOption option) noexcept;
-    future_lite::coro::Lazy<std::vector<FSResult<util::BlockHandle>>>
+    async_simple::coro::Lazy<std::vector<FSResult<util::BlockHandle>>>
     GetBlockHandles(const std::vector<size_t>& blockIdxs, ReadOption option) noexcept;
-    future_lite::coro::Lazy<FSResult<size_t>> ReadFromFileWrapper(const std::vector<util::Block*>& blocks,
+    async_simple::coro::Lazy<FSResult<size_t>> ReadFromFileWrapper(const std::vector<util::Block*>& blocks,
                                                                   size_t beginIdx, size_t endIdx, size_t offset,
                                                                   int advice, int64_t timeout) noexcept;
 
     FSResult<size_t> Prefetch(size_t length, size_t offset, ReadOption option) noexcept;
-    future_lite::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset, ReadOption option) noexcept;
+    async_simple::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset, ReadOption option) noexcept;
     FL_LAZY(FSResult<size_t>) PrefetchAsyncCoro(size_t length, size_t offset, ReadOption option) noexcept;
 
     // TryRead return length if cache hit. return 0 if any cacheline miss
@@ -195,13 +195,13 @@ private:
     Future<FSResult<autil::CacheBase::Handle*>> ReadBlockFromFileToCache(util::Block* block, uint64_t blockOffset,
                                                                          ReadOption option) noexcept;
     size_t FillOneBlock(const SingleIO& io, util::Block* block, size_t blockId) const noexcept;
-    future_lite::coro::Lazy<std::vector<FSResult<util::BlockHandle>>>
+    async_simple::coro::Lazy<std::vector<FSResult<util::BlockHandle>>>
     BatchReadBlocksFromFile(const std::vector<size_t>& blockIds, ReadOption option) noexcept;
     void FillBatchIOFromHandles(const std::vector<FSResult<util::BlockHandle>>& blockHandles,
                                 const std::vector<size_t>& blockIdxs, const BatchIO& batchIO,
                                 std::vector<FSResult<size_t>>& result) const noexcept;
 
-    void AddExecutorIfNotSet(ReadOption* option, future_lite::Executor* executor) noexcept
+    void AddExecutorIfNotSet(ReadOption* option, async_simple::Executor* executor) noexcept
     {
         if (!option->executor && option->useInternalExecutor) {
             option->executor = executor;
@@ -224,7 +224,7 @@ private:
     bool TEST_mDisableCache;
     util::BlockCache::TaggedMetricReporter _tagMetricReporter;
 
-    future_lite::Executor* _executor;
+    async_simple::Executor* _executor;
 
 private:
     AUTIL_LOG_DECLARE();

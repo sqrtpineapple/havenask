@@ -193,7 +193,7 @@ bool NormalKKVIteratorImpl<SKeyType>::SwitchBuiltSegmentIterator()
             continue;
         }
 
-        auto [status, curSegIterator] = future_lite::interface::syncAwait(
+        auto [status, curSegIterator] = async_simple::interface::syncAwait(
             _builtSegReaders[_curBuiltSegIdx].first->Lookup(_pkey, _pool, _metricsCollector));
         // TODO(xinfei.sxf) return error
         if (!status.IsOK()) {

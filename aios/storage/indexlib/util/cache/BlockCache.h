@@ -19,7 +19,7 @@
 
 #include "autil/Log.h"
 #include "autil/cache/cache.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/util/Timer.h"
 #include "indexlib/util/cache/Block.h"
 #include "indexlib/util/cache/BlockAccessCounter.h"

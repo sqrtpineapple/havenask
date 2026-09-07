@@ -17,7 +17,7 @@
 
 #include "suez/sdk/KMonitorMetaInfo.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -29,8 +29,8 @@ struct SearchInitParam {
     RpcServer *rpcServer = nullptr;
     KMonitorMetaInfo kmonMetaInfo;
     std::string installRoot; // suez_navi
-    future_lite::Executor *asyncInterExecutor = nullptr;
-    future_lite::Executor *asyncIntraExecutor = nullptr;
+    async_simple::Executor *asyncInterExecutor = nullptr;
+    async_simple::Executor *asyncIntraExecutor = nullptr;
 };
 
 } // namespace suez

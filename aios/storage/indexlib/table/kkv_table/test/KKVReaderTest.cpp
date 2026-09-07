@@ -482,7 +482,7 @@ TEST_P(KKVReaderTest, TestBatchQuery)
         ASSERT_TRUE(helper.DoBatchQuery("kkv", "pkey", {"1", "2"}, readOptions,
                                         "skey=1,value=1;skey=2,value=2;skey=3,value=3", true));
         // TODO(xinfei.sxf) fix this metrics
-#if FUTURE_LITE_USE_COROUTINES
+#if ASYNC_SIMPLE_USE_COROUTINES
         ASSERT_EQ(helper.GetMetricsCollector()->GetMemTableCount(), 3);
         ASSERT_EQ(helper.GetMetricsCollector()->GetSSTableCount(), 0);
 #else
@@ -493,7 +493,7 @@ TEST_P(KKVReaderTest, TestBatchQuery)
         ASSERT_TRUE(helper.DoBatchQuery("kkv", "pkey", {"1", "2", "3"}, readOptions,
                                         "skey=1,value=1;skey=2,value=2;skey=3,value=3", true));
         // TODO(xinfei.sxf) fix this metrics
-#if FUTURE_LITE_USE_COROUTINES
+#if ASYNC_SIMPLE_USE_COROUTINES
         ASSERT_EQ(helper.GetMetricsCollector()->GetMemTableCount(), 3);
         ASSERT_EQ(helper.GetMetricsCollector()->GetSSTableCount(), 0);
 #else
@@ -503,7 +503,7 @@ TEST_P(KKVReaderTest, TestBatchQuery)
 
         ASSERT_TRUE(helper.DoBatchQuery("kkv", "pkey", {"1", "2", "3"}, readOptions,
                                         "skey=1,value=1;skey=2,value=2;skey=3,value=3", false));
-#if FUTURE_LITE_USE_COROUTINES
+#if ASYNC_SIMPLE_USE_COROUTINES
         ASSERT_EQ(helper.GetMetricsCollector()->GetMemTableCount(), 3);
         ASSERT_EQ(helper.GetMetricsCollector()->GetSSTableCount(), 0);
 #else

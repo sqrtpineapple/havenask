@@ -21,9 +21,9 @@
 #include "autil/EnvUtil.h"
 #include "autil/Scope.h"
 #include "autil/legacy/legacy_jsonizable.h"
-#include "future_lite/coro/CoAwait.h"
-#include "future_lite/coro/LazyHelper.h"
-#include "future_lite/experimental/coroutine.h"
+#include "async_simple/coro/ViaCoroutine.h"
+#include "async_simple/coro/SyncAwait.h"
+#include "async_simple/experimental/coroutine.h"
 #include "indexlib/config/CustomIndexTaskClassInfo.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/framework/IMetrics.h"
@@ -84,7 +84,7 @@ versionid_t VersionMerger::GetBaseVersion() const
     return _currentBaseVersion.GetVersionId();
 }
 
-future_lite::coro::Lazy<Status> VersionMerger::SubmitTask(IndexTaskContext* context)
+async_simple::coro::Lazy<Status> VersionMerger::SubmitTask(IndexTaskContext* context)
 {
     // TODO: delete when use taskMeta to specify designate task
     auto tabletData = context->GetTabletData();
@@ -124,7 +124,7 @@ future_lite::coro::Lazy<Status> VersionMerger::SubmitTask(IndexTaskContext* cont
 void VersionMerger::WaitStop()
 {
     _controller->Stop();
-    future_lite::coro::syncAwait([this]() -> future_lite::coro::Lazy<> {
+    async_simple::coro::syncAwait([this]() -> async_simple::coro::Lazy<> {
         co_await _runMutex.coLock();
         _stopped = true;
         _runMutex.unlock();
@@ -204,14 +204,14 @@ bool VersionMerger::NeedCommit() const
     return _mergedVersionInfo && _mergedVersionInfo->committedVersionId == INVALID_VERSIONID;
 }
 
-future_lite::coro::Lazy<std::pair<Status, versionid_t>>
+async_simple::coro::Lazy<std::pair<Status, versionid_t>>
 VersionMerger::ExecuteTask(const Version& sourceVersion, const std::string& taskType, const std::string& taskName,
                            const std::map<std::string, std::string>& params)
 {
     co_return co_await InnerExecuteTask(sourceVersion, taskType, taskName, params);
 }
 
-future_lite::coro::Lazy<std::pair<Status, versionid_t>> VersionMerger::Run()
+async_simple::coro::Lazy<std::pair<Status, versionid_t>> VersionMerger::Run()
 {
     std::string taskType;
     std::string taskName;
@@ -219,7 +219,7 @@ future_lite::coro::Lazy<std::pair<Status, versionid_t>> VersionMerger::Run()
     co_return co_await InnerExecuteTask(_currentBaseVersion, taskType, taskName, params);
 }
 
-future_lite::coro::Lazy<Status> VersionMerger::EnsureRecovered()
+async_simple::coro::Lazy<Status> VersionMerger::EnsureRecovered()
 {
     if (!_recovered) {
         auto status = co_await _controller->Recover();
@@ -255,7 +255,7 @@ future_lite::coro::Lazy<Status> VersionMerger::EnsureRecovered()
     co_return Status::OK();
 }
 
-future_lite::coro::Lazy<std::pair<Status, versionid_t>>
+async_simple::coro::Lazy<std::pair<Status, versionid_t>>
 VersionMerger::InnerExecuteTask(const Version& sourceVersion, const std::string& taskType, const std::string& taskName,
                                 const std::map<std::string, std::string>& params)
 {

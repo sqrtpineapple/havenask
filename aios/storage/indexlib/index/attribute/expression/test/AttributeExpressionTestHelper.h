@@ -31,7 +31,7 @@ public:
         std::string fieldValue = std::to_string(value);
         auto encodeStr = _indexer->_attrConvertor->Encode(autil::StringView(fieldValue), &pool);
         _indexer->AddField(docid, encodeStr, false);
-        _segmentMeta.segmentInfo->docCount++;
+        _segmentMeta.segmentInfo->docCount = _segmentMeta.segmentInfo->docCount + 1;
     }
     std::pair<Status, size_t> EstimateMemUsed(const std::shared_ptr<config::ITabletSchema>& schema) override
     {

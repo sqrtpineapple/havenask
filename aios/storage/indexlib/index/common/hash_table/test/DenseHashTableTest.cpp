@@ -22,7 +22,7 @@
 
 using namespace std;
 using namespace autil;
-using namespace future_lite;
+using namespace async_simple;
 using namespace indexlib::file_system;
 using namespace indexlib::util;
 
@@ -633,7 +633,7 @@ _CheckFileReader(const char* file, int32_t line, const std::shared_ptr<indexlib:
         const Action<_KT, _VT>& expectAct = expectKV.second;
         _VT value;
         indexlib::util::Status st =
-            future_lite::interface::syncAwait(hashTableFileReader.Find(expectAct.key, value, counter, nullptr));
+            async_simple::interface::syncAwait(hashTableFileReader.Find(expectAct.key, value, counter, nullptr));
         if (expectAct.isDelete) {
             EXPECT_EQ(DELETED, st) << msg;
         } else {
@@ -644,7 +644,7 @@ _CheckFileReader(const char* file, int32_t line, const std::shared_ptr<indexlib:
     for (const auto& notExistKey : notExistKeys) {
         _VT value;
         EXPECT_EQ(NOT_FOUND,
-                  future_lite::interface::syncAwait(hashTableFileReader.Find(notExistKey, value, counter, nullptr)));
+                  async_simple::interface::syncAwait(hashTableFileReader.Find(notExistKey, value, counter, nullptr)));
     }
 }
 

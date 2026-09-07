@@ -1,7 +1,7 @@
 #include "suez/service/KVTableSearcher.h"
 
-#include "future_lite/Executor.h"
-#include "future_lite/ExecutorCreator.h"
+#include "async_simple/Executor.h"
+#include "ExecutorCreator.h"
 #include "indexlib/index/common/KeyHasherWrapper.h"
 #include "indexlib/table/kv_table/KVTabletSessionReader.h"
 #include "indexlib/table/kv_table/test/KVTableTestHelper.h"
@@ -41,15 +41,15 @@ public:
 
 public:
     void setUp() override {
-        _executor = future_lite::ExecutorCreator::Create(
-            "hos", future_lite::ExecutorCreator::Parameters().SetExecutorName("test").SetThreadNum(2));
+        _executor = async_simple::ExecutorCreator::Create(
+            "hos", async_simple::ExecutorCreator::Parameters().SetExecutorName("test").SetThreadNum(2));
         _pool = autil::mem_pool::PoolPtr(new autil::mem_pool::Pool(1024));
         _multiTableReader = make_shared<MultiTableReader>();
     }
 
 protected:
     std::unique_ptr<indexlibv2::table::KVTableTestHelper> _helper;
-    std::unique_ptr<future_lite::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _executor;
     std::shared_ptr<MultiTableReader> _multiTableReader;
     autil::mem_pool::PoolPtr _pool;
 };

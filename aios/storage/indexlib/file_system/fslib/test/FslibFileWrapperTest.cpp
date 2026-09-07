@@ -10,8 +10,8 @@
 
 #include "fslib/common/common_type.h"
 #include "fslib/fs/File.h"
-#include "future_lite/Common.h"
-#include "future_lite/Future.h"
+#include "async_simple/Common.h"
+#include "async_simple/Future.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/fslib/FslibOption.h"
 #include "indexlib/file_system/fslib/FslibWrapper.h"

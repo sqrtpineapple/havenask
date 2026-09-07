@@ -173,7 +173,7 @@ inline FL_LAZY(KKVIterator*) KKVReaderImpl<SKeyType>::InnerLookup(KKVIndexOption
 
     KKVIteratorImplBase* iter = nullptr;
     auto keyHash = indexOptions->GetLookupKeyHash(pKey);
-    if ((!mHasSearchCache || searchCacheType == tsc_no_cache) && !future_lite::interface::USE_COROUTINES) {
+    if ((!mHasSearchCache || searchCacheType == tsc_no_cache) && !async_simple::interface::USE_COROUTINES) {
         if (suffixKeyHashVec.size() > 0) {
             iter = IE_POOL_COMPATIBLE_NEW_CLASS(pool, SeekSkeyKKVIteratorImpl, pool, indexOptions, keyHash,
                                                 std::move(suffixKeyHashVec), columnSegReaders, mBuildingSegReaders,

@@ -15,7 +15,8 @@
  */
 #include "indexlib/framework/index_task/LocalExecuteEngine.h"
 
-#include "future_lite/MoveWrapper.h"
+#include "async_simple/MoveWrapper.h"
+#include "async_simple/coro/Collect.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/file_system/JsonUtil.h"
 #include "indexlib/framework/index_task/IIndexOperationCreator.h"
@@ -24,7 +25,7 @@
 namespace indexlibv2::framework {
 AUTIL_LOG_SETUP(indexlib.framework, LocalExecuteEngine);
 
-LocalExecuteEngine::LocalExecuteEngine(future_lite::Executor* executor,
+LocalExecuteEngine::LocalExecuteEngine(async_simple::Executor* executor,
                                        std::unique_ptr<IIndexOperationCreator> operationCreator)
     : _executor(executor)
     , _operationCreator(std::move(operationCreator))
@@ -37,13 +38,13 @@ class ScheduleAwaiter
 {
 private:
     IndexOperation* _op;
-    future_lite::Executor* _executor;
+    async_simple::Executor* _executor;
     const IndexTaskContext& _context;
 
     Status _status;
 
 public:
-    ScheduleAwaiter(IndexOperation* op, future_lite::Executor* e, const IndexTaskContext& context)
+    ScheduleAwaiter(IndexOperation* op, async_simple::Executor* e, const IndexTaskContext& context)
         : _op(op)
         , _executor(e)
         , _context(context)
@@ -63,7 +64,7 @@ public:
 
 } // namespace
 
-future_lite::coro::Lazy<Status> LocalExecuteEngine::Schedule(const IndexOperationDescription& desc,
+async_simple::coro::Lazy<Status> LocalExecuteEngine::Schedule(const IndexOperationDescription& desc,
                                                              IndexTaskContext* context)
 {
     auto op = _operationCreator->CreateOperation(desc);
@@ -80,7 +81,7 @@ future_lite::coro::Lazy<Status> LocalExecuteEngine::Schedule(const IndexOperatio
     }
 }
 
-future_lite::coro::Lazy<Status> LocalExecuteEngine::ScheduleTask(const IndexTaskPlan& taskPlan,
+async_simple::coro::Lazy<Status> LocalExecuteEngine::ScheduleTask(const IndexTaskPlan& taskPlan,
                                                                  IndexTaskContext* context)
 {
     // TODO(hanyao): run task in another thread/executor
@@ -99,7 +100,7 @@ future_lite::coro::Lazy<Status> LocalExecuteEngine::ScheduleTask(const IndexTask
     }
 
     for (auto stage : stages) {
-        std::vector<future_lite::coro::RescheduleLazy<Status>> ops;
+        std::vector<async_simple::coro::RescheduleLazy<Status>> ops;
         std::vector<std::unique_ptr<IndexTaskContext>> sessionContexts;
         for (auto node : stage) {
             sessionContexts.push_back(std::make_unique<IndexTaskContext>(*context));
@@ -109,7 +110,7 @@ future_lite::coro::Lazy<Status> LocalExecuteEngine::ScheduleTask(const IndexTask
             }
             ops.push_back(Schedule(node->desc, sessionContexts.back().get()).via(_executor));
         }
-        auto results = co_await future_lite::coro::collectAll(std::move(ops));
+        auto results = co_await async_simple::coro::collectAll(std::move(ops));
         for (auto& r : results) {
             if (!r.value().IsOK()) {
                 AUTIL_LOG(ERROR, "execute op failed: %s", r.value().ToString().c_str());

@@ -24,7 +24,7 @@
 
 #include "autil/Log.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/framework/SegmentDumper.h"
@@ -36,7 +36,7 @@ namespace indexlibv2::framework {
 class TabletDumper : public autil::NoMoveable
 {
 public:
-    TabletDumper(const std::string& tabletName, future_lite::Executor* dumpExecutor, TabletCommitter* tabletCommitter);
+    TabletDumper(const std::string& tabletName, async_simple::Executor* dumpExecutor, TabletCommitter* tabletCommitter);
     ~TabletDumper() = default;
 
     void Init(int32_t maxRealtimeDumpIntervalSecond);
@@ -58,7 +58,7 @@ private:
     mutable std::mutex _dumpMutex;
     const std::string _tabletName;
     std::deque<std::unique_ptr<SegmentDumpable>> _segmentDumpQueue;
-    future_lite::Executor* _dumpExecutor;
+    async_simple::Executor* _dumpExecutor;
     TabletCommitter* _tabletCommitter;
     int64_t _lastDumpTimestampSecond = -1;
     int64_t _maxRealtimeDumpIntervalSecond = -1;

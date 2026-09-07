@@ -26,7 +26,7 @@ public:
     std::shared_ptr<indexlib::file_system::IFileSystem> TEST_GetFileSystem() const;
     const Fence& TEST_GetFence() const;
     TabletReaderContainer* TEST_GetTabletReaderContainer() const;
-    future_lite::NamedTaskScheduler* TEST_GetTaskScheduler() const;
+    async_simple::NamedTaskScheduler* TEST_GetTaskScheduler() const;
     TabletMetrics* TEST_GetTabletMetrics() const;
     TabletDumper* TEST_GetTabletDumper() const;
     void TEST_ReportMetrics();

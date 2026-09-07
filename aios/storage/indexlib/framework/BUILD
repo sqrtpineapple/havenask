@@ -112,7 +112,7 @@ strict_cc_library(
 strict_cc_library(
     name='TabletDumper',
     deps=[
-        ':SegmentDumper', ':TabletCommitter', '//aios/future_lite',
+        ':SegmentDumper', ':TabletCommitter', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/config:TabletOptions'
     ]
 )
@@ -148,7 +148,7 @@ strict_cc_library(
     name='SegmentDumper',
     deps=[
         ':Locator', ':MemSegment', ':MetricsWrapper', ':SegmentDumpItem',
-        ':Version', '//aios/future_lite',
+        ':Version', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:NoExceptionWrapper'
     ]
 )
@@ -212,7 +212,7 @@ strict_cc_library(
     name='TabletResource',
     srcs=[],
     deps=[
-        ':TabletId', '//aios/future_lite', '//aios/kmonitor:kmonitor_client_cpp'
+        ':TabletId', '//aios/ylt:async_simple', '//aios/kmonitor:kmonitor_client_cpp'
     ]
 )
 strict_cc_library(
@@ -300,7 +300,7 @@ strict_cc_library(
         ':TabletMetrics', ':TabletReader', ':TabletReaderContainer',
         ':TabletResource', ':TabletSchemaManager', ':TabletWriter', ':TaskType',
         ':Version', ':VersionCommitter', ':VersionLoader', ':VersionMerger',
-        ':VersionMetaCreator', '//aios/future_lite',
+        ':VersionMetaCreator', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:MemoryQuotaController',
         '//aios/storage/indexlib/base:MemoryQuotaSynchronizer',
         '//aios/storage/indexlib/base:NoExceptionWrapper',
@@ -339,7 +339,7 @@ strict_cc_library(
     srcs=[],
     deps=[
         ':OpenOptions', ':SegmentDumper', ':Version', '//aios/autil:NoCopyable',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status'
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status'
     ]
 )
 strict_cc_library(
@@ -387,7 +387,7 @@ strict_cc_library(
     deps=[
         ':ITabletMergeController', ':MetricsManager', ':VersionCoord',
         ':VersionLoader', '//aios/alog', '//aios/autil:scope',
-        '//aios/future_lite', '//aios/storage/indexlib/file_system',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/file_system',
         '//aios/storage/indexlib/framework:TabletData',
         '//aios/storage/indexlib/framework/index_task:CustomIndexTaskFactory',
         '//aios/storage/indexlib/framework/index_task:CustomIndexTaskFactoryCreator',

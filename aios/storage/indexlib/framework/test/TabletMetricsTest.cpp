@@ -1,6 +1,6 @@
 #include "indexlib/framework/TabletMetrics.h"
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/file_system/fslib/FslibWrapper.h"
@@ -53,8 +53,8 @@ public:
 public:
     void setUp() override
     {
-        _executor.reset(new future_lite::executors::SimpleExecutor(2));
-        _taskScheduler.reset(new future_lite::TaskScheduler(_executor.get()));
+        _executor.reset(new async_simple::executors::SimpleExecutor(2));
+        _taskScheduler.reset(new async_simple::TaskScheduler(_executor.get()));
     }
     void tearDown() override {}
 
@@ -71,8 +71,8 @@ private:
     }
 
 private:
-    std::unique_ptr<future_lite::Executor> _executor = nullptr;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler = nullptr;
+    std::unique_ptr<async_simple::Executor> _executor = nullptr;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler = nullptr;
     std::unique_ptr<FakeMockTablet> _tablet = nullptr;
     int64_t _memoryQuota = 8 * 1024 * 1024; // same with double MemoryQuotaController::BLOCK_SIZE
 };

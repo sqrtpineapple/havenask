@@ -44,7 +44,7 @@ public:
                                                    autil::mem_pool::Pool* pool = nullptr) override;
 
     // pool in LookupAsync and BatchLookup should be thread-safe
-    virtual future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    virtual async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override;
 

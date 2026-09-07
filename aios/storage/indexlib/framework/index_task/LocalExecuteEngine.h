@@ -17,9 +17,9 @@
 
 #include "autil/Log.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/Executor.h"
-#include "future_lite/Future.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Executor.h"
+#include "async_simple/Future.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/framework/index_task/IIndexOperationCreator.h"
 #include "indexlib/framework/index_task/IndexOperationDescription.h"
@@ -31,10 +31,10 @@ namespace indexlibv2::framework {
 class LocalExecuteEngine : autil::NoCopyable
 {
 public:
-    LocalExecuteEngine(future_lite::Executor* executor, std::unique_ptr<IIndexOperationCreator> operationCreator);
+    LocalExecuteEngine(async_simple::Executor* executor, std::unique_ptr<IIndexOperationCreator> operationCreator);
 
-    future_lite::coro::Lazy<Status> Schedule(const IndexOperationDescription& desc, IndexTaskContext* context);
-    future_lite::coro::Lazy<Status> ScheduleTask(const IndexTaskPlan& taskPlan, IndexTaskContext* context);
+    async_simple::coro::Lazy<Status> Schedule(const IndexOperationDescription& desc, IndexTaskContext* context);
+    async_simple::coro::Lazy<Status> ScheduleTask(const IndexTaskPlan& taskPlan, IndexTaskContext* context);
 
 private:
     struct NodeDef {
@@ -53,7 +53,7 @@ private:
     static Status FillDependOpFences(const IndexOperationDescription& desc, IndexTaskContext* context);
 
 private:
-    future_lite::Executor* _executor;
+    async_simple::Executor* _executor;
     std::unique_ptr<IIndexOperationCreator> _operationCreator;
 
 private:

@@ -1,7 +1,7 @@
 #include "indexlib/partition/test/kkv_table_intetest.h"
 
 #include "autil/StringUtil.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common/chunk/chunk_define.h"
 #include "indexlib/config/impl/merge_config_impl.h"
 #include "indexlib/config/test/region_schema_maker.h"
@@ -620,7 +620,7 @@ void KKVTableTest::TestSearchPkeyAndSkeysInCache()
     autil::mem_pool::Pool pool;
     auto kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
     KVMetricsCollector collector;
-    KKVIterator* kkvIterator = future_lite::interface::syncAwait(
+    KKVIterator* kkvIterator = async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("pkey1"), vector<autil::StringView>({StringView("2"), StringView("4")}), 0,
                                tsc_default, &pool, &collector));
     ASSERT_TRUE(kkvIterator);
@@ -631,7 +631,7 @@ void KKVTableTest::TestSearchPkeyAndSkeysInCache()
     kkvIterator->Finish();
     ASSERT_EQ(0L, collector.GetSearchCacheHitCount());
     IE_POOL_COMPATIBLE_DELETE_CLASS(&pool, kkvIterator);
-    kkvIterator = future_lite::interface::syncAwait(
+    kkvIterator = async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("pkey1"), vector<autil::StringView>({StringView("2"), StringView("4")}), 0,
                                tsc_default, &pool, &collector));
     ASSERT_TRUE(kkvIterator);
@@ -713,7 +713,7 @@ void KKVTableTest::TestSearchPkeyAndSkeysPerf()
     KVMetricsCollector collector;
     autil::mem_pool::Pool mPool;
     auto kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
-    auto kkvIter = future_lite::interface::syncAwait(
+    auto kkvIter = async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("pkey1"), std::vector<StringView>({StringView("2"), StringView("5")}), 0,
                                tsc_default, &mPool, &collector));
 
@@ -2599,13 +2599,13 @@ void KKVTableTest::CheckKKVReader(const KKVReaderPtr& kkvReader, const string& p
     Pool pool;
     KKVIterator* iter = NULL;
     if (skeyVec.empty()) {
-        iter = future_lite::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, tsc_default, &pool));
+        iter = async_simple::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, tsc_default, &pool));
     } else {
         vector<StringView> skeyStrVec;
         for (size_t i = 0; i < skeyVec.size(); i++) {
             skeyStrVec.push_back(StringView(skeyVec[i]));
         }
-        iter = future_lite::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, skeyStrVec, 0, tsc_default, &pool));
+        iter = async_simple::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, skeyStrVec, 0, tsc_default, &pool));
     }
     ASSERT_TRUE(iter);
 

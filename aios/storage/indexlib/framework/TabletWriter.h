@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/NoCopyable.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/framework/BuildResource.h"
 #include "indexlib/framework/OpenOptions.h"

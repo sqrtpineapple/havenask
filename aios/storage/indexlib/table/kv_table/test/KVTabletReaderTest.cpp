@@ -1,6 +1,6 @@
 #include "autil/HashAlgorithm.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/config/TabletOptions.h"
@@ -65,7 +65,7 @@ AUTIL_LOG_SETUP(indexlib.index, KVTabletReaderTest);
 void KVTabletReaderTest::CompareQueryResult(const KVIndexReaderPtr& kvIndexReader, const string keyStr, uint64_t ts,
                                             bool exist, bool isDeleted, const string expectedValue)
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     autil::StringView key(keyStr);
     vector<autil::StringView> keys = {key};
     autil::StringView value;
@@ -75,25 +75,25 @@ void KVTabletReaderTest::CompareQueryResult(const KVIndexReaderPtr& kvIndexReade
     readOptions.pool = _pool;
     readOptions.metricsCollector = &collector;
     if (exist) {
-        auto status = future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
+        auto status = async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
         ASSERT_EQ(status, KVResultStatus::FOUND);
         ASSERT_GT(value.size(), expectedValue.length());
         ASSERT_NE(value.to_string().find(expectedValue), std::string::npos);
 
-        auto result = future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, readOptions), &ex);
+        auto result = async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, readOptions), &ex);
         ASSERT_EQ(result.status, KVResultStatus::FOUND);
         auto packValue = result.valueExtractor.GetPackValue();
         ASSERT_GT(packValue.size(), expectedValue.length());
         ASSERT_NE(packValue.to_string().find(expectedValue), std::string::npos);
 
-        auto resultVec = future_lite::interface::syncAwait(kvIndexReader->BatchGetAsync(keys, readOptions), &ex);
+        auto resultVec = async_simple::interface::syncAwait(kvIndexReader->BatchGetAsync(keys, readOptions), &ex);
         ASSERT_EQ(1, resultVec.size());
-        ASSERT_EQ(future_lite::interface::getTryValue(resultVec[0]).status, KVResultStatus::FOUND);
-        packValue = future_lite::interface::getTryValue(resultVec[0]).valueExtractor.GetPackValue();
+        ASSERT_EQ(async_simple::interface::getTryValue(resultVec[0]).status, KVResultStatus::FOUND);
+        packValue = async_simple::interface::getTryValue(resultVec[0]).valueExtractor.GetPackValue();
         ASSERT_GT(packValue.size(), expectedValue.length());
         ASSERT_NE(packValue.to_string().find(expectedValue), std::string::npos);
     } else {
-        auto status = future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
+        auto status = async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
         if (isDeleted) {
             ASSERT_EQ(status, KVResultStatus::DELETED);
         } else {
@@ -106,14 +106,14 @@ void KVTabletReaderTest::CompareQueryResultAndMetric(const KVIndexReaderPtr& kvI
                                                      const string expectedValue, int64_t expectedBlockHit,
                                                      int64_t expectedBlockMiss)
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     autil::StringView key(keyStr);
     autil::StringView value;
     KVMetricsCollector collector;
     KVReadOptions readOptions;
     readOptions.pool = _pool;
     readOptions.metricsCollector = &collector;
-    auto status = future_lite::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
+    auto status = async_simple::interface::syncAwait(kvIndexReader->GetAsync(key, value, readOptions), &ex);
     ASSERT_EQ(status, KVResultStatus::FOUND);
     ASSERT_GT(value.size(), expectedValue.length());
     ASSERT_NE(value.to_string().find(expectedValue), std::string::npos);
@@ -328,7 +328,7 @@ TEST_F(KVTabletReaderTest, TestValueAdapter)
     ASSERT_TRUE(newReader.Open(newKvIndexConfig, tabletData.get()).IsOK());
 
     string keyStr = "1";
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     autil::StringView key(keyStr);
     KVMetricsCollector collector;
     KVReadOptions readOptions;
@@ -336,7 +336,7 @@ TEST_F(KVTabletReaderTest, TestValueAdapter)
     readOptions.pool = _pool;
     readOptions.metricsCollector = &collector;
 
-    auto result = future_lite::interface::syncAwait(newReader.GetAsync(key, readOptions), &ex);
+    auto result = async_simple::interface::syncAwait(newReader.GetAsync(key, readOptions), &ex);
     ASSERT_EQ(result.status, KVResultStatus::FOUND);
     ASSERT_EQ(3, result.valueExtractor.GetFieldCount());
 

@@ -41,7 +41,7 @@ public:
     Status GetDataLengthFromStream(const std::shared_ptr<indexlib::file_system::FileStream>& stream, size_t offset,
                                    bool& isNull, uint32_t& length) const;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGetDataLenghFromStream(const std::shared_ptr<indexlib::file_system::FileStream>& stream,
                                 const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                 indexlib::file_system::ReadOption readOption,
@@ -55,12 +55,12 @@ private:
     Status GetNormalAttrDataLengthFromStream(const std::shared_ptr<indexlib::file_system::FileStream>& stream,
                                              size_t offset, bool& isNull, uint32_t& length) const;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGetNormalLengthFromStream(const std::shared_ptr<indexlib::file_system::FileStream>& stream,
                                    const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                    indexlib::file_system::ReadOption readOption,
                                    std::vector<size_t>* dataLength) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGetStringLengthFromStream(const std::shared_ptr<indexlib::file_system::FileStream>& stream,
                                    const std::vector<size_t>& offsets, autil::mem_pool::Pool* sessionPool,
                                    indexlib::file_system::ReadOption readOption,
@@ -223,7 +223,7 @@ inline Status MultiValueAttributeDataFormatter::GetMultiStringAttrDataLengthFrom
     return Status::OK();
 }
 
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 MultiValueAttributeDataFormatter::BatchGetStringLengthFromStream(
     const std::shared_ptr<indexlib::file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
@@ -325,7 +325,7 @@ MultiValueAttributeDataFormatter::BatchGetStringLengthFromStream(
     IE_POOL_COMPATIBLE_DELETE_VECTOR(sessionPool, buffer, 8 * offsets.size());
     co_return ec;
 }
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 MultiValueAttributeDataFormatter::BatchGetNormalLengthFromStream(
     const std::shared_ptr<indexlib::file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,
@@ -367,7 +367,7 @@ MultiValueAttributeDataFormatter::BatchGetNormalLengthFromStream(
     co_return ec;
 }
 
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 MultiValueAttributeDataFormatter::BatchGetDataLenghFromStream(
     const std::shared_ptr<indexlib::file_system::FileStream>& stream, const std::vector<size_t>& offsets,
     autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption readOption,

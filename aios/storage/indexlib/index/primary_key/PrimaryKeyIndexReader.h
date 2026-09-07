@@ -25,7 +25,7 @@
 #include "indexlib/index/inverted_index/InvertedIndexReader.h"
 #include "indexlib/index/primary_key/Types.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -55,25 +55,25 @@ public:
     virtual Status OpenWithoutPKAttribute(const std::shared_ptr<indexlibv2::config::IIndexConfig>& indexConfig,
                                           const indexlibv2::framework::TabletData* tabletData) = 0;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override
     {
         co_return Lookup(*term, statePoolSize, type, pool);
     }
 
-    virtual docid64_t Lookup(const std::string& pkStr, future_lite::Executor* executor) const = 0;
+    virtual docid64_t Lookup(const std::string& pkStr, async_simple::Executor* executor) const = 0;
     virtual docid64_t Lookup(const std::string& pkStr) const { return Lookup(pkStr, nullptr); }
     virtual docid64_t Lookup(const autil::StringView& pkStr) const { return INVALID_DOCID; }
     virtual docid64_t LookupWithPKHash(const autil::uint128_t& pkHash,
-                                       future_lite::Executor* executor = nullptr) const = 0;
+                                       async_simple::Executor* executor = nullptr) const = 0;
     virtual bool LookupWithPKHash(const autil::uint128_t& pkHash, segmentid_t specifySegment,
                                   docid64_t* docid) const = 0;
 
     virtual std::shared_ptr<indexlibv2::index::AttributeReader> GetPKAttributeReader() const = 0;
 
     virtual docid64_t LookupWithDocRange(const autil::uint128_t& pkHash, std::pair<docid_t, docid_t> docRange,
-                                         future_lite::Executor* executor) const
+                                         async_simple::Executor* executor) const
     {
         assert(false);
         return INVALID_DOCID;
@@ -83,7 +83,7 @@ public:
         assert(false);
         return INVALID_DOCID;
     }
-    virtual future_lite::Executor* GetBuildExecutor() const { return nullptr; }
+    virtual async_simple::Executor* GetBuildExecutor() const { return nullptr; }
 
     virtual bool CheckDuplication() const { return true; }
 
@@ -105,7 +105,7 @@ public:
 
 public:
     template <typename T>
-    inline docid64_t LookupWithType(const T& key, future_lite::Executor* executor = nullptr) const;
+    inline docid64_t LookupWithType(const T& key, async_simple::Executor* executor = nullptr) const;
 
 public:
     bool Is128PK() const { return _is128Pk; }
@@ -126,7 +126,7 @@ private:
         assert(false);
         return false;
     }
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept override
     {
@@ -144,7 +144,7 @@ private:
 };
 
 template <typename T>
-docid64_t PrimaryKeyIndexReader::LookupWithType(const T& key, future_lite::Executor* executor) const
+docid64_t PrimaryKeyIndexReader::LookupWithType(const T& key, async_simple::Executor* executor) const
 {
     if (_isNumberHash && !_is128Pk) {
         const autil::uint128_t pkHash((uint64_t)key);
@@ -155,21 +155,21 @@ docid64_t PrimaryKeyIndexReader::LookupWithType(const T& key, future_lite::Execu
 }
 
 template <>
-inline docid64_t PrimaryKeyIndexReader::LookupWithType(const std::string& key, future_lite::Executor* executor) const
+inline docid64_t PrimaryKeyIndexReader::LookupWithType(const std::string& key, async_simple::Executor* executor) const
 {
     return Lookup(key, executor);
 }
 
 template <>
 inline docid64_t PrimaryKeyIndexReader::LookupWithType(const autil::StringView& key,
-                                                       future_lite::Executor* executor) const
+                                                       async_simple::Executor* executor) const
 {
     return Lookup(key);
 }
 
 template <>
 inline docid64_t PrimaryKeyIndexReader::LookupWithType(const autil::MultiChar& key,
-                                                       future_lite::Executor* executor) const
+                                                       async_simple::Executor* executor) const
 {
     const auto& constStr = autil::StringView(key.data(), key.size());
     return Lookup(constStr);

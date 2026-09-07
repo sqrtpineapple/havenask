@@ -1,7 +1,7 @@
 #include "indexlib/table/kkv_table/test/KKVTableTestSearcher.h"
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/attribute/config/AttributeConfig.h"
 #include "indexlib/index/common/field_format/pack_attribute/PackAttributeFormatter.h"
 #include "indexlib/index/kkv/common/Trait.h"
@@ -51,7 +51,7 @@ std::shared_ptr<indexlibv2::table::Result> KKVTableTestSearcher::Search(const st
 
     std::shared_ptr<indexlibv2::table::Result> result(new indexlibv2::table::Result());
 
-    auto kkvDocIter = future_lite::interface::syncAwait(_kkvReader->LookupAsync(pkey, skeys, readOptions), &_executor);
+    auto kkvDocIter = async_simple::interface::syncAwait(_kkvReader->LookupAsync(pkey, skeys, readOptions), &_executor);
 
     if (!kkvDocIter) {
         result->SetError(true);
@@ -90,11 +90,11 @@ KKVTableTestSearcher::Search(const std::vector<std::string>& pkeyStrVec,
 
     std::shared_ptr<indexlibv2::table::Result> result(new indexlibv2::table::Result());
 
-    auto kkvResult = future_lite::interface::syncAwait(
+    auto kkvResult = async_simple::interface::syncAwait(
         _kkvReader->BatchLookupAsync(pkeyVec.begin(), pkeyVec.end(), skeysVec.begin(), skeysVec.end(), readOptions),
         &_executor);
 
-#if FUTURE_LITE_USE_COROUTINES
+#if ASYNC_SIMPLE_USE_COROUTINES
     {
         for (auto iter = kkvResult->Begin(); iter != kkvResult->End(); iter++) {
             auto& lazyKKVDocIter = *iter;

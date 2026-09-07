@@ -18,8 +18,8 @@
 #include <stddef.h>
 
 #include "autil/Log.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Unit.h"
+#include "CoroInterface.h"
+#include "async_simple/Unit.h"
 #include "indexlib/file_system/file/CompressFileReader.h"
 
 namespace autil { namespace mem_pool {
@@ -49,7 +49,7 @@ private:
 
     FL_LAZY(ErrorCode) LoadBufferAsyncCoro(size_t offset, ReadOption option) noexcept override;
 
-    future_lite::coro::Lazy<std::vector<ErrorCode>>
+    async_simple::coro::Lazy<std::vector<ErrorCode>>
     BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                     ReadOption option) noexcept override;
 

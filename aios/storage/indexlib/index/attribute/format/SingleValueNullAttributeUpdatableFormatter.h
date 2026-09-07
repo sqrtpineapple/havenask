@@ -37,7 +37,7 @@ public:
     void Set(docid_t docId, uint8_t* data, const T& value, bool isNull);
 
     Status Get(docid_t docId, const uint8_t* data, T& value, bool& isNull) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGet(const std::vector<docid_t>& docIds, const uint8_t* data, indexlib::file_system::ReadOption readOption,
              std::vector<T>* values, std::vector<bool>* isNulls) const noexcept;
 
@@ -164,7 +164,7 @@ inline void SingleValueNullAttributeUpdatableFormatter<float>::Set(docid_t docId
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueNullAttributeUpdatableFormatter<T>::BatchGet(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueNullAttributeUpdatableFormatter<T>::BatchGet(
     const std::vector<docid_t>& docIds, const uint8_t* data, indexlib::file_system::ReadOption readOption,
     std::vector<T>* values, std::vector<bool>* isNulls) const noexcept
 {

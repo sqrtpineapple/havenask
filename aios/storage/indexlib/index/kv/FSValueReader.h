@@ -18,7 +18,7 @@
 #include "autil/Log.h"
 #include "autil/StringView.h"
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/file_system/file/FileReader.h"
 #include "indexlib/index/common/field_format/attribute/MultiValueAttributeFormatter.h"
 #include "indexlib/index/common/field_format/pack_attribute/PlainFormatEncoder.h"
@@ -35,7 +35,7 @@ public:
 public:
     inline FL_LAZY(bool) Read(indexlib::file_system::FileReader* reader, autil::StringView& value, offset_t offset,
                               autil::mem_pool::Pool* pool, KVMetricsCollector* collector,
-                              autil::TimeoutTerminator* timeoutTerminator) const __attribute__((always_inline));
+                              autil::TimeoutTerminator* timeoutTerminator) const;
 
 public:
     void SetFixedValueLen(int32_t fixedValueLen);

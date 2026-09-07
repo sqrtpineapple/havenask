@@ -24,7 +24,7 @@
 #include "indexlib/misc/common.h"
 #include "indexlib/misc/log.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -44,12 +44,12 @@ public:
     ExecutorManager& operator=(ExecutorManager&&) = delete;
 
 public:
-    std::shared_ptr<future_lite::Executor> RegisterExecutor(const std::shared_ptr<ExecutorProvider>& provider);
+    std::shared_ptr<async_simple::Executor> RegisterExecutor(const std::shared_ptr<ExecutorProvider>& provider);
     size_t ClearUselessExecutors();
 
 private:
     mutable autil::ThreadMutex mMapLock;
-    std::map<std::string, std::shared_ptr<future_lite::Executor>> mExecutors;
+    std::map<std::string, std::shared_ptr<async_simple::Executor>> mExecutors;
 
 private:
     IE_LOG_DECLARE();

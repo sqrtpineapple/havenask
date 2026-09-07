@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/common/hash_table/closed_hash_table_traits.h"
 #include "indexlib/config/index_partition_schema.h"
 #include "indexlib/config/kv_index_config.h"

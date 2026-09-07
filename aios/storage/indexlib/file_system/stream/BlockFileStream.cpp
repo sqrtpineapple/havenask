@@ -74,7 +74,7 @@ FSResult<size_t> BlockFileStream::Read(void* buffer, size_t length, size_t offse
     return _blockFileNode->Read(buffer, length, offset, option);
 }
 
-future_lite::Future<FSResult<size_t>> BlockFileStream::ReadAsync(void* buffer, size_t length, size_t offset,
+async_simple::Future<FSResult<size_t>> BlockFileStream::ReadAsync(void* buffer, size_t length, size_t offset,
                                                                  file_system::ReadOption option) noexcept(false)
 {
     assert(_blockFileNode);
@@ -88,7 +88,7 @@ future_lite::Future<FSResult<size_t>> BlockFileStream::ReadAsync(void* buffer, s
                           "read file [%s] out of range, offset: [%lu], "
                           "read length: [%lu], file length: [%lu]",
                           _blockFileNode->DebugString().c_str(), offset, length, accessor->GetFileLength());
-                return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
+                return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
             }
             return accessor->GetBlockAsync(offset, option)
                 .thenValue(
@@ -100,15 +100,15 @@ future_lite::Future<FSResult<size_t>> BlockFileStream::ReadAsync(void* buffer, s
                     });
         }
         ::memcpy(buffer, _currentHandle.GetData() + offset - _currentHandle.GetOffset(), length);
-        return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_OK, length});
+        return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_OK, length});
     } else {
         return _blockFileNode->ReadAsync(buffer, length, offset, option);
     }
     assert(false);
-    return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
+    return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
 }
 
-future_lite::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
+async_simple::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
 BlockFileStream::BatchRead(file_system::BatchIO& batchIO, file_system::ReadOption option) noexcept
 {
     co_return co_await _fileReader->BatchRead(batchIO, option);

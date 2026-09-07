@@ -3,6 +3,7 @@
 #include "indexlib/index/kv/KVTypeId.h"
 #include "indexlib/index/kv/test/KVIndexConfigBuilder.h"
 #include "indexlib/index/kv/test/VarLenIndexerReadWriteTestBase.h"
+#include "async_simple/coro/SyncAwait.h"
 
 namespace indexlibv2::index {
 
@@ -125,7 +126,11 @@ protected:
 
             uint64_t expectTs = 0l;
             ASSERT_TRUE(autil::StringUtil::strToUInt64(tss[i].c_str(), expectTs));
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
+            auto status = async_simple::coro::syncAwait(reader->Get(key, value, ts, &pool, nullptr, nullptr));
+#else
             auto status = reader->Get(key, value, ts, &pool, nullptr, nullptr);
+#endif
             if (cmds[i] != "add") {
                 ASSERT_EQ(indexlib::util::Status::DELETED, status) << i;
                 ASSERT_EQ(ts * 1000000, expectTs) << i;

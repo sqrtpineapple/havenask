@@ -133,7 +133,7 @@ TEST_F(InlineKKVBuiltSegmentIteratorTest, TestSimpleProcess)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
     // check value
@@ -181,7 +181,7 @@ TEST_F(InlineKKVBuiltSegmentIteratorTest, TestSkeyDeleted)
     }
 
     {
-        auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
+        auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), nullptr));
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iter);
 
@@ -242,7 +242,7 @@ TEST_F(InlineKKVBuiltSegmentIteratorTest, TestExpireTime)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 
@@ -299,7 +299,7 @@ TEST_F(InlineKKVBuiltSegmentIteratorTest, TestFoundKeys)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 
@@ -341,7 +341,7 @@ TEST_F(InlineKKVBuiltSegmentIteratorTest, TestFillBuffer)
     }
 
     auto metricsCollector = std::make_shared<index::KVMetricsCollector>();
-    auto [status, iter] = future_lite::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
+    auto [status, iter] = async_simple::interface::syncAwait(reader.Lookup(1, _pool.get(), metricsCollector.get()));
     ASSERT_TRUE(status.IsOK());
     ASSERT_TRUE(iter);
 

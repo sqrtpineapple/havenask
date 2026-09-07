@@ -47,7 +47,7 @@ public:
                                                   PostingType type = pt_default,
                                                   autil::mem_pool::Pool* sessionPool = NULL) override;
 
-    future_lite::coro::Lazy<index::Result<index::PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<index::PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override;
 
@@ -63,7 +63,7 @@ protected:
     std::shared_ptr<BuildingIndexReader> CreateBuildingIndexReader() override;
     DocValueFilter* CreateDocValueFilter(const index::Term& term, const AttributeReaderPtr& attrReader,
                                          autil::mem_pool::Pool* sessionPool);
-    future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+    async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
     GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                        const DocIdRangeVector& ranges, file_system::ReadOption option) const noexcept;
 

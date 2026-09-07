@@ -99,17 +99,17 @@ void ChunkReaderTest::DoTestChunkRead(uint32_t chunkOffsetAlignBit)
     ChunkReader chunkReader(ReadOption::LowLatency(), chunkOffsetAlignBit, true, &pool);
     chunkReader.Init(fileReader.get(), false);
 
-    auto fsResult = future_lite::interface::syncAwait(chunkReader.Prefetch(0, len0 + len1));
+    auto fsResult = async_simple::interface::syncAwait(chunkReader.Prefetch(0, len0 + len1));
     ASSERT_TRUE(fsResult.IsOK());
 
     size_t chunkOffset0 = 0;
-    auto chunkData0 = future_lite::interface::syncAwait(chunkReader.Read(chunkOffset0));
+    auto chunkData0 = async_simple::interface::syncAwait(chunkReader.Read(chunkOffset0));
     ASSERT_NE(nullptr, chunkData0.data);
     ASSERT_EQ(4096, chunkData0.length);
     ASSERT_EQ(expectChunkData0, string(chunkData0.data, chunkData0.length));
 
     size_t chunkOffset1 = chunkReader.CalcNextChunkOffset(chunkOffset0, chunkData0.length);
-    auto chunkData1 = future_lite::interface::syncAwait(chunkReader.Read(chunkOffset1));
+    auto chunkData1 = async_simple::interface::syncAwait(chunkReader.Read(chunkOffset1));
     ASSERT_NE(nullptr, chunkData1.data);
     ASSERT_EQ(1024, chunkData1.length);
     ASSERT_EQ(expectChunkData1, string(chunkData1.data, chunkData1.length));

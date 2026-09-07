@@ -142,7 +142,7 @@ private:
     std::shared_ptr<IndexProvider> _indexProvider;
     mutable autil::ReadWriteLock _lock;
     std::unique_ptr<kmonitor::MetricsReporter> _metricsReporter;
-    future_lite::Executor *_executor;
+    async_simple::Executor *_executor;
     RpcServer *_rpcServer = nullptr;
     bool _enablePublishTopoInfo = false;
 

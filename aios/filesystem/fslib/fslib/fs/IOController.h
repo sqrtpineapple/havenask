@@ -17,10 +17,10 @@
 #define FSLIB_IO_CONTROLLER_H_
 #include "fslib/common/common_type.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class IOExecutor;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace fslib {
 
@@ -64,8 +64,8 @@ public:
     };
     int getAdvice() { return advice; }
 
-    void setExecutor(future_lite::Executor *ex) noexcept { executor = ex; }
-    future_lite::Executor *getExecutor() noexcept { return executor; }
+    void setExecutor(async_simple::Executor *ex) noexcept { executor = ex; }
+    async_simple::Executor *getExecutor() noexcept { return executor; }
 
 private:
     // options
@@ -74,7 +74,7 @@ private:
     // response
     ErrorCode errorCode;
     size_t ioSize;
-    future_lite::Executor *executor;
+    async_simple::Executor *executor;
 };
 
 } // namespace fslib

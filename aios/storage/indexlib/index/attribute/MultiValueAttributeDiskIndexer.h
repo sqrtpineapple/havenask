@@ -120,7 +120,7 @@ public:
     inline bool Read(docid_t docId, autil::MultiValueType<T>& value, bool& isNull,
                      ReadContext& ctx) const __ALWAYS_INLINE;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx, indexlib::file_system::ReadOption readOption,
               typename std::vector<autil::MultiValueType<T>>* values, std::vector<bool>* isNullVec) const noexcept;
 
@@ -158,7 +158,7 @@ private:
 
     const uint8_t* ReadFromPatch(docid_t docId, autil::mem_pool::Pool* pool) const;
     const uint8_t* ReadData(docid_t docId, ReadContext& ctx) const __ALWAYS_INLINE;
-    future_lite::coro::Lazy<std::vector<indexlib::index::Result<uint8_t*>>>
+    async_simple::coro::Lazy<std::vector<indexlib::index::Result<uint8_t*>>>
     BatchReadData(const std::vector<docid_t>& docIds, ReadContext& ctx,
                   indexlib::file_system::ReadOption readOption) const;
     bool InnerRead(docid_t docId, autil::MultiValueType<T>* value, autil::mem_pool::Pool* pool, bool& isNull);
@@ -645,7 +645,7 @@ inline const uint8_t* MultiValueAttributeDiskIndexer<T>::ReadData(docid_t docId,
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<std::vector<indexlib::index::Result<uint8_t*>>>
+inline async_simple::coro::Lazy<std::vector<indexlib::index::Result<uint8_t*>>>
 MultiValueAttributeDiskIndexer<T>::BatchReadData(const std::vector<docid_t>& docIds, ReadContext& ctx,
                                                  indexlib::file_system::ReadOption readOption) const
 {
@@ -734,7 +734,7 @@ void MultiValueAttributeDiskIndexer<T>::FetchValueFromStreamNoCopy(
 }
 
 template <typename T>
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> MultiValueAttributeDiskIndexer<T>::BatchRead(
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> MultiValueAttributeDiskIndexer<T>::BatchRead(
     const std::vector<docid_t>& docIds, ReadContext& ctx, indexlib::file_system::ReadOption readOption,
     typename std::vector<autil::MultiValueType<T>>* values, std::vector<bool>* isNulls) const noexcept
 {

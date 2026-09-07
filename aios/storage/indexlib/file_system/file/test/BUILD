@@ -29,7 +29,7 @@ strict_cc_fast_test(
     tags=['disabled'],
     deps=[
         ':indexlib_file_system_file_test_helper',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/file_system:byte_slice_rw',
         '//aios/storage/indexlib/file_system/test:test-util',
         '//aios/storage/indexlib/util/testutil:unittest'

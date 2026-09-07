@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/file_system/IDirectory.h"
 #include "indexlib/index/kkv/common/KKVMetricsCollector.h"
 #include "indexlib/index/kkv/pkey_table/PKeyTableType.h"

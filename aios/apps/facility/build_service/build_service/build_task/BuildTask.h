@@ -39,8 +39,8 @@
 #include "build_service/proto/Heartbeat.pb.h"
 #include "build_service/task_base/Task.h"
 #include "build_service/workflow/SwiftProcessedDocConsumer.h"
-#include "future_lite/Executor.h"
-#include "future_lite/TaskScheduler.h"
+#include "async_simple/Executor.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -99,7 +99,7 @@ private:
     bool commitAndReopen(versionid_t alignVersionId, const std::shared_ptr<BuildTaskTarget>& target,
                          const std::optional<indexlibv2::framework::Locator>& specifyLocator,
                          proto::VersionInfo* versionInfo);
-    std::unique_ptr<future_lite::Executor> createExecutor(const std::string& executorName, uint32_t threadCount);
+    std::unique_ptr<async_simple::Executor> createExecutor(const std::string& executorName, uint32_t threadCount);
     void updateCurrent(const proto::VersionInfo& commitedVersionInfo, const versionid_t alignFailedVersionId,
                        const std::shared_ptr<BuildTaskTarget>& target);
     void collectErrorInfos() const;
@@ -151,10 +151,10 @@ private:
     std::shared_ptr<autil::LoopThread> _workLoopThread;
     std::unique_ptr<SingleBuilder> _singleBuilder;
     std::unique_ptr<BuilderController> _builderController;
-    std::unique_ptr<future_lite::Executor> _executor;
-    std::unique_ptr<future_lite::Executor> _dumpExecutor;
-    std::unique_ptr<future_lite::Executor> _localMergeExecutor;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _dumpExecutor;
+    std::unique_ptr<async_simple::Executor> _localMergeExecutor;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler;
     std::shared_ptr<indexlibv2::MemoryQuotaController> _totalMemoryController;
     std::shared_ptr<indexlibv2::MemoryQuotaController> _buildMemoryController;
     std::shared_ptr<indexlib::file_system::FileBlockCacheContainer> _fileBlockCacheContainer;

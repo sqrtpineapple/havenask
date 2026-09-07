@@ -16,7 +16,7 @@
 #pragma once
 
 #include <functional>
-#include <future_lite/Executor.h>
+#include <async_simple/Executor.h>
 #include <memory>
 #include <string>
 
@@ -78,7 +78,7 @@ public:
     void write(const std::string &format,
                const WalDocVector &docs,
                const std::function<void(autil::Result<WriteResult>)> &done,
-               future_lite::Executor *executor);
+               async_simple::Executor *executor);
 
     void
     updateSchema(uint32_t version, const std::string &configPath, std::function<void(autil::Result<int64_t>)> done);

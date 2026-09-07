@@ -21,7 +21,7 @@ strict_cc_library(
         ':KVMemSegment', ':KVSchemaResolver', ':KVTabletExporter',
         ':KVTabletOptions', ':KVTabletSessionReader', ':KVTabletWriter',
         '//aios/autil:NoCopyable', '//aios/autil:env_util',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/base:Types',
         '//aios/storage/indexlib/config:TabletSchema',
         '//aios/storage/indexlib/document:DocumentBatch',

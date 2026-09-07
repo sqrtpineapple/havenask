@@ -106,12 +106,12 @@ public:
     Lookup(const indexlib::index::Term& term, uint32_t statePoolSize = 1000, PostingType type = pt_default,
            autil::mem_pool::Pool* sessionPool = NULL) override;
     docid64_t Lookup(const autil::StringView& pkStr) const override;
-    docid64_t Lookup(const std::string& strKey, future_lite::Executor* executor) const override;
+    docid64_t Lookup(const std::string& strKey, async_simple::Executor* executor) const override;
     docid64_t LookupWithHintValues(const autil::uint128_t& pkHash, int32_t hintValues) const override;
-    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, future_lite::Executor* executor) const override;
+    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, async_simple::Executor* executor) const override;
     bool LookupWithPKHash(const autil::uint128_t& pkHash, segmentid_t specifySegment, docid64_t* docid) const override;
     docid64_t LookupWithDocRange(const autil::uint128_t& pkHash, std::pair<docid_t, docid_t> docRange,
-                                 future_lite::Executor* executor) const override;
+                                 async_simple::Executor* executor) const override;
     bool LookupAll(const std::string& pkStr, std::vector<std::pair<docid64_t, bool>>& docidPairVec) const override;
 
     docid64_t Lookup(const std::string& strKey) const override { return Lookup(strKey, nullptr); }
@@ -119,7 +119,7 @@ public:
     bool CheckDuplication() const override;
 
 public:
-    docid64_t Lookup(const Key& key, future_lite::Executor* executor = nullptr) const __ALWAYS_INLINE;
+    docid64_t Lookup(const Key& key, async_simple::Executor* executor = nullptr) const __ALWAYS_INLINE;
     docid64_t Lookup(const Key& key, docid64_t& lastDocId) const;
     docid64_t Lookup(const std::string& pkStr, docid64_t& lastDocId) const;
 
@@ -140,7 +140,7 @@ public:
         }
         return PRIMARY_KEY_DEFAULT_READER_IDENTIFIER;
     }
-    future_lite::Executor* GetBuildExecutor() const override { return _buildExecutor; }
+    async_simple::Executor* GetBuildExecutor() const override { return _buildExecutor; }
     FieldType GetFieldType() const { return _fieldType; }
     PrimaryKeyHashType GetPrimaryKeyHashType() const { return _primaryKeyHashType; }
 
@@ -162,20 +162,20 @@ protected:
     bool IsDocIdValid(docid64_t docid) const __ALWAYS_INLINE;
     docid64_t LookupInMemorySegment(const Key& hashKey) const;
     docid64_t LookupOnDiskSegments(const Key& hashKey, docid64_t& lastDocId) const __ALWAYS_INLINE;
-    docid64_t LookupOnDiskSegments(const Key& hashKey, future_lite::Executor* executor) const __ALWAYS_INLINE;
-    future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>
-    LookupOnDiskSegmentsAsync(const Key& hashKey, future_lite::Executor* executor) const noexcept;
-    future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>
+    docid64_t LookupOnDiskSegments(const Key& hashKey, async_simple::Executor* executor) const __ALWAYS_INLINE;
+    async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>
+    LookupOnDiskSegmentsAsync(const Key& hashKey, async_simple::Executor* executor) const noexcept;
+    async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>
     LookupOneSegmentAsync(const Key& hashKey, docid64_t baseDocid,
                           const std::shared_ptr<PrimaryKeyDiskIndexer<Key>>& segReader,
-                          future_lite::Executor* executor) const noexcept;
+                          async_simple::Executor* executor) const noexcept;
     indexlib::index::Result<docid64_t>
     LookupOneSegment(const Key& hashKey, docid64_t baseDocid,
                      const std::shared_ptr<PrimaryKeyDiskIndexer<Key>>& segReader) const noexcept __ALWAYS_INLINE;
     bool InnerLookupWithPKHash(const Key& hashKey, segmentid_t specifySegment, docid64_t* docid) const;
     docid64_t InnerLookupWithHintValues(const Key& pkHash, int32_t hintValues) const;
     docid64_t InnerLookupWithDocRange(const Key& hashKey, const std::pair<docid32_t, docid32_t> docRange,
-                                      future_lite::Executor* executor) const;
+                                      async_simple::Executor* executor) const;
     bool GetDocIdRanges(int32_t hintValues, DocIdRangeVector& docIdRanges) const;
 
     void CreateLoadPlans(std::vector<SegmentDataAdapter::SegmentDataType>& segmentDatas,
@@ -229,7 +229,7 @@ protected:
     docid64_t _baseDocid = 0;
 
     std::unique_ptr<DeletionMapIndexReader> _deletionMapReader;
-    future_lite::Executor* _buildExecutor = nullptr;
+    async_simple::Executor* _buildExecutor = nullptr;
 
     std::shared_ptr<index::PrimaryKeyIndexConfig> _primaryKeyIndexConfig;
     std::unique_ptr<PrimaryKeyBuildingReader> _buildingIndexReader;
@@ -652,7 +652,7 @@ docid64_t PrimaryKeyReader<Key, DerivedType>::Lookup(const autil::StringView& pk
 }
 
 template <typename Key, typename DerivedType>
-docid64_t PrimaryKeyReader<Key, DerivedType>::Lookup(const std::string& strKey, future_lite::Executor* executor) const
+docid64_t PrimaryKeyReader<Key, DerivedType>::Lookup(const std::string& strKey, async_simple::Executor* executor) const
 {
     Key hashKey;
     if (!Hash(strKey, hashKey)) {
@@ -699,7 +699,7 @@ inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupWithHintValues(const 
 
 template <typename Key, typename DerivedType>
 inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupWithPKHash(const autil::uint128_t& pkHash,
-                                                                      future_lite::Executor* executor) const
+                                                                      async_simple::Executor* executor) const
 {
     if constexpr (std::is_same_v<Key, autil::uint128_t>) {
         return Lookup(pkHash, executor);
@@ -726,7 +726,7 @@ inline bool PrimaryKeyReader<Key, DerivedType>::LookupWithPKHash(const autil::ui
 template <typename Key, typename DerivedType>
 inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupWithDocRange(const autil::uint128_t& pkHash,
                                                                         std::pair<docid_t, docid_t> docRange,
-                                                                        future_lite::Executor* executor) const
+                                                                        async_simple::Executor* executor) const
 {
     if constexpr (std::is_same_v<Key, autil::uint128_t>) {
         return InnerLookupWithDocRange(pkHash, docRange, executor);
@@ -747,7 +747,7 @@ bool PrimaryKeyReader<Key, DerivedType>::LookupAll(const std::string& pkStr,
     }
 
     for (const auto& readerInfo : _segmentReaderList) {
-        auto retWithEc = future_lite::coro::syncAwait(
+        auto retWithEc = async_simple::coro::syncAwait(
             LookupOneSegmentAsync(hashKey, readerInfo._segmentPair.first, readerInfo._segmentPair.second, nullptr));
         docid64_t docId = retWithEc.ValueOrThrow();
         if (docId != INVALID_DOCID) {
@@ -773,17 +773,17 @@ docid64_t PrimaryKeyReader<Key, DerivedType>::LookupInMemorySegment(const Key& h
 }
 
 template <typename Key, typename DerivedType>
-inline future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>
+inline async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>
 PrimaryKeyReader<Key, DerivedType>::LookupOnDiskSegmentsAsync(const Key& hashKey,
-                                                              future_lite::Executor* executor) const noexcept
+                                                              async_simple::Executor* executor) const noexcept
 {
-    std::vector<future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>> tasks;
+    std::vector<async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>> tasks;
     tasks.reserve(_segmentReaderList.size());
     for (const auto& readerInfo : _segmentReaderList) {
         tasks.push_back(
             LookupOneSegmentAsync(hashKey, readerInfo._segmentPair.first, readerInfo._segmentPair.second, executor));
     }
-    auto results = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto results = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < results.size(); ++i) {
         assert(!results[i].hasError());
         auto ret = results[i].value();
@@ -801,10 +801,10 @@ PrimaryKeyReader<Key, DerivedType>::LookupOnDiskSegmentsAsync(const Key& hashKey
 
 template <typename Key, typename DerivedType>
 inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupOnDiskSegments(const Key& hashKey,
-                                                                          future_lite::Executor* executor) const
+                                                                          async_simple::Executor* executor) const
 {
     if (executor) {
-        auto retWithEc = future_lite::coro::syncAwait(LookupOnDiskSegmentsAsync(hashKey, executor));
+        auto retWithEc = async_simple::coro::syncAwait(LookupOnDiskSegmentsAsync(hashKey, executor));
         return retWithEc.ValueOrThrow();
     } else {
         for (const auto& readerInfo : _segmentReaderList) {
@@ -833,10 +833,10 @@ inline bool PrimaryKeyReader<Key, DerivedType>::IsDocIdValid(docid64_t docid) co
 }
 
 template <typename Key, typename DerivedType>
-inline future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>
+inline async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>
 PrimaryKeyReader<Key, DerivedType>::LookupOneSegmentAsync(const Key& hashKey, docid64_t baseDocid,
                                                           const std::shared_ptr<PrimaryKeyDiskIndexer<Key>>& segReader,
-                                                          future_lite::Executor* executor) const noexcept
+                                                          async_simple::Executor* executor) const noexcept
 {
     auto retWithEc = co_await segReader->LookupAsync(hashKey, executor);
     if (!retWithEc.Ok()) {
@@ -870,7 +870,7 @@ inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupOnDiskSegments(const 
                                                                           docid64_t& lastDocId) const
 {
     for (const auto& readerInfo : _segmentReaderList) {
-        auto retWithEc = future_lite::coro::syncAwait(
+        auto retWithEc = async_simple::coro::syncAwait(
             LookupOneSegmentAsync(hashKey, readerInfo._segmentPair.first, readerInfo._segmentPair.second, nullptr));
         auto gDocId = retWithEc.ValueOrThrow();
         if (lastDocId < gDocId) {
@@ -887,7 +887,7 @@ inline docid64_t PrimaryKeyReader<Key, DerivedType>::LookupOnDiskSegments(const 
 }
 
 template <typename Key, typename DerivedType>
-inline docid64_t PrimaryKeyReader<Key, DerivedType>::Lookup(const Key& hashKey, future_lite::Executor* executor) const
+inline docid64_t PrimaryKeyReader<Key, DerivedType>::Lookup(const Key& hashKey, async_simple::Executor* executor) const
 {
     docid64_t docId = INVALID_DOCID;
     if (_needLookupReverse) {
@@ -923,7 +923,7 @@ inline bool PrimaryKeyReader<Key, DerivedType>::InnerLookupWithPKHash(const Key&
                     AUTIL_LOG(ERROR, "not support find specify segment doc with combine pk load strategy");
                     return false;
                 }
-                auto retWithEc = future_lite::coro::syncAwait(LookupOneSegmentAsync(
+                auto retWithEc = async_simple::coro::syncAwait(LookupOneSegmentAsync(
                     hashKey, segmentReaderInfo._segmentPair.first, segmentReaderInfo._segmentPair.second, nullptr));
                 *docid = retWithEc.ValueOrThrow();
                 if (*docid == INVALID_DOCID) {
@@ -954,20 +954,20 @@ inline bool PrimaryKeyReader<Key, DerivedType>::InnerLookupWithPKHash(const Key&
 
 template <typename Key, typename DerivedType>
 inline docid64_t PrimaryKeyReader<Key, DerivedType>::InnerLookupWithDocRange(
-    const Key& pkHash, const std::pair<docid32_t, docid32_t> docRange, future_lite::Executor* executor) const
+    const Key& pkHash, const std::pair<docid32_t, docid32_t> docRange, async_simple::Executor* executor) const
 {
     docid64_t id = INVALID_DOCID;
 
     if (executor) {
-        auto getDocidFunc = [&]() -> future_lite::coro::Lazy<docid64_t> {
-            std::vector<future_lite::coro::Lazy<indexlib::index::Result<docid64_t>>> tasks;
+        auto getDocidFunc = [&]() -> async_simple::coro::Lazy<docid64_t> {
+            std::vector<async_simple::coro::Lazy<indexlib::index::Result<docid64_t>>> tasks;
             for (auto& segmentReaderInfo : _segmentReaderList) {
                 if (segmentReaderInfo._segmentPair.first < docRange.second) {
                     tasks.push_back(LookupOneSegmentAsync(pkHash, segmentReaderInfo._segmentPair.first,
                                                           segmentReaderInfo._segmentPair.second, executor));
                 }
             }
-            auto results = co_await future_lite::coro::collectAll(std::move(tasks));
+            auto results = co_await async_simple::coro::collectAll(std::move(tasks));
             for (size_t i = 0; i < results.size(); ++i) {
                 assert(!results[i].hasError());
                 docid64_t docId = results[i].value().ValueOrThrow();
@@ -979,14 +979,14 @@ inline docid64_t PrimaryKeyReader<Key, DerivedType>::InnerLookupWithDocRange(
             }
             co_return INVALID_DOCID;
         };
-        id = future_lite::coro::syncAwait(getDocidFunc());
+        id = async_simple::coro::syncAwait(getDocidFunc());
         if (id != INVALID_DOCID) {
             return id;
         }
     } else {
         for (auto& segmentReaderInfo : _segmentReaderList) {
             if (segmentReaderInfo._segmentPair.first < docRange.second) {
-                auto retWithEc = future_lite::coro::syncAwait(LookupOneSegmentAsync(
+                auto retWithEc = async_simple::coro::syncAwait(LookupOneSegmentAsync(
                     pkHash, segmentReaderInfo._segmentPair.first, segmentReaderInfo._segmentPair.second, executor));
                 docid64_t docId = retWithEc.ValueOrThrow();
                 if (docId != INVALID_DOCID && docId >= docRange.first && docId < docRange.second) {

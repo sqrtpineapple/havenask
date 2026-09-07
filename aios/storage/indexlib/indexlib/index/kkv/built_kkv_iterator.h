@@ -197,8 +197,8 @@ inline void BuiltKKVIterator<SKeyType>::MoveToNext()
 {
     if (mCurrentBuiltSegIter) {
         if (!mCurrentBuiltSegIter->MoveToNext() && !mCurrentBuiltSegIter->HasHitLastNode()) {
-            assert(!future_lite::interface::USE_COROUTINES);
-            future_lite::interface::syncAwait(mCurrentBuiltSegIter->SwitchChunk());
+            assert(!async_simple::interface::USE_COROUTINES);
+            async_simple::interface::syncAwait(mCurrentBuiltSegIter->SwitchChunk());
         }
     }
 }
@@ -224,7 +224,7 @@ inline void BuiltKKVIterator<SKeyType>::SwitchIterator()
             continue;
         }
 
-        mCurrentBuiltSegIter = future_lite::interface::syncAwait(
+        mCurrentBuiltSegIter = async_simple::interface::syncAwait(
             reader->template Lookup<BuiltKKVSegIter>(mPKey, mPool, mIndexOptions, mMetricsCollector));
         if (mCurrentBuiltSegIter) {
             if (!reader->IsRealtimeSegment()) {

@@ -1,0 +1,16 @@
+--- a/include/ylt/thirdparty/async_simple/coro/Collect.h
++++ b/include/ylt/thirdparty/async_simple/coro/Collect.h
+@@ -506,9 +506,11 @@ inline auto collectAllWindowedImpl(Slot* slot, SignalType SignalType,
+         size_t end = (std::min)(
+             input_size,
+             start + maxConcurrency);  // Avoid to conflict with Windows macros.
+-        std::vector<LazyType> tmp_group(
++        using IAlloc = typename Container::allocator_type;
++        std::vector<LazyType, IAlloc> tmp_group(
+             std::make_move_iterator(input.begin() + start),
+-            std::make_move_iterator(input.begin() + end));
++            std::make_move_iterator(input.begin() + end),
++            input.get_allocator());
+         start = end;
+         for (auto& t :
+              co_await AT(slot, SignalType, std::move(tmp_group), out_alloc)) {

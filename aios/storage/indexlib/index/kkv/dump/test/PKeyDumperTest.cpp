@@ -57,7 +57,11 @@ TEST_F(PKeyDumperTest, TestGeneral)
 
     {
         OnDiskPKeyOffset firstSkeyOffset;
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
+        ASSERT_TRUE(async_simple::interface::syncAwait(((PKeyTable*)pkeyTable.get())->FindForRead(0, firstSkeyOffset, nullptr)));
+#else
         ASSERT_TRUE(FL_COAWAIT((PKeyTable*)pkeyTable.get())->FindForRead(0, firstSkeyOffset, nullptr));
+#endif
         ASSERT_EQ(0, firstSkeyOffset.GetBlockOffset());
         ASSERT_EQ(8192, firstSkeyOffset.GetHintSize());
         ASSERT_EQ(3, firstSkeyOffset.inChunkOffset);
@@ -65,7 +69,11 @@ TEST_F(PKeyDumperTest, TestGeneral)
     }
     {
         OnDiskPKeyOffset firstSkeyOffset;
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
+        ASSERT_TRUE(async_simple::interface::syncAwait(((PKeyTable*)pkeyTable.get())->FindForRead(1, firstSkeyOffset, nullptr)));
+#else
         ASSERT_TRUE(FL_COAWAIT((PKeyTable*)pkeyTable.get())->FindForRead(1, firstSkeyOffset, nullptr));
+#endif
         ASSERT_EQ(8192, firstSkeyOffset.GetBlockOffset());
         ASSERT_EQ(4096, firstSkeyOffset.GetHintSize());
         ASSERT_EQ(6, firstSkeyOffset.inChunkOffset);

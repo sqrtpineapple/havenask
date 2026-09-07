@@ -113,7 +113,7 @@ OnDiskKKVSegmentIterator::GetIterator(Pool* pool, const KKVIndexConfigPtr& regio
         typedef FieldTypeTraits<type>::AttrItemType SKeyType;                                                          \
         KKVBuiltSegmentDocIterator<SKeyType>* iter =                                                                   \
             IE_POOL_COMPATIBLE_NEW_CLASS(pool, KKVBuiltSegmentDocIterator<SKeyType>, pool, false);                     \
-        future_lite::interface::syncAwait(iter->Init(mSkeyReader, mValueReader, regionKkvConfig.get(), offset,         \
+        async_simple::interface::syncAwait(iter->Init(mSkeyReader, mValueReader, regionKkvConfig.get(), offset,         \
                                                      mDefaultTs, mStoreTs, mKeepSortSequence));                        \
         return iter;                                                                                                   \
     }

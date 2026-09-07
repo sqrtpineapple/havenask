@@ -49,9 +49,9 @@ public:
     void Next(index::DictKeyInfo& key, dictvalue_t& value) override;
     void Seek(dictkey_t key) override;
 
-    future_lite::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key,
+    async_simple::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key,
                                                         file_system::ReadOption option) noexcept override;
-    future_lite::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
+    async_simple::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
                                                         dictvalue_t& value) noexcept override;
 
 private:
@@ -178,7 +178,7 @@ void CommonDiskTieredDictionaryIteratorTyped<KeyType>::Seek(dictkey_t key)
 }
 
 template <typename KeyType>
-inline future_lite::coro::Lazy<index::ErrorCode>
+inline async_simple::coro::Lazy<index::ErrorCode>
 CommonDiskTieredDictionaryIteratorTyped<KeyType>::SeekAsync(dictkey_t key, file_system::ReadOption option) noexcept
 {
     // block index and data both use binary-search
@@ -217,7 +217,7 @@ CommonDiskTieredDictionaryIteratorTyped<KeyType>::SeekAsync(dictkey_t key, file_
     co_return index::ErrorCode::OK;
 }
 template <typename KeyType>
-inline future_lite::coro::Lazy<index::ErrorCode>
+inline async_simple::coro::Lazy<index::ErrorCode>
 CommonDiskTieredDictionaryIteratorTyped<KeyType>::NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
                                                             dictvalue_t& value) noexcept
 {

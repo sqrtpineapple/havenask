@@ -50,8 +50,8 @@ public:
 public:
     void Init(const config::PrimaryKeyIndexConfigPtr& indexConfig, const PrimaryKeyLoadPlanPtr& plan);
 
-    future_lite::coro::Lazy<docid_t> LookupAsync(const Key& hashKey,
-                                                 future_lite::Executor* executor) const __ALWAYS_INLINE;
+    async_simple::coro::Lazy<docid_t> LookupAsync(const Key& hashKey,
+                                                 async_simple::Executor* executor) const __ALWAYS_INLINE;
 
     PkPairIteratorPtr CreateIterator() const
     {
@@ -171,8 +171,8 @@ inline void PrimaryKeySegmentReaderTyped<Key>::Init(const config::PrimaryKeyInde
 }
 
 template <typename Key>
-inline future_lite::coro::Lazy<docid_t>
-PrimaryKeySegmentReaderTyped<Key>::LookupAsync(const Key& hashKey, future_lite::Executor* executor) const
+inline async_simple::coro::Lazy<docid_t>
+PrimaryKeySegmentReaderTyped<Key>::LookupAsync(const Key& hashKey, async_simple::Executor* executor) const
 {
     if (mBloomFilter && !mBloomFilter->Contains(hashKey)) {
         co_return INVALID_DOCID;

@@ -15,7 +15,7 @@
 #include "autil/MultiValueType.h"
 #include "autil/Span.h"
 #include "autil/mem_pool/PoolBase.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/index/attribute/Constant.h"
 #include "indexlib/index/common/numeric_compress/EquivalentCompressSessionReader.h"

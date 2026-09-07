@@ -108,15 +108,16 @@ inline FL_LAZY(bool) HashTableCompressVarSegmentReader::GetCompressValue(const K
     } else {
         // read encodeCount
         uint8_t buffer[5];
-        size_t retLen = (FL_COAWAIT fileReader->ReadAsyncCoro(buffer, sizeof(uint8_t), offset, option)).GetOrThrow();
+        auto firstByteResult = FL_COAWAIT fileReader->ReadAsyncCoro(buffer, sizeof(uint8_t), offset, option);
+        size_t retLen = firstByteResult.GetOrThrow();
         if (retLen != sizeof(uint8_t)) {
             IE_LOG(ERROR, "read encodeCount first bytes failed from file[%s]", fileReader->DebugString().c_str());
             FL_CORETURN false;
         }
         encodeCountLen = common::VarNumAttributeFormatter::GetEncodedCountFromFirstByte(*buffer);
-        retLen = (FL_COAWAIT fileReader->ReadAsyncCoro(buffer + sizeof(uint8_t), encodeCountLen - 1,
-                                                       offset + sizeof(uint8_t), option))
-                     .GetOrThrow();
+        auto encodeCountResult = FL_COAWAIT fileReader->ReadAsyncCoro(buffer + sizeof(uint8_t), encodeCountLen - 1,
+                                                       offset + sizeof(uint8_t), option);
+        retLen = encodeCountResult.GetOrThrow();
         if (retLen != encodeCountLen - 1) {
             IE_LOG(ERROR, "read encodeCount from file[%s]", fileReader->DebugString().c_str());
             FL_CORETURN false;
@@ -130,8 +131,8 @@ inline FL_LAZY(bool) HashTableCompressVarSegmentReader::GetCompressValue(const K
     }
     assert(pool);
     char* poolBuf = (char*)pool->allocate(itemLen);
-    size_t retLen =
-        (FL_COAWAIT fileReader->ReadAsyncCoro(poolBuf, itemLen, offset + encodeCountLen, option)).GetOrThrow();
+    auto valueResult = FL_COAWAIT fileReader->ReadAsyncCoro(poolBuf, itemLen, offset + encodeCountLen, option);
+    size_t retLen = valueResult.GetOrThrow();
     if (retLen != itemLen) {
         IE_LOG(ERROR, "read value from file[%s]", fileReader->DebugString().c_str());
         FL_CORETURN false;

@@ -15,6 +15,7 @@
  */
 #include "indexlib/index/source/SourceDiskIndexer.h"
 
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/config/GroupDataParameter.h"
 #include "indexlib/document/normal/SerializedSourceDocument.h"
 #include "indexlib/document/normal/SourceFormatter.h"
@@ -130,14 +131,14 @@ size_t SourceDiskIndexer::EvaluateCurrentMemUsed()
     return memoryUsed;
 }
 
-future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 SourceDiskIndexer::GetDocument(const std::vector<docid_t>& docIds,
                                const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                                autil::mem_pool::PoolBase* sessionPool, indexlib::file_system::ReadOption readOption,
                                const std::vector<indexlib::document::SerializedSourceDocument*>* docs) const
 {
     indexlib::index::ErrorCodeVec result(docIds.size(), indexlib::index::ErrorCode::OK);
-    std::vector<future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>> subTasks;
+    std::vector<async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>> subTasks;
     subTasks.reserve(requiredGroupdIds.size() + 1);
     std::vector<autil::StringView> metaResult;
     std::deque<std::vector<autil::StringView>> dataResults;
@@ -150,7 +151,7 @@ SourceDiskIndexer::GetDocument(const std::vector<docid_t>& docIds,
         dataResults.emplace_back(std::vector<autil::StringView>());
         subTasks.push_back(groupReader->GetValue(docIds, sessionPool, readOption, &(dataResults.back())));
     }
-    auto subTaskResults = co_await future_lite::coro::collectAll(std::move(subTasks));
+    auto subTaskResults = co_await async_simple::coro::collectAll(std::move(subTasks));
     // fill meta result
     assert(!subTaskResults[0].hasError());
     auto& metaEc = subTaskResults[0].value();

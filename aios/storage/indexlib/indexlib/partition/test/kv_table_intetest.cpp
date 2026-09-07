@@ -1147,9 +1147,9 @@ void KVTableInteTest::TestHashTableOneField()
     auto kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
     uint64_t value;
     KVReadOptions options;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, options)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, options)));
     ASSERT_EQ(1ul, value);
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abcf"), value, options)));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abcf"), value, options)));
 }
 
 void KVTableInteTest::TestHashTableOneStringField()
@@ -1193,11 +1193,11 @@ void KVTableInteTest::TestHashTableOneStringField()
     autil::mem_pool::Pool pool;
     KVReadOptions options;
     options.pool = &pool;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("1"), value, options)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("1"), value, options)));
     ASSERT_EQ(2, value.size());
     ASSERT_EQ('v', value[0]);
     ASSERT_EQ('1', value[1]);
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
 }
 
 void KVTableInteTest::TestHashTableOneMultiField()
@@ -1236,11 +1236,11 @@ void KVTableInteTest::TestHashTableOneMultiField()
     options.pool = &pool;
 
     MultiUInt64 value;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, options)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, options)));
     ASSERT_EQ(2, value.size());
     ASSERT_EQ(1, value[0]);
     ASSERT_EQ(2, value[1]);
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
 }
 
 void KVTableInteTest::TestHashTableMultiField()
@@ -1277,14 +1277,14 @@ void KVTableInteTest::TestHashTableMultiField()
     options.pool = &pool;
 
     MultiString value;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, options)));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, options)));
     ASSERT_EQ(2, value.size());
     ASSERT_EQ(1, value[0].size());
     ASSERT_EQ('a', value[0][0]);
     ASSERT_EQ(2, value[1].size());
     ASSERT_EQ('c', value[1][0]);
     ASSERT_EQ('d', value[1][1]);
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, options)));
 }
 
 void KVTableInteTest::TestHashTableVarIndexMerge()

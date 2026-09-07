@@ -238,7 +238,7 @@ private:
                 }
                 std::vector<T> values;
                 auto getResult =
-                    future_lite::coro::syncAwait(sessionReader.BatchGet(batchPos, file_system::ReadOption(), &values));
+                    async_simple::coro::syncAwait(sessionReader.BatchGet(batchPos, file_system::ReadOption(), &values));
                 ASSERT_EQ(count, getResult.size());
                 ASSERT_EQ(count, values.size());
                 for (size_t i = 0; i < count; ++i) {
@@ -260,7 +260,7 @@ private:
                 auto checkFunction = [&](EquivalentCompressSessionReader<T>& reader, std::vector<int32_t> pos) {
                     std::vector<T> values;
                     auto getResult =
-                        future_lite::coro::syncAwait(reader.BatchGet(pos, file_system::ReadOption(), &values));
+                        async_simple::coro::syncAwait(reader.BatchGet(pos, file_system::ReadOption(), &values));
                     ASSERT_EQ(pos.size(), getResult.size());
                     ASSERT_EQ(pos.size(), values.size());
                     for (size_t i = 0; i < pos.size(); ++i) {
@@ -291,13 +291,13 @@ private:
                     // unordered, will read fail
                     ASSERT_EQ(indexlib::index::ErrorCodeVec(
                                   {indexlib::index::ErrorCode::BadParameter, indexlib::index::ErrorCode::BadParameter}),
-                              future_lite::coro::syncAwait(
+                              async_simple::coro::syncAwait(
                                   sessionReader.BatchGet({2, 1}, file_system::ReadOption(), &values)));
 
                     // read over bound, will read fail
                     ASSERT_EQ(indexlib::index::ErrorCodeVec(
                                   {indexlib::index::ErrorCode::BadParameter, indexlib::index::ErrorCode::BadParameter}),
-                              future_lite::coro::syncAwait(
+                              async_simple::coro::syncAwait(
                                   sessionReader.BatchGet({2, 100000 + 100}, file_system::ReadOption(), &values)));
                 }
             }

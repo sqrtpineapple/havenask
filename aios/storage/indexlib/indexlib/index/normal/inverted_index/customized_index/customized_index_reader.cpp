@@ -101,7 +101,7 @@ index::Result<PostingIterator*> CustomizedIndexReader::Lookup(const Term& term, 
     }
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 CustomizedIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                                    autil::mem_pool::Pool* pool, file_system::ReadOption option) noexcept
 {

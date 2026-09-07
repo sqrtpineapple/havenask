@@ -18,8 +18,8 @@
 #include <cstddef>
 #include <stdint.h>
 
-#include "future_lite/Common.h"
-#include "future_lite/Try.h"
+#include "async_simple/Common.h"
+#include "async_simple/Try.h"
 #include "indexlib/file_system/FileSystemMetricsReporter.h"
 #include "indexlib/file_system/package/PackageOpenMeta.h"
 #include "indexlib/util/Exception.h"
@@ -87,7 +87,7 @@ FileNode* FileNode::Clone() const noexcept
     return nullptr;
 }
 
-future_lite::Future<FSResult<uint32_t>> FileNode::ReadVUInt32Async(size_t offset, ReadOption option) noexcept
+async_simple::Future<FSResult<uint32_t>> FileNode::ReadVUInt32Async(size_t offset, ReadOption option) noexcept
 {
     auto fileLen = GetLength();
     if (unlikely(offset >= fileLen)) {
@@ -95,7 +95,7 @@ future_lite::Future<FSResult<uint32_t>> FileNode::ReadVUInt32Async(size_t offset
                   "read file out of range, offset: [%lu], "
                   "file length: [%lu]",
                   offset, fileLen);
-        return future_lite::makeReadyFuture(FSResult<uint32_t> {FSEC_ERROR, 0});
+        return async_simple::makeReadyFuture(FSResult<uint32_t> {FSEC_ERROR, 0});
     }
     auto bufferPtr = std::make_unique<uint64_t>(0);
     auto buffer = static_cast<void*>(bufferPtr.get());

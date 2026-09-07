@@ -37,7 +37,7 @@ DECLARE_REFERENCE_CLASS(config, KVIndexConfig);
 DECLARE_REFERENCE_CLASS(util, SearchCachePartitionWrapper);
 
 template <typename T>
-using use_try_t = future_lite::interface::use_try_t<T>;
+using use_try_t = async_simple::interface::use_try_t<T>;
 
 namespace indexlib { namespace index {
 class KVReader;
@@ -64,7 +64,7 @@ public:
              TableSearchCacheType searchCacheType = tsc_default, autil::mem_pool::Pool* pool = NULL,
              KVMetricsCollector* metricsCollector = NULL) const
     {
-        return future_lite::interface::syncAwait(GetAsync(key, value, ts, searchCacheType, pool, metricsCollector));
+        return async_simple::interface::syncAwait(GetAsync(key, value, ts, searchCacheType, pool, metricsCollector));
     }
 
     FL_LAZY(bool)
@@ -76,7 +76,7 @@ public:
              TableSearchCacheType searchCacheType = tsc_default, autil::mem_pool::Pool* pool = NULL,
              KVMetricsCollector* metricsCollector = NULL) const
     {
-        return future_lite::interface::syncAwait(GetAsync(keyHash, value, ts, searchCacheType, pool, metricsCollector));
+        return async_simple::interface::syncAwait(GetAsync(keyHash, value, ts, searchCacheType, pool, metricsCollector));
     }
 
     FL_LAZY(bool)
@@ -87,7 +87,7 @@ public:
     template <typename T>
     bool Get(const autil::StringView& key, T& value, const KVReadOptions& options) const
     {
-        return future_lite::interface::syncAwait(GetAsync(key, value, options));
+        return async_simple::interface::syncAwait(GetAsync(key, value, options));
     }
 
     template <typename T>
@@ -97,7 +97,7 @@ public:
     template <typename T>
     bool Get(keytype_t keyHash, T& value, const KVReadOptions& options) const
     {
-        return future_lite::interface::syncAwait(GetAsync(keyHash, value, options));
+        return async_simple::interface::syncAwait(GetAsync(keyHash, value, options));
     }
 
     template <typename T>
@@ -105,13 +105,13 @@ public:
     GetAsync(keytype_t keyHash, T& value, const KVReadOptions& options) const;
 
     template <typename StringAlloc = std::allocator<autil::StringView>>
-    future_lite::coro::Lazy<BoolPoolVector> BatchGetAsync(const std::vector<autil::StringView, StringAlloc>& keys,
+    async_simple::coro::Lazy<BoolPoolVector> BatchGetAsync(const std::vector<autil::StringView, StringAlloc>& keys,
                                                           std::vector<autil::StringView, StringAlloc>& values,
                                                           TableSearchCacheType searchCacheType,
                                                           const KVReadOptions& options) const;
     template <typename KeyTypeAlloc = std::allocator<keytype_t>,
               typename StringAlloc = std::allocator<autil::StringView>>
-    future_lite::coro::Lazy<BoolPoolVector> BatchGetAsync(const std::vector<keytype_t, KeyTypeAlloc>& keyHashes,
+    async_simple::coro::Lazy<BoolPoolVector> BatchGetAsync(const std::vector<keytype_t, KeyTypeAlloc>& keyHashes,
                                                           std::vector<autil::StringView, StringAlloc>& values,
                                                           TableSearchCacheType searchCacheType,
                                                           const KVReadOptions& options) const;
@@ -281,7 +281,7 @@ inline bool KVReader::GetValueByReference(common::AttributeReference* attrRefBas
                                           options.pool, &metricsCollectors[i]));                                       \
         }                                                                                                              \
         BoolPoolAlloc alloc(options.pool);                                                                             \
-        auto res = FL_COAWAIT future_lite::interface::collectAll(std::move(lazyGroups), alloc);                        \
+        auto res = FL_COAWAIT async_simple::interface::collectAll(std::move(lazyGroups), alloc);                        \
         for (auto& metricsCollector : metricsCollectors) {                                                             \
             *options.metricsCollector += metricsCollector;                                                             \
         }                                                                                                              \
@@ -292,11 +292,11 @@ inline bool KVReader::GetValueByReference(common::AttributeReference* attrRefBas
                                           options.pool, NULL));                                                        \
         }                                                                                                              \
         BoolPoolAlloc alloc(options.pool);                                                                             \
-        co_return FL_COAWAIT future_lite::interface::collectAll(std::move(lazyGroups), alloc);                         \
+        co_return FL_COAWAIT async_simple::interface::collectAll(std::move(lazyGroups), alloc);                         \
     }
 
 template <typename StringAlloc>
-inline future_lite::coro::Lazy<KVReader::BoolPoolVector>
+inline async_simple::coro::Lazy<KVReader::BoolPoolVector>
 KVReader::BatchGetAsync(const std::vector<autil::StringView, StringAlloc>& keys,
                         std::vector<autil::StringView, StringAlloc>& values, TableSearchCacheType searchCacheType,
                         const KVReadOptions& options) const
@@ -305,7 +305,7 @@ KVReader::BatchGetAsync(const std::vector<autil::StringView, StringAlloc>& keys,
 }
 
 template <typename KeyTypeAlloc, typename StringAlloc>
-inline future_lite::coro::Lazy<KVReader::BoolPoolVector>
+inline async_simple::coro::Lazy<KVReader::BoolPoolVector>
 KVReader::BatchGetAsync(const std::vector<keytype_t, KeyTypeAlloc>& keyHashes,
                         std::vector<autil::StringView, StringAlloc>& values, TableSearchCacheType searchCacheType,
                         const KVReadOptions& options) const

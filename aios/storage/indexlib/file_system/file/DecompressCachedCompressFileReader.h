@@ -76,7 +76,7 @@ public:
 private:
     void LoadBuffer(size_t offset, ReadOption option) noexcept(false) override;
     // blockInfo: pair<blockIdx, BufferCompressor*>
-    future_lite::coro::Lazy<std::vector<ErrorCode>>
+    async_simple::coro::Lazy<std::vector<ErrorCode>>
     BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                     ReadOption option) noexcept override;
     ErrorCode ProcessSingleBlock(const std::vector<FSResult<size_t>>& readResult, size_t compressBlockIdx,

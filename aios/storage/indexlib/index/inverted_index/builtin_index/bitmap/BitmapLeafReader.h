@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/common/ErrorCode.h"
 #include "indexlib/index/inverted_index/builtin_index/bitmap/BitmapPostingExpandData.h"
 #include "indexlib/index/inverted_index/builtin_index/bitmap/BitmapPostingWriter.h"

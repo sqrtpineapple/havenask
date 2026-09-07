@@ -34,9 +34,9 @@ public:
 
 public:
     FSResult<size_t> Read(void* buffer, size_t length, size_t offset, file_system::ReadOption option) noexcept override;
-    future_lite::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
+    async_simple::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
                                                     file_system::ReadOption option) override;
-    future_lite::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
+    async_simple::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
     BatchRead(file_system::BatchIO& batchIO, file_system::ReadOption option) noexcept override
     {
         co_return co_await _fileReader->BatchRead(batchIO, option);

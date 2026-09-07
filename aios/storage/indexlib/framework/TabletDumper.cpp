@@ -22,7 +22,7 @@
 
 #include "autil/CommonMacros.h"
 #include "autil/TimeUtility.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/framework/Segment.h"
 #include "indexlib/framework/TabletData.h"
 #include "indexlib/framework/Version.h"
@@ -31,7 +31,7 @@ namespace indexlibv2::framework {
 AUTIL_LOG_SETUP(indexlib.framework, TabletDumper);
 #define TABLET_LOG(level, format, args...) AUTIL_LOG(level, "[%s] [%p] " format, _tabletName.c_str(), this, ##args)
 
-TabletDumper::TabletDumper(const std::string& tabletName, future_lite::Executor* dumpExecutor,
+TabletDumper::TabletDumper(const std::string& tabletName, async_simple::Executor* dumpExecutor,
                            TabletCommitter* tabletCommitter)
     : _tabletName(tabletName)
     , _dumpExecutor(dumpExecutor)

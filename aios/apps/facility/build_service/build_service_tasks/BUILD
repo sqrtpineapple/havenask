@@ -358,7 +358,7 @@ cc_test(
     copts=['-fno-access-control'],
     data=TEST_COMMON_DATA,
     deps=([':bs_tasks_io', ':bs_tasks_testbase'] +
-          ['//aios/future_lite/future_lite/executors:simple_async_io_executor'])
+          ['//aios/ylt:simple_async_io_executor'])
 )
 cc_library(
     name='bs_tasks_factory',

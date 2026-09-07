@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/file_system/file/ReadOption.h"
@@ -75,7 +75,7 @@ public:
                                         indexlib::document::SearchSummaryDocument* summaryDoc) const;
 
 public:
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        indexlib::file_system::ReadOption option,
                                                                        const SearchSummaryDocVec* docs) const noexcept
@@ -83,7 +83,7 @@ public:
         return GetDocument(docIds, _allGroupIds, sessionPool, option, docs);
     }
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                                        const SummaryGroupIdVec& groupVec,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        indexlib::file_system::ReadOption option,

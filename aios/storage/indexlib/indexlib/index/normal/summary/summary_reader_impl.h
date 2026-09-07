@@ -41,10 +41,10 @@ public:
     void AddAttrReader(fieldid_t fieldId, const AttributeReaderPtr& attrReader) override final;
     void AddPackAttrReader(fieldid_t fieldId, const PackAttributeReaderPtr& attrReader) override final;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                 const SearchSummaryDocVec* docs) const noexcept override final;
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                 autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                 const SearchSummaryDocVec* docs) const noexcept override final;
@@ -63,12 +63,12 @@ private:
                        const SummaryGroupIdVec& groupVec) const;
 
 private:
-    future_lite::coro::Lazy<index::ErrorCodeVec> InnerGetDocumentAsync(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> InnerGetDocumentAsync(const std::vector<docid_t>& docIds,
                                                                        const SummaryGroupIdVec& groupVec,
                                                                        autil::mem_pool::Pool* sessionPool,
                                                                        file_system::ReadOption option,
                                                                        const SearchSummaryDocVec* docs) const noexcept;
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     InnerGetDocumentAsyncOrdered(const std::vector<docid_t>& docIds, const SummaryGroupIdVec& groupVec,
                                  autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                                  const SearchSummaryDocVec* docs) const noexcept;
@@ -77,7 +77,7 @@ private:
     typedef std::vector<LocalDiskSummaryReaderPtr> SummaryGroupVec;
     SummaryGroupVec mSummaryGroups;
     SummaryGroupIdVec mAllGroupIds;
-    future_lite::Executor* mExecutor;
+    async_simple::Executor* mExecutor;
 
 private:
     IE_LOG_DECLARE();

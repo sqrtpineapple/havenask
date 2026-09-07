@@ -56,7 +56,7 @@ public:
 
     inline std::pair<Status, uint64_t> GetOffset(docid_t docId) const __ALWAYS_INLINE;
 
-    inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetOffset(const std::vector<docid_t>& docIds, indexlib::file_system::ReadOption option,
               std::vector<uint64_t>* offsets) const noexcept;
 
@@ -128,7 +128,7 @@ inline std::pair<Status, uint64_t> MultiValueAttributeUnCompressOffsetReader::Ge
     }
 }
 
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 MultiValueAttributeUnCompressOffsetReader::GetOffset(const std::vector<docid_t>& docIds,
                                                      indexlib::file_system::ReadOption option,
                                                      std::vector<uint64_t>* offsets) const noexcept

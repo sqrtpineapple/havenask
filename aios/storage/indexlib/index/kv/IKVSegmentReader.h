@@ -18,7 +18,7 @@
 #include <memory>
 
 #include "autil/StringView.h"
-#include "future_lite/CoroInterface.h"
+#include "CoroInterface.h"
 #include "indexlib/index/kv/KVCommonDefine.h"
 #include "indexlib/index/kv/KVMetricsCollector.h"
 #include "indexlib/util/Status.h"

@@ -94,7 +94,7 @@ public:
     inline bool Read(docid_t docId, autil::MultiValueType<T>& value, bool& isNull,
                      ReadContext& ctx) const __ALWAYS_INLINE;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx,
+    async_simple::coro::Lazy<index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds, ReadContext& ctx,
                                                            file_system::ReadOption readOption,
                                                            typename std::vector<autil::MultiValueType<T>>* values,
                                                            std::vector<bool>* isNullVec) const noexcept;
@@ -136,7 +136,7 @@ private:
     const uint8_t* ReadData(docid_t docId, ReadContext& ctx) const __ALWAYS_INLINE;
     void ReadCount(const std::shared_ptr<file_system::FileStream>& fileStream, uint8_t* buffPtr, uint64_t offset,
                    size_t& encodeCountLen, uint32_t& count, bool& isNull) const;
-    future_lite::coro::Lazy<std::vector<index::Result<uint8_t*>>>
+    async_simple::coro::Lazy<std::vector<index::Result<uint8_t*>>>
     BatchReadData(const std::vector<docid_t>& docIds, ReadContext& ctx,
                   file_system::ReadOption readOption) const noexcept;
 
@@ -521,7 +521,7 @@ inline bool MultiValueAttributeSegmentReader<T>::ReadDataAndLen(docid_t docId, c
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<std::vector<index::Result<uint8_t*>>>
+inline async_simple::coro::Lazy<std::vector<index::Result<uint8_t*>>>
 MultiValueAttributeSegmentReader<T>::BatchReadData(const std::vector<docid_t>& docIds, ReadContext& ctx,
                                                    file_system::ReadOption readOption) const noexcept
 {
@@ -592,7 +592,7 @@ MultiValueAttributeSegmentReader<T>::BatchReadData(const std::vector<docid_t>& d
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<index::ErrorCodeVec> MultiValueAttributeSegmentReader<T>::BatchRead(
+inline async_simple::coro::Lazy<index::ErrorCodeVec> MultiValueAttributeSegmentReader<T>::BatchRead(
     const std::vector<docid_t>& docIds, ReadContext& ctx, file_system::ReadOption readOption,
     typename std::vector<autil::MultiValueType<T>>* values, std::vector<bool>* isNullVec) const noexcept
 {

@@ -77,7 +77,7 @@ public:
 
         BuiltKKVSegmentIteratorTyped* iter =
             IE_POOL_COMPATIBLE_NEW_CLASS(sessionPool, BuiltKKVSegmentIteratorTyped, sessionPool);
-        FL_COAWAIT iter->Init(mSkeyReader, mValueReader, options->kkvConfig.get(), skeyOffset, mTimestamp, mStoreTs,
+        [[maybe_unused]] auto _init_result = FL_COAWAIT iter->Init(mSkeyReader, mValueReader, options->kkvConfig.get(), skeyOffset, mTimestamp, mStoreTs,
                               !options->sortParams.empty(), metricsCollector);
         FL_CORETURN iter;
     }

@@ -82,7 +82,7 @@ public:
 
 public:
     docid64_t Lookup(const std::string& pkStr) const override { return Lookup(pkStr, nullptr); }
-    docid64_t Lookup(const std::string& pkStr, future_lite::Executor* executor) const override
+    docid64_t Lookup(const std::string& pkStr, async_simple::Executor* executor) const override
     {
         return Lookup(autil::StringView(pkStr.data(), pkStr.size()));
     }
@@ -134,7 +134,7 @@ private:
         assert(false);
         return nullptr;
     }
-    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, future_lite::Executor* executor) const override
+    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, async_simple::Executor* executor) const override
     {
         assert(false);
         return INVALID_DOCID;
@@ -147,7 +147,7 @@ private:
     }
 
     docid64_t LookupWithDocRange(const autil::uint128_t& pkHash, std::pair<docid_t, docid_t> docRange,
-                                 future_lite::Executor* executor) const override
+                                 async_simple::Executor* executor) const override
     {
         assert(false);
         return INVALID_DOCID;

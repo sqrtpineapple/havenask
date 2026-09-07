@@ -62,7 +62,7 @@ private:
     void LoadBuffer(size_t offset, ReadOption option) noexcept(false) override;
     void LoadBufferFromMemory(size_t offset, uint8_t* buffer, uint32_t bufLen,
                               bool enableTrace) noexcept(false) override;
-    future_lite::coro::Lazy<std::vector<ErrorCode>>
+    async_simple::coro::Lazy<std::vector<ErrorCode>>
     BatchLoadBuffer(const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo,
                     ReadOption option) noexcept override;
     bool DecompressOneBlock(size_t blockId, util::BufferCompressor* compressor) const noexcept(false);

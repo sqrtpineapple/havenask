@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/file_system/stream/FileStream.h"
 #include "indexlib/file_system/stream/FileStreamCreator.h"
 #include "indexlib/index/common/ErrorCode.h"
@@ -45,12 +45,12 @@ public:
     inline std::pair<Status, T> Get(size_t pos) __ALWAYS_INLINE { return (*this)[pos]; }
     std::pair<Status, T> operator[](size_t rowId) __ALWAYS_INLINE;
 
-    future_lite::Future<size_t> ReadAsync(const std::vector<int32_t>& indiceVec, size_t beginIndice,
+    async_simple::Future<size_t> ReadAsync(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                                           std::vector<T>& resultBuffer,
                                           indexlib::file_system::ReadOption readOption) __ALWAYS_INLINE;
 
     // batch pos should be non-decreasing
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> BatchGet(const std::vector<int32_t>& batchPos,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> BatchGet(const std::vector<int32_t>& batchPos,
                                                                     indexlib::file_system::ReadOption readOption,
                                                                     std::vector<T>* values) noexcept;
 
@@ -99,7 +99,7 @@ private:
 private:
     // precondition: 1. indiceVec[beginIndice] != -1 && beginIndice <= endIndice && indiceVec[endIndice] != -1
     //            or 2. beginIndice >= indiceVec.size()
-    future_lite::Future<size_t> BatchReadDeltaArray(const std::vector<int32_t>& indiceVec, size_t beginIndice,
+    async_simple::Future<size_t> BatchReadDeltaArray(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                                                     size_t endIndice, size_t depth, std::vector<T>& resultBuffer,
                                                     indexlib::file_system::ReadOption readOption) __ALWAYS_INLINE;
 
@@ -110,7 +110,7 @@ private:
                     const indexlib::file_system::BatchIO& slotBatchIO,
                     const std::vector<indexlib::file_system::FSResult<size_t>>& slotResult);
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchReadDeltaArray(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                         indexlib::file_system::ReadOption readOption, std::vector<T>* values) noexcept;
 
@@ -123,10 +123,10 @@ private:
     T GetLongValueFromDeltaArray(uint8_t* slotItem, uint8_t* deltaArray, size_t inArrayIdx);
 
     // prepare slotItems from range [beginPos, endPos]
-    inline future_lite::Future<std::pair<Status, int32_t>>
+    inline async_simple::Future<std::pair<Status, int32_t>>
     PrepareSlotItems(int32_t beginPos, int32_t endPos, indexlib::file_system::ReadOption readOption) __ALWAYS_INLINE;
     inline bool AppendToCurrentReadBatch(int32_t pos) __ALWAYS_INLINE;
-    inline future_lite::Future<std::pair<Status, size_t>>
+    inline async_simple::Future<std::pair<Status, size_t>>
     FetchCurrentReadBatch(indexlib::file_system::ReadOption readOption) __ALWAYS_INLINE;
 
     T GetValueFromBuffer(size_t rowId) __ALWAYS_INLINE;
@@ -309,7 +309,7 @@ EquivalentCompressSessionReader<T>::operator=(EquivalentCompressSessionReader&& 
 }
 
 template <typename T>
-inline future_lite::Future<std::pair<Status, int32_t>>
+inline async_simple::Future<std::pair<Status, int32_t>>
 EquivalentCompressSessionReader<T>::PrepareSlotItems(int32_t beginPos, int32_t endPos,
                                                      indexlib::file_system::ReadOption readOption)
 {
@@ -319,10 +319,10 @@ EquivalentCompressSessionReader<T>::PrepareSlotItems(int32_t beginPos, int32_t e
     if (endPos >= _fileContent.itemCount || beginPos >= _fileContent.itemCount) {
         AUTIL_LOG(ERROR, "Bad read range[%d, %d] for file with itemCount[%u]", beginPos, endPos,
                   _fileContent.itemCount);
-        return future_lite::makeReadyFuture(std::make_pair(Status::OK(), /*invalid value*/ -1));
+        return async_simple::makeReadyFuture(std::make_pair(Status::OK(), /*invalid value*/ -1));
     }
     if (beginSlotId >= _beginSlotId && beginSlotId < _endSlotId) {
-        return future_lite::makeReadyFuture(std::make_pair(Status::OK(), int32_t(_endSlotId)));
+        return async_simple::makeReadyFuture(std::make_pair(Status::OK(), int32_t(_endSlotId)));
     }
     using SlotType = EquivalentCompressSessionReader<T>::SlotType;
 
@@ -373,7 +373,7 @@ inline std::pair<Status, T> EquivalentCompressSessionReader<T>::operator[](size_
 }
 
 template <typename T>
-inline future_lite::Future<size_t>
+inline async_simple::Future<size_t>
 EquivalentCompressSessionReader<T>::ReadAsync(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                                               std::vector<T>& resultBuffer,
                                               indexlib::file_system::ReadOption readOption)
@@ -386,7 +386,7 @@ EquivalentCompressSessionReader<T>::ReadAsync(const std::vector<int32_t>& indice
                 indexlib::util::ThrowIfStatusError(status);
             }
         }
-        return future_lite::makeReadyFuture(indiceVec.size());
+        return async_simple::makeReadyFuture(indiceVec.size());
     }
 
     size_t beginIdx = beginIndice;
@@ -395,7 +395,7 @@ EquivalentCompressSessionReader<T>::ReadAsync(const std::vector<int32_t>& indice
     }
 
     if (beginIdx >= indiceVec.size()) {
-        return future_lite::makeReadyFuture(indiceVec.size());
+        return async_simple::makeReadyFuture(indiceVec.size());
     }
 
     size_t endIdx = indiceVec.size() - 1;
@@ -418,7 +418,7 @@ EquivalentCompressSessionReader<T>::ReadAsync(const std::vector<int32_t>& indice
     }
     beginIdx = idx;
     if (beginIdx > endIdx) {
-        return future_lite::makeReadyFuture(size_t(indiceVec.size()));
+        return async_simple::makeReadyFuture(size_t(indiceVec.size()));
     }
     return BatchReadDeltaArray(indiceVec, beginIdx, endIdx, 0, resultBuffer, readOption);
 }
@@ -466,16 +466,16 @@ inline bool EquivalentCompressSessionReader<T>::AppendToCurrentReadBatch(int32_t
 }
 
 template <typename T>
-inline future_lite::Future<size_t>
+inline async_simple::Future<size_t>
 EquivalentCompressSessionReader<T>::BatchReadDeltaArray(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                                                         size_t endIndice, size_t depth, std::vector<T>& resultBuffer,
                                                         indexlib::file_system::ReadOption readOption)
 {
     if (beginIndice >= indiceVec.size()) {
-        return future_lite::makeReadyFuture(size_t(indiceVec.size()));
+        return async_simple::makeReadyFuture(size_t(indiceVec.size()));
     }
     if (depth > _sessionOption.maxRecursionDepth) {
-        return future_lite::makeReadyFuture(size_t(beginIndice));
+        return async_simple::makeReadyFuture(size_t(beginIndice));
     }
     return PrepareSlotItems(indiceVec[beginIndice], indiceVec[endIndice], readOption)
         .thenValue([this, &indiceVec, beginIndice, endIndice, depth, &resultBuffer,
@@ -562,7 +562,7 @@ inline indexlib::file_system::BatchIO EquivalentCompressSessionReader<T>::GetArr
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 EquivalentCompressSessionReader<T>::BatchReadDeltaArray(const std::vector<int32_t>& indiceVec, size_t beginIndice,
                                                         indexlib::file_system::ReadOption readOption,
                                                         std::vector<T>* values) noexcept
@@ -868,7 +868,7 @@ inline void EquivalentCompressSessionReader<T>::GetLongDeltaArrayRange(int32_t s
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> EquivalentCompressSessionReader<T>::BatchGet(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> EquivalentCompressSessionReader<T>::BatchGet(
     const std::vector<int32_t>& batchPos, indexlib::file_system::ReadOption readOption, std::vector<T>* values) noexcept
 
 {
@@ -907,7 +907,7 @@ inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> EquivalentCompress
 }
 
 template <typename T>
-inline future_lite::Future<std::pair<Status, size_t>>
+inline async_simple::Future<std::pair<Status, size_t>>
 EquivalentCompressSessionReader<T>::FetchCurrentReadBatch(indexlib::file_system::ReadOption readOption)
 {
     // precondition, deltaArrayBuffer has already been allocated
@@ -920,7 +920,7 @@ EquivalentCompressSessionReader<T>::FetchCurrentReadBatch(indexlib::file_system:
                 std::min((int64_t)_fileContent.itemCount, GetBeginRowIdInSlot(_currentBatch.lastSlotId + 1));
         }
         _currentBatch.Reset();
-        return future_lite::makeReadyFuture(std::make_pair(Status::OK(), size_t(0)));
+        return async_simple::makeReadyFuture(std::make_pair(Status::OK(), size_t(0)));
     }
 
     return _fileStream

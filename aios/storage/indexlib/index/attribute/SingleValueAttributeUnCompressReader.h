@@ -47,7 +47,7 @@ public:
 
     Status Read(docid_t docId, indexlib::file_system::FileStream* fileStream, T& value, bool& isNull) const;
     Status Read(docid_t docId, T& value, bool& isNull) const;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> BatchRead(const std::vector<docid_t>& docIds,
                                                                      indexlib::file_system::FileStream* fileStream,
                                                                      indexlib::file_system::ReadOption readOption,
                                                                      typename std::vector<T>* values,
@@ -150,7 +150,7 @@ inline Status SingleValueAttributeUnCompressReader<T>::Read(docid_t docId, T& va
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeUnCompressReader<T>::BatchRead(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeUnCompressReader<T>::BatchRead(
     const std::vector<docid_t>& docIds, indexlib::file_system::FileStream* fileStream,
     indexlib::file_system::ReadOption readOption, typename std::vector<T>* values,
     std::vector<bool>* isNullVec) const noexcept

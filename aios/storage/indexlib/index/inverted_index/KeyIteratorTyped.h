@@ -18,6 +18,7 @@
 #include <queue>
 #include <sstream>
 
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/index/inverted_index/KeyIterator.h"
 #include "indexlib/index/inverted_index/format/dictionary/DictionaryIterator.h"
 #include "indexlib/index/inverted_index/format/dictionary/DictionaryReader.h"
@@ -147,7 +148,7 @@ PostingIterator* KeyIteratorTyped<IndexReaderType>::NextPosting(std::string& str
         }
     }
 
-    return future_lite::coro::syncAwait(
+    return async_simple::coro::syncAwait(
                _reader.CreateMainPostingIteratorAsync(key, /*statePoolSize*/ 1000, /*sessionPool*/ NULL,
                                                       /*needBuildingSegment*/ true, /*readOption*/ nullptr))
         .ValueOrThrow();

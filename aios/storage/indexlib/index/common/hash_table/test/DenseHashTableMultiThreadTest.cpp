@@ -57,7 +57,7 @@ void ReadHashTable(const Timestamp8Table& hashTable, bool* isSucess)
 
 void WriteHashTable(Timestamp8Table& hashTable)
 {
-    for (; DHTIsDone == false; DHTCurKey = ((DHTCurKey + 1) % maxKeyCount)) {
+    for (; DHTIsDone == false;) {
         int64_t constKey = DHTCurKey;
         int64_t constValue = (constKey << 32) | constKey;
         for (size_t i = 0; i < 10; ++i) {
@@ -67,6 +67,7 @@ void WriteHashTable(Timestamp8Table& hashTable)
                 hashTableDelete(hashTable, constKey, TimestampValue<int64_t>(constKey, constValue));
             }
         }
+        DHTCurKey = ((DHTCurKey + 1) % maxKeyCount);
     }
 }
 

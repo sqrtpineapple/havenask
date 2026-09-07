@@ -30,7 +30,7 @@ public:
 
 public:
     Status Get(docid_t docId, indexlib::file_system::FileStream* data, T& value, bool& isNull) const;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGet(const std::vector<docid_t>& docIds, indexlib::file_system::FileStream* data,
              indexlib::file_system::ReadOption, std::vector<T>* values, std::vector<bool>* isNullVec) const noexcept;
     T GetEncodedNullValue() const { return _nullValueFormatter.GetEncodedNullValue(); }
@@ -98,7 +98,7 @@ inline Status SingleValueAttributeReadOnlyFormatter<float>::Get(docid_t docId,
 }
 
 template <typename T>
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeReadOnlyFormatter<T>::BatchGet(
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec> SingleValueAttributeReadOnlyFormatter<T>::BatchGet(
     const std::vector<docid_t>& docIds, indexlib::file_system::FileStream* fileStream,
     indexlib::file_system::ReadOption readOption, typename std::vector<T>* values,
     std::vector<bool>* isNullVec) const noexcept

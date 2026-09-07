@@ -41,7 +41,7 @@ FSResult<size_t> CompressFileStream::Read(void* buffer, size_t length, size_t of
     return fileReader->Read(buffer, length, offset, option);
 }
 
-future_lite::Future<FSResult<size_t>> CompressFileStream::ReadAsync(void* buffer, size_t length, size_t offset,
+async_simple::Future<FSResult<size_t>> CompressFileStream::ReadAsync(void* buffer, size_t length, size_t offset,
                                                                     file_system::ReadOption option)
 {
     std::shared_ptr<file_system::CompressFileReader> fileReader = _fileReader;
@@ -52,7 +52,7 @@ future_lite::Future<FSResult<size_t>> CompressFileStream::ReadAsync(void* buffer
     return fileReader->ReadAsync(buffer, length, offset, option);
 }
 
-future_lite::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
+async_simple::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
 CompressFileStream::BatchRead(file_system::BatchIO& batchIO, file_system::ReadOption option) noexcept
 {
     std::shared_ptr<file_system::CompressFileReader> fileReader = _fileReader;

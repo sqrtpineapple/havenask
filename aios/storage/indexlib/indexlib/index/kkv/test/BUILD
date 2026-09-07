@@ -13,7 +13,7 @@ cc_fast_test(
     shard_count=10,
     deps=[
         ':indexlib_kkv_test_helper',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/indexlib:indexlib_testbase',
         '//aios/storage/indexlib/indexlib/index/test:indexlib_index_test_helper'
     ]

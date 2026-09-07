@@ -101,7 +101,7 @@ strict_cc_library(
 strict_cc_library(
     name='DictionaryReader',
     deps=[
-        ':DictionaryIterator', ':UtilDefine', '//aios/future_lite',
+        ':DictionaryIterator', ':UtilDefine', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/index/common:DictKeyInfo',
         '//aios/storage/indexlib/index/common:error_code'
     ]

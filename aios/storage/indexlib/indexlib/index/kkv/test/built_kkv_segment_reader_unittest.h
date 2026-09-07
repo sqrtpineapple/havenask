@@ -1,6 +1,6 @@
 #pragma once
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/common_define.h"
 #include "indexlib/index/kkv/built_kkv_segment_reader.h"
 #include "indexlib/partition/segment/multi_region_kkv_segment_writer.h"
@@ -34,7 +34,7 @@ private:
 private:
     std::shared_ptr<autil::mem_pool::Pool> mPool;
     util::QuotaControlPtr mQuotaControl;
-    future_lite::executors::SimpleExecutor mEx;
+    async_simple::executors::SimpleExecutor mEx;
 
 private:
     IE_LOG_DECLARE();

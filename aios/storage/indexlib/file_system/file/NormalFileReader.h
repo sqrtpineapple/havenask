@@ -22,8 +22,8 @@
 #include <utility>
 
 #include "autil/Log.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
 #include "indexlib/file_system/FileSystemDefine.h"
 #include "indexlib/file_system/file/FileNode.h"
 #include "indexlib/file_system/file/FileReader.h"
@@ -53,12 +53,12 @@ public:
     FSResult<size_t> Prefetch(size_t length, size_t offset, ReadOption option) noexcept override;
     std::shared_ptr<FileNode> GetFileNode() const noexcept override { return _fileNode; }
 
-    // future_lite
-    future_lite::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
+    // async_simple
+    async_simple::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
                                                     ReadOption option) noexcept override;
-    future_lite::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
-    future_lite::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept override;
-    future_lite::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset,
+    async_simple::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
+    async_simple::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept override;
+    async_simple::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset,
                                                         ReadOption option) noexcept override;
 
     // FL_LAZY
@@ -67,7 +67,7 @@ public:
     FL_LAZY(FSResult<size_t>) PrefetchAsyncCoro(size_t length, size_t offset, ReadOption option) noexcept override;
 
 private:
-    future_lite::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
+    async_simple::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
                                                                             ReadOption option) noexcept override;
 
 private:
@@ -79,7 +79,7 @@ private:
 typedef std::shared_ptr<NormalFileReader> NormalFileReaderPtr;
 
 //////////////////////////////////////////////////////////////////////
-inline future_lite::coro::Lazy<std::vector<FSResult<size_t>>>
+inline async_simple::coro::Lazy<std::vector<FSResult<size_t>>>
 NormalFileReader::BatchReadOrdered(const BatchIO& batchIO, ReadOption option) noexcept
 {
     co_return co_await _fileNode->BatchReadOrdered(batchIO, option);
@@ -97,7 +97,7 @@ inline FL_LAZY(FSResult<size_t>) NormalFileReader::PrefetchAsyncCoro(size_t leng
     FL_CORETURN FL_COAWAIT _fileNode->PrefetchAsyncCoro(length, offset, option);
 }
 
-inline future_lite::Future<FSResult<uint32_t>> NormalFileReader::ReadUInt32Async(size_t offset,
+inline async_simple::Future<FSResult<uint32_t>> NormalFileReader::ReadUInt32Async(size_t offset,
                                                                                  ReadOption option) noexcept
 {
     return _fileNode->ReadUInt32Async(offset, option);

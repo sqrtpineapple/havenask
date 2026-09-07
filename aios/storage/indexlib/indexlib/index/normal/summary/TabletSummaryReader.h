@@ -33,12 +33,12 @@ public:
     ~TabletSummaryReader() = default;
 
 public:
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t>& docIds, const indexlib::index::SummaryGroupIdVec& groupVec,
                 autil::mem_pool::Pool* sessionPool, indexlib::file_system::ReadOption option,
                 const indexlib::index::SearchSummaryDocVec* docs) const noexcept override;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocument(const std::vector<docid_t>& docIds, autil::mem_pool::Pool* sessionPool,
                 indexlib::file_system::ReadOption option,
                 const indexlib::index::SearchSummaryDocVec* docs) const noexcept override;

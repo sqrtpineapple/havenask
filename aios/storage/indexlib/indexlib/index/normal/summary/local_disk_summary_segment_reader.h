@@ -44,7 +44,7 @@ public:
     bool Open(const index_base::SegmentData& segmentData);
 
     bool GetDocument(docid_t localDocId, document::SearchSummaryDocument* summaryDoc) const override;
-    future_lite::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> GetDocument(const std::vector<docid_t>& docIds,
                                                              autil::mem_pool::Pool* sessionPool,
                                                              file_system::ReadOption readOption,
                                                              const SearchSummaryDocVec* docs) noexcept;

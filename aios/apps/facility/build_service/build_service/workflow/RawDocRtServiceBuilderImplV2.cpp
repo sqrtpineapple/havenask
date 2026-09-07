@@ -45,7 +45,7 @@ BS_LOG_SETUP(workflow, RawDocRtServiceBuilderImplV2);
 RawDocRtServiceBuilderImplV2::RawDocRtServiceBuilderImplV2(const std::string& configPath,
                                                            std::shared_ptr<indexlibv2::framework::ITablet> tablet,
                                                            const RealtimeBuilderResource& builderResource,
-                                                           future_lite::NamedTaskScheduler* tasker)
+                                                           async_simple::NamedTaskScheduler* tasker)
 
     : RealtimeBuilderImplV2(configPath, std::move(tablet), builderResource, tasker)
     , _producer(NULL)

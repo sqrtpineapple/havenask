@@ -26,11 +26,11 @@
 #include "alog/Logger.h"
 #include "autil/CommonMacros.h"
 #include "autil/Log.h"
-#include "future_lite/Common.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
-#include "future_lite/Helper.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Common.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
+#include "Helper.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FSResult.h"
 #include "indexlib/file_system/FileSystemDefine.h"
@@ -79,13 +79,13 @@ public:
     virtual size_t GetLength() const noexcept = 0;
     virtual bool ReadOnly() const noexcept = 0;
 
-    // future_lite
-    virtual future_lite::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
+    // async_simple
+    virtual async_simple::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
                                                             ReadOption option) noexcept;
-    virtual future_lite::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept;
-    virtual future_lite::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset,
+    virtual async_simple::Future<FSResult<uint32_t>> ReadUInt32Async(size_t offset, ReadOption option) noexcept;
+    virtual async_simple::Future<FSResult<size_t>> PrefetchAsync(size_t length, size_t offset,
                                                                 ReadOption option) noexcept;
-    virtual future_lite::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept;
+    virtual async_simple::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept;
 
     // FL_LAZY
     virtual FL_LAZY(FSResult<size_t>)
@@ -93,7 +93,7 @@ public:
     virtual FL_LAZY(FSResult<uint32_t>) ReadUInt32AsyncCoro(size_t offset, ReadOption option) noexcept;
     virtual FL_LAZY(FSResult<size_t>) PrefetchAsyncCoro(size_t length, size_t offset, ReadOption option) noexcept;
     virtual FL_LAZY(FSResult<uint32_t>) ReadVUInt32AsyncCoro(size_t offset, ReadOption option) noexcept;
-    virtual future_lite::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
+    virtual async_simple::coro::Lazy<std::vector<FSResult<size_t>>> BatchReadOrdered(const BatchIO& batchIO,
                                                                                     ReadOption option) noexcept;
 
     virtual bool MatchType(FSOpenType type, FSFileType fileType, bool needWrite) const noexcept;
@@ -136,7 +136,7 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
-inline future_lite::coro::Lazy<std::vector<FSResult<size_t>>> FileNode::BatchReadOrdered(const BatchIO& batchIO,
+inline async_simple::coro::Lazy<std::vector<FSResult<size_t>>> FileNode::BatchReadOrdered(const BatchIO& batchIO,
                                                                                          ReadOption option) noexcept
 {
     assert(std::is_sorted(batchIO.begin(), batchIO.end()));
@@ -149,20 +149,20 @@ inline future_lite::coro::Lazy<std::vector<FSResult<size_t>>> FileNode::BatchRea
     co_return result;
 }
 
-inline future_lite::Future<FSResult<size_t>> FileNode::PrefetchAsync(size_t length, size_t offset,
+inline async_simple::Future<FSResult<size_t>> FileNode::PrefetchAsync(size_t length, size_t offset,
                                                                      ReadOption option) noexcept
 {
-    return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
+    return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_OK, 0});
 }
 inline FL_LAZY(FSResult<size_t>) FileNode::PrefetchAsyncCoro(size_t length, size_t offset, ReadOption option) noexcept
 {
     FL_CORETURN FSResult<size_t> {FSEC_OK, 0ul};
 }
 
-inline future_lite::Future<FSResult<size_t>> FileNode::ReadAsync(void* buffer, size_t length, size_t offset,
+inline async_simple::Future<FSResult<size_t>> FileNode::ReadAsync(void* buffer, size_t length, size_t offset,
                                                                  ReadOption option) noexcept
 {
-    return future_lite::makeReadyFuture(Read(buffer, length, offset, option));
+    return async_simple::makeReadyFuture(Read(buffer, length, offset, option));
 }
 inline FL_LAZY(FSResult<size_t>) FileNode::ReadAsyncCoro(void* buffer, size_t length, size_t offset,
                                                          ReadOption option) noexcept
@@ -170,12 +170,12 @@ inline FL_LAZY(FSResult<size_t>) FileNode::ReadAsyncCoro(void* buffer, size_t le
     FL_CORETURN Read(buffer, length, offset, option);
 }
 
-inline future_lite::Future<FSResult<uint32_t>> FileNode::ReadUInt32Async(size_t offset, ReadOption option) noexcept
+inline async_simple::Future<FSResult<uint32_t>> FileNode::ReadUInt32Async(size_t offset, ReadOption option) noexcept
 {
     uint32_t buffer = 0;
     auto result = Read(static_cast<void*>(&buffer), sizeof(buffer), offset, option);
     assert(result.GetOrThrow() == sizeof(buffer));
-    return future_lite::makeReadyFuture<FSResult<uint32_t>>({result.Code(), buffer});
+    return async_simple::makeReadyFuture<FSResult<uint32_t>>({result.Code(), buffer});
 }
 inline FL_LAZY(FSResult<uint32_t>) FileNode::ReadUInt32AsyncCoro(size_t offset, ReadOption option) noexcept
 {

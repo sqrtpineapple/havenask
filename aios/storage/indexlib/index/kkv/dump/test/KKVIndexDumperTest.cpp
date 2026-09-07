@@ -205,7 +205,11 @@ void KKVIndexDumperTest::CheckIndex(const std::shared_ptr<indexlib::file_system:
     auto indexReader = indexer.GetReader();
 
     for (const auto& [pk, skval] : pk2skval) {
+#ifdef ASYNC_SIMPLE_USE_COROUTINES
+        auto [status, iterator] = async_simple::interface::syncAwait(indexReader->Lookup(pk, &_pool));
+#else
         auto [status, iterator] = indexReader->Lookup(pk, &_pool);
+#endif
         ASSERT_TRUE(status.IsOK());
         ASSERT_TRUE(iterator);
         ASSERT_TRUE(iterator->IsValid());

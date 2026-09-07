@@ -3,9 +3,10 @@
 #include <iomanip>
 
 #include "fslib/util/FileUtil.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/NamedTaskScheduler.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "ExecutorCreator.h"
+#include "NamedTaskScheduler.h"
+#include "async_simple/executors/SimpleExecutor.h"
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/base/PathUtil.h"
 #include "indexlib/config/BackgroundTaskConfig.h"
 #include "indexlib/document/DocumentBatch.h"
@@ -25,8 +26,8 @@ namespace indexlibv2::table {
 AUTIL_LOG_SETUP(indexlib.table, TableTestHelper);
 
 struct TableTestHelper::Impl {
-    std::unique_ptr<future_lite::Executor> executor;
-    std::unique_ptr<future_lite::TaskScheduler> taskScheduler;
+    std::unique_ptr<async_simple::Executor> executor;
+    std::unique_ptr<async_simple::TaskScheduler> taskScheduler;
     framework::TabletResource tabletResource;
     std::shared_ptr<framework::Tablet> tablet;
 };
@@ -65,7 +66,7 @@ Status TableTestHelper::TriggerBulkloadTask(framework::MergeTaskStatus& taskStat
     assert(factory);
     factory->Init(tabletOptions, nullptr);
 
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalTabletMergeController mergeController;
     LocalTabletMergeController::InitParam initParam;
     initParam.executor = &executor;
@@ -87,12 +88,12 @@ Status TableTestHelper::TriggerBulkloadTask(framework::MergeTaskStatus& taskStat
     RETURN_IF_STATUS_ERROR(planStatus, "CreateTaskPlan failed");
     assert(plan);
 
-    auto task = [&](auto plan) -> future_lite::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> {
+    auto task = [&](auto plan) -> async_simple::coro::Lazy<std::pair<Status, framework::MergeTaskStatus>> {
         auto status = co_await mergeController.SubmitMergeTask(std::move(plan), context.get());
         co_return co_await mergeController.WaitMergeResult();
     };
 
-    std::tie(status, taskStatus) = future_lite::coro::syncAwait(task(std::move(plan)));
+    std::tie(status, taskStatus) = async_simple::coro::syncAwait(task(std::move(plan)));
     return status;
 }
 
@@ -167,12 +168,12 @@ Status TableTestHelper::InitTabletResource()
 {
     _impl->tabletResource.tabletId = indexlib::framework::TabletId("TestHelper");
     if (!_impl->tabletResource.dumpExecutor) {
-        _impl->executor = future_lite::ExecutorCreator::Create(
-            /*type=*/"simple", future_lite::ExecutorCreator::Parameters().Set<size_t>("threadNum", 5));
+        _impl->executor = async_simple::ExecutorCreator::Create(
+            /*type=*/"simple", async_simple::ExecutorCreator::Parameters().Set<size_t>("threadNum", 5));
         _impl->tabletResource.dumpExecutor = _impl->executor.get();
     }
     if (!_impl->tabletResource.taskScheduler) {
-        _impl->taskScheduler = std::make_unique<future_lite::TaskScheduler>(_impl->executor.get());
+        _impl->taskScheduler = std::make_unique<async_simple::TaskScheduler>(_impl->executor.get());
         _impl->tabletResource.taskScheduler = _impl->taskScheduler.get();
     }
     if (!_impl->tabletResource.mergeController) {
@@ -248,7 +249,7 @@ const framework::Version& TableTestHelper::GetCurrentVersion() const
     return framework::TabletTestAgent(GetTablet()).TEST_GetTabletData()->GetOnDiskVersion();
 }
 
-future_lite::NamedTaskScheduler* TableTestHelper::GetTaskScheduler() const
+async_simple::NamedTaskScheduler* TableTestHelper::GetTaskScheduler() const
 {
     return framework::TabletTestAgent(GetTablet()).TEST_GetTaskScheduler();
 }
@@ -647,8 +648,8 @@ bool TableTestHelper::Query(std::string indexType, std::string indexName, std::s
     return DoQuery(indexType, indexName, queryStr, expectValue);
 }
 
-TableTestHelper& TableTestHelper::SetExecutor(future_lite::Executor* dumpExecutor,
-                                              future_lite::TaskScheduler* taskScheduler)
+TableTestHelper& TableTestHelper::SetExecutor(async_simple::Executor* dumpExecutor,
+                                              async_simple::TaskScheduler* taskScheduler)
 {
     _impl->tabletResource.dumpExecutor = dumpExecutor;
     _impl->tabletResource.taskScheduler = taskScheduler;

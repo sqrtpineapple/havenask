@@ -67,7 +67,7 @@ public:
         if (kvReader) {
             assert(tableType == tt_kv);
             isNull = false;
-            return future_lite::interface::syncAwait(kvReader->GetAsync(key, value, kvReaderOptions));
+            return async_simple::interface::syncAwait(kvReader->GetAsync(key, value, kvReaderOptions));
         }
 
         assert(tableType == tt_index);
@@ -85,7 +85,7 @@ public:
         if (kvReader) {
             assert(tableType == tt_kv);
             isNull = false;
-            return future_lite::interface::syncAwait(kvReader->GetAsync(key, value, kvReaderOptions));
+            return async_simple::interface::syncAwait(kvReader->GetAsync(key, value, kvReaderOptions));
         }
         assert(tableType == tt_index);
         assert(pkReader);

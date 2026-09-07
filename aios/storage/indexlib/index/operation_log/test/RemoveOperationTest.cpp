@@ -50,7 +50,7 @@ public:
 
 public:
     MOCK_METHOD(docid64_t, LookupWithDocRange,
-                (const autil::uint128_t&, (std::pair<docid_t, docid_t>), future_lite::Executor*), (const, override));
+                (const autil::uint128_t&, (std::pair<docid_t, docid_t>), async_simple::Executor*), (const, override));
 };
 
 class MockOperationLogProcessor : public OperationLogProcessor

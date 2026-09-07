@@ -53,8 +53,8 @@ public:
         }
     }
 
-    future_lite::coro::Lazy<docid_t> FindAsync(char* data, size_t count, Key key,
-                                               future_lite::Executor* executor) const __ALWAYS_INLINE;
+    async_simple::coro::Lazy<docid_t> FindAsync(char* data, size_t count, Key key,
+                                               async_simple::Executor* executor) const __ALWAYS_INLINE;
 
 private:
     PrimaryKeyFormatterPtr mPrimaryKeyFormatter;
@@ -68,8 +68,8 @@ private:
 
 //////////////////////////////////////////////////////////////
 template <typename Key>
-inline future_lite::coro::Lazy<docid_t>
-PrimaryKeySegmentFormatter<Key>::FindAsync(char* data, size_t count, Key key, future_lite::Executor* executor) const
+inline async_simple::coro::Lazy<docid_t>
+PrimaryKeySegmentFormatter<Key>::FindAsync(char* data, size_t count, Key key, async_simple::Executor* executor) const
 {
     if (mLoadMode == config::PrimaryKeyLoadStrategyParam::HASH_TABLE) {
         co_return mHashPrimaryKeyFormatter->Find(data, key);

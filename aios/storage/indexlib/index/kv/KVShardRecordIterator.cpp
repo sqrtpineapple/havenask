@@ -288,7 +288,7 @@ Status KVShardRecordIterator::AddRawKey(index::IShardRecordIterator::ShardRecord
     uint64_t ts = 0;
     autil::StringView pkValue;
     auto status =
-        future_lite::interface::syncAwait(pkValueReader->Get(shardRecord->key, pkValue, ts, &_pool, nullptr, nullptr));
+        async_simple::interface::syncAwait(pkValueReader->Get(shardRecord->key, pkValue, ts, &_pool, nullptr, nullptr));
     switch (status) {
     case indexlib::util::Status::DELETED:
         return Status::NotFound("no record found, [DELETED]");

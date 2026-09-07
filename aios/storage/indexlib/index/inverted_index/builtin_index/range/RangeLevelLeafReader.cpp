@@ -38,7 +38,7 @@ RangeLevelLeafReader::RangeLevelLeafReader(const std::shared_ptr<indexlibv2::con
 
 RangeLevelLeafReader::~RangeLevelLeafReader() {}
 
-future_lite::coro::Lazy<Result<SegmentPosting>>
+async_simple::coro::Lazy<Result<SegmentPosting>>
 RangeLevelLeafReader::FillOneSegment(dictvalue_t value, docid64_t baseDocId, autil::mem_pool::Pool* sessionPool,
                                      file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept
 {
@@ -50,7 +50,7 @@ RangeLevelLeafReader::FillOneSegment(dictvalue_t value, docid64_t baseDocId, aut
     co_return result;
 }
 
-future_lite::coro::Lazy<ErrorCode>
+async_simple::coro::Lazy<ErrorCode>
 RangeLevelLeafReader::FillSegmentPostings(const RangeFieldEncoder::Ranges& ranges, docid64_t baseDocId,
                                           const std::shared_ptr<SegmentPostings>& segmentPostings,
                                           autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
@@ -68,7 +68,7 @@ RangeLevelLeafReader::FillSegmentPostings(const RangeFieldEncoder::Ranges& range
     }
     std::shared_ptr<DictionaryIterator> iter = _dictReader->CreateIterator();
     assert(iter);
-    std::vector<future_lite::coro::Lazy<Result<SegmentPosting>>> tasks;
+    std::vector<async_simple::coro::Lazy<Result<SegmentPosting>>> tasks;
     if (tracer) {
         option.blockCounter = tracer->GetDictionaryBlockCacheCounter();
     }
@@ -102,7 +102,7 @@ RangeLevelLeafReader::FillSegmentPostings(const RangeFieldEncoder::Ranges& range
             tracer->IncDictionaryHitCount(seekDictCount - 1);
         }
     }
-    auto taskResult = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto taskResult = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < taskResult.size(); ++i) {
         assert(!taskResult[i].hasError());
         if (taskResult[i].value().Ok()) {

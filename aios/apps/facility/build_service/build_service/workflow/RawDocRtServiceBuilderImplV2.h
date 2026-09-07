@@ -38,7 +38,7 @@ class RawDocRtServiceBuilderImplV2 : public RealtimeBuilderImplV2
 public:
     RawDocRtServiceBuilderImplV2(const std::string& configPath, std::shared_ptr<indexlibv2::framework::ITablet> tablet,
                                  const RealtimeBuilderResource& builderResource,
-                                 future_lite::NamedTaskScheduler* tasker);
+                                 async_simple::NamedTaskScheduler* tasker);
     virtual ~RawDocRtServiceBuilderImplV2();
 
     RawDocRtServiceBuilderImplV2(const RawDocRtServiceBuilderImplV2&) = delete;

@@ -1,7 +1,7 @@
 #include "indexlib/index/kv/test/kv_reader_unittest.h"
 
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/kv_index_config.h"
 #include "indexlib/config/test/region_schema_maker.h"
 #include "indexlib/config/test/schema_maker.h"
@@ -19,7 +19,7 @@
 using namespace std;
 using namespace autil;
 using namespace autil::mem_pool;
-using namespace future_lite::interface;
+using namespace async_simple::interface;
 
 using namespace indexlib::test;
 using namespace indexlib::config;
@@ -113,12 +113,12 @@ void KVReaderTest::TestBlockCache()
     kvOptions.metricsCollector = &collector;
     kvOptions.fieldName = "mstr";
     kvOptions.pool = &pool;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     MultiString value;
-    ASSERT_FALSE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, kvOptions), &ex));
+    ASSERT_FALSE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("2"), value, kvOptions), &ex));
 
     collector.Reset();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value, kvOptions), &ex));
     ASSERT_EQ(2, value.size());
     ASSERT_EQ(1, value[0].size());
     ASSERT_EQ('a', value[0][0]);
@@ -142,13 +142,13 @@ void KVReaderTest::TestBlockCache()
     kvOptions.fieldName = "uint32";
     uint32_t value32;
     kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value32, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value32, kvOptions), &ex));
     ASSERT_EQ(11, value32);
     ASSERT_EQ(0L, collector.GetSSTableCount());
     ASSERT_EQ(1L, collector.GetMemTableCount());
 
     // accumulate metrics collector
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("10"), value32, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("10"), value32, kvOptions), &ex));
     ASSERT_EQ(11, value32);
     ASSERT_EQ(0L, collector.GetSSTableCount());
     ASSERT_EQ(2L, collector.GetMemTableCount());
@@ -156,7 +156,7 @@ void KVReaderTest::TestBlockCache()
 
 void KVReaderTest::TestSearchCache()
 {
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     string field = "key:string;value:uint64;";
     IndexPartitionSchemaPtr schema = SchemaMaker::MakeKVSchema(field, "key", "value");
     string docString = "cmd=add,key=abc,value=1,ts=101000000;"
@@ -175,13 +175,13 @@ void KVReaderTest::TestSearchCache()
     KVMetricsCollector collector;
     kvOptions.metricsCollector = &collector;
     kvOptions.pool = &pool;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1ul, value);
     ASSERT_EQ(1L, collector.GetSearchCacheMissCount());
     ASSERT_EQ(0L, collector.GetSearchCacheHitCount());
 
     collector.Reset();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1ul, value);
     ASSERT_LE(0L, collector.GetSSTableLatency());
     ASSERT_LE(0L, collector.GetMemTableLatency());
@@ -198,7 +198,7 @@ void KVReaderTest::TestSearchCache()
     ASSERT_TRUE(psm.Transfer(BUILD_RT, docString, "", ""));
     collector.Reset();
     kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(3, value);
     ASSERT_EQ(0L, collector.GetSearchCacheHitCount());
     ASSERT_EQ(0L, collector.GetSearchCacheMissCount());
@@ -206,7 +206,7 @@ void KVReaderTest::TestSearchCache()
     ASSERT_EQ(1L, collector.GetMemTableCount());
 
     // accumulate metrics collector
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(3, value);
     ASSERT_EQ(0L, collector.GetSearchCacheHitCount());
     ASSERT_EQ(2L, collector.GetMemTableCount());
@@ -233,16 +233,16 @@ void KVReaderTest::TestSearchCacheIncReclaimAllRtBug()
     mem_pool::Pool pool;
     KVReadOptions kvOptions;
     KVMetricsCollector collector;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     kvOptions.metricsCollector = &collector;
     kvOptions.pool = &pool;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1ul, value);
     ASSERT_EQ(1L, collector.GetSearchCacheMissCount());
     ASSERT_EQ(0L, collector.GetSearchCacheHitCount());
 
     collector.Reset();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1ul, value);
     // FIXME: refactor
     ASSERT_EQ(1L, collector.GetSearchCacheHitCount());
@@ -255,7 +255,7 @@ void KVReaderTest::TestSearchCacheIncReclaimAllRtBug()
     ASSERT_TRUE(psm.Transfer(BUILD_RT, rtDocStr, "", ""));
     collector.Reset();
     kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1, value);
     ASSERT_EQ(1L, collector.GetSearchCacheHitCount());
     ASSERT_EQ(0L, collector.GetSearchCacheMissCount());
@@ -265,13 +265,13 @@ void KVReaderTest::TestSearchCacheIncReclaimAllRtBug()
     ASSERT_TRUE(psm.Transfer(BUILD_INC_NO_MERGE, incDocStr, "", ""));
     kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
     // accumulate metrics collector
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1, value);
     ASSERT_EQ(1L, collector.GetSearchCacheHitCount());
     ASSERT_EQ(0L, collector.GetSearchCacheMissCount());
     EXPECT_EQ(1L, collector.GetSearchCacheResultCount());
 
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1, value);
     EXPECT_EQ(2L, collector.GetSearchCacheHitCount());
     EXPECT_EQ(0L, collector.GetSearchCacheMissCount());
@@ -308,9 +308,9 @@ void KVReaderTest::TestCuckoo()
     uint64_t value;
     mem_pool::Pool pool;
     KVReadOptions kvOptions;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     kvOptions.pool = &pool;
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(1ul, value);
 
     docString = "cmd=add,key=hij,value=4,ts=202000000;";
@@ -320,11 +320,11 @@ void KVReaderTest::TestCuckoo()
     ASSERT_TRUE(psm.Transfer(BUILD_RT, docString, "", ""));
 
     kvReader = psm.GetIndexPartition()->GetReader()->GetKVReader();
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("abc"), value, kvOptions), &ex));
     ASSERT_EQ(3ul, value);
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("def"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("def"), value, kvOptions), &ex));
     ASSERT_EQ(2ul, value);
-    ASSERT_TRUE(future_lite::interface::syncAwait(kvReader->GetAsync(StringView("hij"), value, kvOptions), &ex));
+    ASSERT_TRUE(async_simple::interface::syncAwait(kvReader->GetAsync(StringView("hij"), value, kvOptions), &ex));
     ASSERT_EQ(4ul, value);
 }
 
@@ -373,8 +373,8 @@ void KVReaderTest::CheckValue(const KVReader* reader, uint64_t key, const string
                               const KVReadOptions& options)
 {
     ValueType value;
-    future_lite::executors::SimpleExecutor ex(1);
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader->GetAsync(key, value, options), &ex));
+    async_simple::executors::SimpleExecutor ex(1);
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader->GetAsync(key, value, options), &ex));
     vector<uint32_t> expectValues;
     StringUtil::fromString(resultStr, expectValues, "#");
 
@@ -440,19 +440,19 @@ void KVReaderTest::TestGetWithRegionId()
     };
     auto validater1 = [](KVReaderImpl& reader, KVReadOptions& kvOptions) {
         int32_t value;
-        future_lite::executors::SimpleExecutor ex(1);
-        future_lite::interface::syncAwait(reader.GetAsync(7, value, kvOptions), &ex);
+        async_simple::executors::SimpleExecutor ex(1);
+        async_simple::interface::syncAwait(reader.GetAsync(7, value, kvOptions), &ex);
         ASSERT_EQ(10, value);
-        future_lite::interface::syncAwait(reader.GetAsync(12, value, kvOptions), &ex);
+        async_simple::interface::syncAwait(reader.GetAsync(12, value, kvOptions), &ex);
         ASSERT_EQ(20, value);
     };
     innerCheck(0, validater1);
     auto validater2 = [](KVReaderImpl& reader, KVReadOptions& kvOptions) {
         uint32_t value;
-        future_lite::executors::SimpleExecutor ex(1);
-        future_lite::interface::syncAwait(reader.GetAsync(7, value, kvOptions), &ex);
+        async_simple::executors::SimpleExecutor ex(1);
+        async_simple::interface::syncAwait(reader.GetAsync(7, value, kvOptions), &ex);
         ASSERT_EQ(10, value);
-        future_lite::interface::syncAwait(reader.GetAsync(12, value, kvOptions), &ex);
+        async_simple::interface::syncAwait(reader.GetAsync(12, value, kvOptions), &ex);
         ASSERT_EQ(20, value);
     };
     innerCheck(1, validater2);
@@ -475,11 +475,11 @@ void KVReaderTest::TestBatchGet()
     Pool pool;
     KVReadOptions options;
     options.pool = &pool;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     vector<uint64_t> keys = {1, 2};
     vector<StringView> values;
-    auto res = future_lite::coro::syncAwait(readerImpl->BatchGetAsync(keys, values, tsc_default, options), &ex);
-#if FUTURE_LITE_USE_COROUTINES
+    auto res = async_simple::coro::syncAwait(readerImpl->BatchGetAsync(keys, values, tsc_default, options), &ex);
+#if ASYNC_SIMPLE_USE_COROUTINES
     ASSERT_FALSE(res[0].hasError());
     ASSERT_FALSE(res[1].hasError());
     ASSERT_TRUE(res[0].value());

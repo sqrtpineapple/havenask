@@ -3,7 +3,7 @@
 #include "autil/mem_pool/Pool.h"
 #include "fslib/fs/ErrorGenerator.h"
 #include "fslib/fs/FileSystem.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/common_define.h"
 #include "indexlib/config/index_partition_options.h"
 #include "indexlib/config/index_partition_schema_maker.h"
@@ -282,7 +282,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithTruncAndMain()
     PrepareSegmentPosting(mIndexReader, termMeta);
 
     SegmentPosting resultSegPosting(mPostingFormatOption);
-    bool ret = future_lite::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
+    bool ret = async_simple::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
                                                                                  index::DictKeyInfo(1), 1,
                                                                                  resultSegPosting, nullptr))
                    .ValueOrThrow();
@@ -290,7 +290,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithTruncAndMain()
 
     SegmentPosting truncSegPosting(mPostingFormatOption);
     [[maybe_unused]] auto result =
-        future_lite::coro::syncAwait(
+        async_simple::coro::syncAwait(
             mTruncateIndexReader->GetSegmentPostingAsync(index::DictKeyInfo(1), 1, truncSegPosting, nullptr, nullptr))
             .ValueOrThrow();
     truncSegPosting.SetMainChainTermMeta(termMeta);
@@ -303,7 +303,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithTruncAndNoMain()
 
     // TODO: bitmap should exist
     SegmentPosting resultSegPosting(mPostingFormatOption);
-    bool ret = future_lite::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
+    bool ret = async_simple::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
                                                                                  index::DictKeyInfo(1), 1,
                                                                                  resultSegPosting, nullptr))
                    .ValueOrThrow();
@@ -314,7 +314,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithTruncAndNoMain()
     EXPECT_CALL(*mBitmapIndexReader, DoGetSegmentPosting(_, _, _))
         .WillRepeatedly(DoAll(SetArgReferee<2>(bitmapSegPosting), Return(true)));
 
-    ret = future_lite::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
+    ret = async_simple::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
                                                                             index::DictKeyInfo(1), 1, resultSegPosting,
                                                                             nullptr))
               .ValueOrThrow();
@@ -322,7 +322,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithTruncAndNoMain()
 
     SegmentPosting truncSegPosting(mPostingFormatOption);
     [[maybe_unused]] auto result =
-        future_lite::coro::syncAwait(
+        async_simple::coro::syncAwait(
             mTruncateIndexReader->GetSegmentPostingAsync(index::DictKeyInfo(1), 1, truncSegPosting, nullptr, nullptr))
             .ValueOrThrow();
     truncSegPosting.SetMainChainTermMeta(termMeta);
@@ -336,12 +336,12 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithNoTruncAndMain()
 
     SegmentPosting mainSegPosting(mPostingFormatOption);
     [[maybe_unused]] auto result =
-        future_lite::coro::syncAwait(
+        async_simple::coro::syncAwait(
             mIndexReader.GetSegmentPostingAsync(index::DictKeyInfo(1), 1, mainSegPosting, nullptr, nullptr))
             .ValueOrThrow();
 
     SegmentPosting resultSegPosting(mPostingFormatOption);
-    bool ret = future_lite::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
+    bool ret = async_simple::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
                                                                                  index::DictKeyInfo(1), 1,
                                                                                  resultSegPosting, nullptr))
                    .ValueOrThrow();
@@ -354,7 +354,7 @@ void NormalIndexReaderTest::TestFillTruncSegmentPostingWithNoTruncAndMain()
 void NormalIndexReaderTest::TestFillTruncSegmentPostingWithNoTruncAndNoMain()
 {
     SegmentPosting resultSegPosting(mPostingFormatOption);
-    bool ret = future_lite::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
+    bool ret = async_simple::coro::syncAwait(mIndexReader.FillTruncSegmentPosting(Term("", "index", "trunc"),
                                                                                  index::DictKeyInfo(1), 1,
                                                                                  resultSegPosting, nullptr))
                    .ValueOrThrow();
@@ -535,7 +535,7 @@ void NormalIndexReaderTest::TestLookupAsync()
     PartitionDataPtr partitionData = onlinePart->GetPartitionData();
     IndexSchemaPtr indexSchema = schema->GetIndexSchema();
     IndexConfigPtr indexConfig = indexSchema->GetIndexConfig("string2");
-    shared_ptr<future_lite::Executor> executor(new future_lite::executors::SimpleExecutor(2));
+    shared_ptr<async_simple::Executor> executor(new async_simple::executors::SimpleExecutor(2));
 
     NormalIndexReader reader;
     reader.Open(indexConfig, partitionData);
@@ -543,7 +543,7 @@ void NormalIndexReaderTest::TestLookupAsync()
 
     {
         Term term("1", "string2");
-        auto iter = future_lite::coro::syncAwait(
+        auto iter = async_simple::coro::syncAwait(
                         reader.LookupAsync(&term, (uint32_t)1000, pt_default, nullptr, nullptr).via(executor.get()))
                         .ValueOrThrow();
         ASSERT_TRUE(iter);
@@ -558,7 +558,7 @@ void NormalIndexReaderTest::TestLookupAsync()
     }
     {
         Term term("2", "string2");
-        auto iter = future_lite::coro::syncAwait(
+        auto iter = async_simple::coro::syncAwait(
                         reader.LookupAsync(&term, (uint32_t)1000, pt_default, nullptr, nullptr).via(executor.get()))
                         .ValueOrThrow();
         ASSERT_TRUE(iter);
@@ -575,7 +575,7 @@ void NormalIndexReaderTest::TestLookupAsync()
         // test timeout
         autil::TimeoutTerminator terminator(1, 1);
         Term term("1", "string2");
-        auto result = future_lite::coro::syncAwait(
+        auto result = async_simple::coro::syncAwait(
             reader.LookupAsync(&term, (uint32_t)1000, pt_default, nullptr, &terminator).via(executor.get()));
         ASSERT_FALSE(result.Ok());
         ASSERT_EQ(index::ErrorCode::Timeout, result.GetErrorCode());
@@ -1384,7 +1384,7 @@ void NormalIndexReaderTest::TestLookupWithIoException()
     errorMap.insert({{fullFilePath, "pread"}, ec});
     errorGenerator->setErrorMap(errorMap);
     auto postingResult =
-        future_lite::coro::syncAwait(reader->LookupAsync(&term, 1000, pt_default, &sessionPool, nullptr));
+        async_simple::coro::syncAwait(reader->LookupAsync(&term, 1000, pt_default, &sessionPool, nullptr));
     EXPECT_FALSE(postingResult.Ok());
     fslib::fs::FileSystem::_useMock = false;
 }

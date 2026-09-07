@@ -32,7 +32,7 @@ public:
 public:
     void Open(const config::IndexConfigPtr& indexConfig, const index_base::SegmentData& segmentData,
               const NormalIndexSegmentReader* hintReader) override;
-    future_lite::coro::Lazy<index::Result<SegmentPostingsVec>> Lookup(uint64_t leftTerm, uint64_t rightTerm,
+    async_simple::coro::Lazy<index::Result<SegmentPostingsVec>> Lookup(uint64_t leftTerm, uint64_t rightTerm,
                                                                       autil::mem_pool::Pool* sessionPool,
                                                                       file_system::ReadOption option) noexcept;
 

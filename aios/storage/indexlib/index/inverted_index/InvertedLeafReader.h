@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/file/ReadOption.h"
 // #include "indexlib/index/DiskIndexerParameter.h"
 #include "indexlib/index/common/ErrorCode.h"
@@ -45,7 +45,7 @@ public:
     bool GetSegmentPosting(const index::DictKeyInfo& key, docid64_t baseDocId, SegmentPosting& segPosting,
                            autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                            InvertedIndexSearchTracer* tracer) const override;
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, docid64_t baseDocId, SegmentPosting& segPosting,
                            autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                            InvertedIndexSearchTracer* tracer) const noexcept;
@@ -64,7 +64,7 @@ public:
 protected:
     void InnerGetSegmentPosting(dictvalue_t value, docid64_t baseDocId, SegmentPosting& segPosting,
                                 autil::mem_pool::Pool* sessionPool) const;
-    future_lite::coro::Lazy<index::ErrorCode> GetSegmentPostingAsync(dictvalue_t value, docid64_t baseDocId,
+    async_simple::coro::Lazy<index::ErrorCode> GetSegmentPostingAsync(dictvalue_t value, docid64_t baseDocId,
                                                                      SegmentPosting& segPosting,
                                                                      autil::mem_pool::Pool* sessionPool,
                                                                      file_system::ReadOption option,

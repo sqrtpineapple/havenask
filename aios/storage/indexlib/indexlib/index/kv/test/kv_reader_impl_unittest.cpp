@@ -1,7 +1,7 @@
 #include "indexlib/index/kv/test/kv_reader_impl_unittest.h"
 
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/test/schema_maker.h"
 #include "indexlib/test/fake_partition_data_creator.h"
 #include "indexlib/test/slow_dump_segment_container.h"
@@ -123,14 +123,14 @@ void KVReaderImplTest::InnerTestGet(const string& offlineValues, const string& o
     KVIndexOptions options;
     options.ttl = ttl;
     options.incTsInSecond = incTimestamp;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     {
         KVReaderImpl reader;
         reader.mHasTTL = true;
         reader.mHasSearchCache = false;
         PrepareSegmentReader(offlineValues, onlineValues, reader);
         autil::StringView value;
-        bool ret = future_lite::interface::syncAwait(reader.InnerGet(&options, key, value, searchTs, tsc_default), &ex);
+        bool ret = async_simple::interface::syncAwait(reader.InnerGet(&options, key, value, searchTs, tsc_default), &ex);
         ASSERT_EQ(ret, success);
         if (ret) {
             ASSERT_EQ(expectValue, value.to_string());
@@ -143,7 +143,7 @@ void KVReaderImplTest::InnerTestGet(const string& offlineValues, const string& o
         reader.mHasSearchCache = false;
         PrepareSegmentReader(offlineValues, onlineValues, reader);
         autil::StringView value;
-        bool ret = future_lite::interface::syncAwait(reader.InnerGet(&options, key, value, searchTs, tsc_default), &ex);
+        bool ret = async_simple::interface::syncAwait(reader.InnerGet(&options, key, value, searchTs, tsc_default), &ex);
         ASSERT_EQ(ret, success);
         if (ret) {
             ASSERT_EQ(expectValue, value.to_string());
@@ -189,8 +189,8 @@ void KVReaderImplTest::CheckReaderValue(const KVReaderPtr& reader, const string&
 {
     StringView keyStr(key.data(), key.size());
     StringView valueStr;
-    future_lite::executors::SimpleExecutor ex(1);
-    ASSERT_TRUE(future_lite::interface::syncAwait(reader->GetAsync(keyStr, valueStr), &ex));
+    async_simple::executors::SimpleExecutor ex(1);
+    ASSERT_TRUE(async_simple::interface::syncAwait(reader->GetAsync(keyStr, valueStr), &ex));
 
     uint64_t actualValue = *(uint64_t*)valueStr.data();
     ASSERT_EQ(value, actualValue);

@@ -27,10 +27,10 @@
 #include "autil/Lock.h"
 #include "autil/StringUtil.h"
 #include "autil/TimeUtility.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Try.h"
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/coro/LazyHelper.h"
+#include "CoroInterface.h"
+#include "async_simple/Try.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/coro/SyncAwait.h"
 #include "indexlib/index/kv/Types.h"
 #include "kmonitor/client/MetricMacro.h"
 #include "kmonitor/client/MetricsReporter.h"
@@ -39,9 +39,9 @@
 #include "navi/engine/AsyncPipe.h"
 #include "navi/log/NaviLogger.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 namespace kmonitor {
 class MetricsTags;
 } // namespace kmonitor
@@ -50,7 +50,7 @@ using namespace std;
 using namespace autil;
 using namespace navi;
 using namespace indexlib::index;
-using namespace future_lite::interface;
+using namespace async_simple::interface;
 using namespace kmonitor;
 
 namespace sql {
@@ -107,7 +107,7 @@ private:
 };
 
 AsyncKVLookupCallbackCtxV1::AsyncKVLookupCallbackCtxV1(const AsyncPipePtr &pipe,
-                                                       future_lite::Executor *executor)
+                                                       async_simple::Executor *executor)
     : _asyncPipe(pipe)
     , _executor(executor) {}
 
@@ -123,7 +123,7 @@ void AsyncKVLookupCallbackCtxV1::asyncGet(KVLookupOption option) {
     if (_asyncPipe == nullptr) {
         NAVI_LOG(DEBUG, "async pipe is nullptr, use sync with reader v1");
         assert(_executor && "executor is nullptr");
-        auto result = future_lite::coro::syncAwait(
+        auto result = async_simple::coro::syncAwait(
             kvReader->BatchGetAsync(_pksForSearch, _rawResults, indexlib::tsc_default, _readOptions)
                 .via(_executor));
         processBoolVec(result);
@@ -133,13 +133,13 @@ void AsyncKVLookupCallbackCtxV1::asyncGet(KVLookupOption option) {
         auto ctx = shared_from_this();
         kvReader->BatchGetAsync(_pksForSearch, _rawResults, indexlib::tsc_default, _readOptions)
             .via(_executor)
-            .start([ctx](future_lite::Try<BoolVector> boolVecTry) {
+            .start([ctx](async_simple::Try<BoolVector> boolVecTry) {
                 ctx->onSessionCallback(boolVecTry);
             });
     }
 }
 
-void AsyncKVLookupCallbackCtxV1::onSessionCallback(future_lite::Try<BoolVector> &boolVecTry) {
+void AsyncKVLookupCallbackCtxV1::onSessionCallback(async_simple::Try<BoolVector> &boolVecTry) {
     assert(!boolVecTry.hasError());
     auto &boolVec = boolVecTry.value();
     processBoolVec(boolVec);
@@ -154,10 +154,10 @@ void AsyncKVLookupCallbackCtxV1::prepareReadOptions(const KVLookupOption &option
 void AsyncKVLookupCallbackCtxV1::processBoolVec(BoolVector &boolVec) {
     _results.resize(boolVec.size());
     for (size_t i = 0; i < boolVec.size(); ++i) {
-        if (future_lite::interface::tryHasError(boolVec[i])) {
+        if (async_simple::interface::tryHasError(boolVec[i])) {
             _failedPks.emplace_back(_pksForSearch[i], 0);
             _results[i] = nullptr;
-        } else if (!future_lite::interface::getTryValue(boolVec[i])) {
+        } else if (!async_simple::interface::getTryValue(boolVec[i])) {
             _notFoundPks.emplace_back(_pksForSearch[i]);
             _results[i] = nullptr;
         } else {

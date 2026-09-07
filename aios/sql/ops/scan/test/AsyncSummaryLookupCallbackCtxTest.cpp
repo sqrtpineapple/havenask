@@ -9,7 +9,7 @@
 
 #include "autil/TimeUtility.h"
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/Try.h"
+#include "async_simple/Try.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/index/common/ErrorCode.h"
 #include "indexlib/indexlib.h"
@@ -54,7 +54,7 @@ TEST_F(AsyncSummaryLookupCallbackCtxTest, testOnSessionCallback) {
     EXPECT_CALL(*pipe, setData(_)).WillOnce(Return(navi::EC_NONE));
     indexlib::index::ErrorCodeVec errorCodes;
     errorCodes.emplace_back(indexlib::index::ErrorCode::OK);
-    future_lite::Try<indexlib::index::ErrorCodeVec> errorCodeTry(std::move(errorCodes));
+    async_simple::Try<indexlib::index::ErrorCodeVec> errorCodeTry(std::move(errorCodes));
     ctx._startVersion = 1;
     ctx._callbackVersion = 0;
     ctx.onSessionCallback(errorCodeTry);
@@ -71,7 +71,7 @@ TEST_F(AsyncSummaryLookupCallbackCtxTest, testOnSessionCallback_ErrorDocId) {
     indexlib::index::ErrorCodeVec errorCodes;
     errorCodes.emplace_back(indexlib::index::ErrorCode::OK);
     errorCodes.emplace_back(indexlib::index::ErrorCode::Timeout);
-    future_lite::Try<indexlib::index::ErrorCodeVec> errorCodeTry(std::move(errorCodes));
+    async_simple::Try<indexlib::index::ErrorCodeVec> errorCodeTry(std::move(errorCodes));
     ctx._startVersion = 1;
     ctx._callbackVersion = 0;
     ctx.onSessionCallback(errorCodeTry);
@@ -85,7 +85,7 @@ TEST_F(AsyncSummaryLookupCallbackCtxTest, testOnSessionCallback_ErrorException) 
     CountedAsyncPipePtr countedPipe(new CountedAsyncPipe(pipe));
     AsyncSummaryLookupCallbackCtx ctx(countedPipe, {}, NULL, _poolPtr, nullptr);
     EXPECT_CALL(*pipe, setData(_)).WillOnce(Return(navi::EC_NONE));
-    future_lite::Try<indexlib::index::ErrorCodeVec> errorCodeTry;
+    async_simple::Try<indexlib::index::ErrorCodeVec> errorCodeTry;
     errorCodeTry.setException(make_exception_ptr(std::bad_exception()));
     ctx._startVersion = 1;
     ctx._callbackVersion = 0;

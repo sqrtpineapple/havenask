@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/config/index_config.h"
 #include "indexlib/index/common/ErrorCode.h"
 #include "indexlib/index/inverted_index/IndexSegmentReader.h"
@@ -43,7 +43,7 @@ public:
                            autil::mem_pool::Pool* sessionPool,
                            InvertedIndexSearchTracer* tracer = nullptr) const override;
 
-    future_lite::coro::Lazy<index::Result<bool>> GetSegmentPostingAsync(const index::DictKeyInfo& key,
+    async_simple::coro::Lazy<index::Result<bool>> GetSegmentPostingAsync(const index::DictKeyInfo& key,
                                                                         docid_t baseDocId, SegmentPosting& segPosting,
                                                                         autil::mem_pool::Pool* sessionPool,
                                                                         file_system::ReadOption option) const noexcept;
@@ -61,7 +61,7 @@ protected:
     void InnerGetSegmentPosting(dictvalue_t value, SegmentPosting& segPosting,
                                 autil::mem_pool::Pool* sessionPool) const;
 
-    future_lite::coro::Lazy<index::ErrorCode> GetSegmentPostingAsync(dictvalue_t value, SegmentPosting& segPosting,
+    async_simple::coro::Lazy<index::ErrorCode> GetSegmentPostingAsync(dictvalue_t value, SegmentPosting& segPosting,
                                                                      autil::mem_pool::Pool* sessionPool,
                                                                      file_system::ReadOption option) const noexcept;
 

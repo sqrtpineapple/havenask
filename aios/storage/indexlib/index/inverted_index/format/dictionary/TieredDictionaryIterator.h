@@ -47,12 +47,12 @@ public:
     bool HasNext() const override;
     void Next(index::DictKeyInfo& key, dictvalue_t& value) override;
     void Seek(dictkey_t key) override;
-    future_lite::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption option) noexcept override
+    async_simple::coro::Lazy<index::ErrorCode> SeekAsync(dictkey_t key, file_system::ReadOption option) noexcept override
     {
         Seek(key);
         co_return index::ErrorCode::OK;
     }
-    future_lite::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
+    async_simple::coro::Lazy<index::ErrorCode> NextAsync(index::DictKeyInfo& key, file_system::ReadOption option,
                                                         dictvalue_t& value) noexcept override
     {
         Next(key, value);

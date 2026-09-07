@@ -94,7 +94,7 @@ strict_cc_library(
     name='KVTableMergePlanCreator',
     deps=[
         ':KVTableMergeDescriptionCreator', ':KeyValueOptimizeMergeStrategy',
-        '//aios/autil:NoCopyable', '//aios/future_lite',
+        '//aios/autil:NoCopyable', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/config:MergeConfig',
         '//aios/storage/indexlib/config:OfflineConfig',

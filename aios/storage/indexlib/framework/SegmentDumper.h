@@ -24,7 +24,7 @@
 #include <tuple>
 
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -98,7 +98,7 @@ public:
     }
     virtual ~SegmentDumper() = default;
 
-    Status Dump(future_lite::Executor* executor, const uint32_t dumpThreadCount);
+    Status Dump(async_simple::Executor* executor, const uint32_t dumpThreadCount);
     segmentid_t GetSegmentId() const { return _dumpingSegment->GetSegmentId(); }
     size_t EstimateDumpExpandMemsize() const { return _dumpExpandMemSize; }
     size_t GetCurrentMemoryUse() const { return _dumpingSegment->EvaluateCurrentMemUsed(); }
@@ -109,7 +109,7 @@ private:
     virtual Status StoreSegmentInfo();
 
     Status SequentialDump(const std::vector<std::shared_ptr<SegmentDumpItem>>& dumpItems, const segmentid_t segId);
-    Status ParallelDump(future_lite::Executor* executor, const std::vector<std::shared_ptr<SegmentDumpItem>>& dumpItems,
+    Status ParallelDump(async_simple::Executor* executor, const std::vector<std::shared_ptr<SegmentDumpItem>>& dumpItems,
                         const segmentid_t segId, const uint32_t parallelism);
     void DumpTask(const std::vector<std::shared_ptr<SegmentDumpItem>>& dumpItems, DumpControl* control,
                   const bool isCoordinator);

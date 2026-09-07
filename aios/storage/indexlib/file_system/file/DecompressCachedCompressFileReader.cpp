@@ -145,7 +145,7 @@ void DecompressCachedCompressFileReader::LoadBuffer(size_t offset, ReadOption op
     _curBlockIdxs[0] = compressBlockIdx;
 }
 
-future_lite::coro::Lazy<std::vector<ErrorCode>> DecompressCachedCompressFileReader::BatchLoadBuffer(
+async_simple::coro::Lazy<std::vector<ErrorCode>> DecompressCachedCompressFileReader::BatchLoadBuffer(
     const std::vector<std::pair<size_t, util::BufferCompressor*>>& blockInfo, ReadOption option) noexcept
 {
     assert(_dataFileReader);

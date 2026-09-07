@@ -126,7 +126,7 @@ InvertedLeafReader::GetSessionPostingFileReader(autil::mem_pool::Pool* sessionPo
     return _postingReader;
 }
 
-future_lite::coro::Lazy<index::Result<bool>> InvertedLeafReader::GetSegmentPostingAsync(
+async_simple::coro::Lazy<index::Result<bool>> InvertedLeafReader::GetSegmentPostingAsync(
     const index::DictKeyInfo& key, docid64_t baseDocId, SegmentPosting& segPosting, autil::mem_pool::Pool* sessionPool,
     file_system::ReadOption option, InvertedIndexSearchTracer* tracer) const noexcept
 {
@@ -156,7 +156,7 @@ future_lite::coro::Lazy<index::Result<bool>> InvertedLeafReader::GetSegmentPosti
     co_return true;
 }
 
-future_lite::coro::Lazy<index::ErrorCode>
+async_simple::coro::Lazy<index::ErrorCode>
 InvertedLeafReader::GetSegmentPostingAsync(dictvalue_t dictValue, docid64_t baseDocId, SegmentPosting& segPosting,
                                            autil::mem_pool::Pool* sessionPool, file_system::ReadOption option,
                                            InvertedIndexSearchTracer* tracer) const noexcept

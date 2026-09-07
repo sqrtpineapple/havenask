@@ -1,7 +1,7 @@
 #include "indexlib/index/kkv/test/value_inline_unittest.h"
 
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/test/schema_maker.h"
 #include "indexlib/file_system/FileBlockCacheContainer.h"
 #include "indexlib/file_system/test/LoadConfigListCreator.h"
@@ -158,8 +158,8 @@ void ValueInlineTest::TestMultiChunk()
     auto kkvReader = psm.GetIndexPartition()->GetReader()->GetKKVReader();
     KVMetricsCollector collector;
 
-    future_lite::executors::SimpleExecutor ex(1);
-    auto kkvDocIter = future_lite::interface::syncAwait(
+    async_simple::executors::SimpleExecutor ex(1);
+    auto kkvDocIter = async_simple::interface::syncAwait(
         kkvReader->LookupAsync(autil::StringView("1"), 0, tsc_default, &mPool, &collector), &ex);
 
     uint64_t idx = 0;

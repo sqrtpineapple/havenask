@@ -40,7 +40,7 @@ BlockPrefetcher::BlockPrefetcher(BlockFileAccessor* accessor, ReadOption option)
     _option.advice = IO_ADVICE_LOW_LATENCY;
 }
 
-future_lite::coro::Lazy<ErrorCode> BlockPrefetcher::Prefetch(size_t offset, size_t len)
+async_simple::coro::Lazy<ErrorCode> BlockPrefetcher::Prefetch(size_t offset, size_t len)
 {
     vector<size_t> blockIds;
     for (size_t i = _accessor->GetBlockIdx(offset); i <= _accessor->GetBlockIdx(offset + len); ++i) {

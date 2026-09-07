@@ -17,8 +17,8 @@
 
 #include "autil/Log.h"
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/Future.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/Future.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FSResult.h"
 #include "indexlib/file_system/FileSystemDefine.h"
@@ -45,10 +45,10 @@ public:
     // general interface
 public:
     virtual FSResult<size_t> Read(void* buffer, size_t length, size_t offset, file_system::ReadOption option) = 0;
-    virtual future_lite::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
+    virtual async_simple::coro::Lazy<std::vector<file_system::FSResult<size_t>>>
     BatchRead(file_system::BatchIO& batchIO, file_system::ReadOption option) noexcept = 0;
 
-    virtual future_lite::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
+    virtual async_simple::Future<FSResult<size_t>> ReadAsync(void* buffer, size_t length, size_t offset,
                                                             file_system::ReadOption option) = 0;
 
     // create a file stream from this, which maybe not support concurrency read

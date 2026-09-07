@@ -74,7 +74,7 @@ strict_cc_library(
     name='NormalTableCompactPlanCreator',
     deps=[
         ':NormalTableMergeDescriptionCreator', '//aios/autil:NoCopyable',
-        '//aios/future_lite', '//aios/storage/indexlib/base:Status',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/config:MergeConfig',
         '//aios/storage/indexlib/config:OfflineConfig',
         '//aios/storage/indexlib/config:TabletOptions',

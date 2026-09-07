@@ -42,7 +42,7 @@ public:
         return index::AttributeReaderPtr(attrReader);
     }
 
-    docid64_t Lookup(const std::string& pkStr, future_lite::Executor* executor) const override
+    docid64_t Lookup(const std::string& pkStr, async_simple::Executor* executor) const override
     {
         std::map<std::string, docid_t>::const_iterator it = _map.find(pkStr);
         if (it != _map.end()) {
@@ -59,7 +59,7 @@ public:
 
     docid64_t Lookup(const autil::StringView& pkStr) const override { return Lookup(pkStr.to_string(), nullptr); }
 
-    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, future_lite::Executor* executor) const override
+    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, async_simple::Executor* executor) const override
     {
         uint64_t pkValue;
         indexlib::index::PrimaryKeyHashConvertor::ToUInt64(pkHash, pkValue);

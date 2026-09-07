@@ -19,7 +19,7 @@
 
 #include "autil/Log.h"
 #include "autil/NoCopyable.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/attribute/format/SingleEncodedNullValue.h"

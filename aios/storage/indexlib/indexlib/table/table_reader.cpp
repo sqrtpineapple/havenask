@@ -30,7 +30,7 @@ TableReader::TableReader() : /* mInterfaceId(DEFAULT_INTERFACE_ID), */ mForceSee
 TableReader::~TableReader() { mExecutor = nullptr; }
 
 bool TableReader::Init(const IndexPartitionSchemaPtr& schema, const IndexPartitionOptions& options,
-                       future_lite::Executor* executor, const util::MetricProviderPtr& metricProvider)
+                       async_simple::Executor* executor, const util::MetricProviderPtr& metricProvider)
 {
     mSchema = schema;
     mOptions = options;

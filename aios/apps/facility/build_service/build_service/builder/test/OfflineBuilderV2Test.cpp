@@ -18,9 +18,9 @@
 #include "build_service/test/unittest.h"
 #include "build_service/util/Log.h"
 #include "build_service/util/ParallelIdGenerator.h"
-#include "future_lite/Executor.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/TaskScheduler.h"
+#include "async_simple/Executor.h"
+#include "ExecutorCreator.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/base/Types.h"
@@ -108,14 +108,14 @@ class FakeOfflineBuilderV2 : public OfflineBuilderV2
         tabletOptions->SetFlushLocal(false);
         tabletOptions->SetIsOnline(false);
 
-        _executor = future_lite::ExecutorCreator::Create(
+        _executor = async_simple::ExecutorCreator::Create(
             /*type*/ "async_io",
-            future_lite::ExecutorCreator::Parameters()
+            async_simple::ExecutorCreator::Parameters()
                 .SetExecutorName("tablet_dump" + autil::StringUtil::toString(_partitionId.range().from()) + "_" +
                                  autil::StringUtil::toString(_partitionId.range().to()))
                 .SetThreadNum(tabletOptions->GetOfflineConfig().GetBuildConfig().GetDumpThreadCount()));
 
-        _taskScheduler = std::make_unique<future_lite::TaskScheduler>(_executor.get());
+        _taskScheduler = std::make_unique<async_simple::TaskScheduler>(_executor.get());
 
         auto schema = _resourceReader->getTabletSchema(_clusterName);
         if (!schema) {

@@ -14,13 +14,14 @@
 #include "fslib/common/common_type.h"
 #include "fslib/fs/ErrorGenerator.h"
 #include "fslib/fs/FileSystem.h"
-#include "future_lite/Common.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/Future.h"
-#include "future_lite/Promise.h"
-#include "future_lite/Unit.h"
-#include "future_lite/executors/SimpleExecutor.h"
-#include "future_lite/executors/SimpleIOExecutor.h"
+#include "async_simple/Common.h"
+#include "CoroInterface.h"
+#include "async_simple/Future.h"
+#include "async_simple/Promise.h"
+#include "async_simple/Unit.h"
+#include "async_simple/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleIOExecutor.h"
+#include "ExecutorCreator.h"
 #include "indexlib/file_system/ByteSliceReader.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FileSystemDefine.h"
@@ -39,13 +40,13 @@
 #include "indexlib/util/cache/BlockHandle.h"
 #include "indexlib/util/testutil/unittest.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 
 using namespace std;
-using namespace future_lite;
-using namespace future_lite::executors;
+using namespace async_simple;
+using namespace async_simple::executors;
 
 using namespace indexlib::file_system;
 using namespace indexlib::util;
@@ -183,7 +184,7 @@ void BlockFileNodeTest::TestCaseForReadWithBuffer()
         char buffer[length];                                                                                           \
         auto executor = ExecutorCreator::Create(                                                                       \
             /*type*/ "async_io", ExecutorCreator::Parameters().SetThreadNum(10).SetExecutorName("suez_write"));        \
-        ASSERT_EQ(FSEC_OK, future_lite::interface::syncAwait(                                                          \
+        ASSERT_EQ(FSEC_OK, async_simple::interface::syncAwait(                                                          \
                                blockFileNode->ReadAsyncCoro(buffer, length, offset, ReadOption()))                     \
                                .Code());                                                                               \
         const string curData(buffer, length);                                                                          \
@@ -222,9 +223,9 @@ void BlockFileNodeTest::TestCaseForReadWithBufferCoro()
             std::shared_ptr<BlockFileNode> blockFileNode = CreateFileNode(true);                                       \
             EXPECT_EQ(FSEC_OK, blockFileNode->Open("LOGICAL_PATH", _fileName, FSOT_CACHE, -1));                        \
             blockFileNode->Read(buffer, length, offset, ReadOption()).GetOrThrow();                                    \
-            FL_CORETURN future_lite::Unit {};                                                                          \
+            FL_CORETURN async_simple::Unit {};                                                                          \
         };                                                                                                             \
-        future_lite::interface::syncAwait(checkReadFunc(), executor);                                                  \
+        async_simple::interface::syncAwait(checkReadFunc(), executor);                                                  \
         const string curData(buffer, length);                                                                          \
         ASSERT_EQ(expectData, curData.substr(0, length));                                                              \
         delete executor;                                                                                               \
@@ -251,7 +252,7 @@ void BlockFileNodeTest::TestCaseForReadWithDirectIO()
         std::shared_ptr<BlockFileNode> blockFileNode = CreateFileNode(true);                                           \
         ASSERT_EQ(FSEC_OK, blockFileNode->Open("LOGICAL_PATH", _fileName, FSOT_CACHE, -1));                            \
         char buffer[length];                                                                                           \
-        ASSERT_EQ(FSEC_OK, future_lite::interface::syncAwait(                                                          \
+        ASSERT_EQ(FSEC_OK, async_simple::interface::syncAwait(                                                          \
                                blockFileNode->ReadAsyncCoro(buffer, length, offset, ReadOption()), executor)           \
                                .Code());                                                                               \
         const string curData(buffer, length);                                                                          \
@@ -381,7 +382,7 @@ void BlockFileNodeTest::TestCaseForGetBlocks()
     ASSERT_EQ(FSEC_OK, blockFileNode->Open("LOGICAL_PATH", _fileName, FSOT_CACHE, -1));
     ReadOption option;
     {
-        auto handles = future_lite::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({0, 1, 2, 3, 4}, option));
+        auto handles = async_simple::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({0, 1, 2, 3, 4}, option));
         for (size_t i = 0; i < 5; i++) {
             ASSERT_TRUE(handles[i].GetOrThrow().GetBlock() != NULL);
             const string expectData(_blockSize, 'a' + i);
@@ -391,7 +392,7 @@ void BlockFileNodeTest::TestCaseForGetBlocks()
     }
     {
         ASSERT_EQ(5, blockFileNode->GetBlockCache()->GetBlockCount());
-        auto handles = future_lite::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({3, 4}, option));
+        auto handles = async_simple::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({3, 4}, option));
         for (size_t i = 0; i < 2; i++) {
             ASSERT_TRUE(handles[i].GetOrThrow().GetBlock() != NULL);
             const string expectData(_blockSize, 'a' + i + 3);
@@ -401,7 +402,7 @@ void BlockFileNodeTest::TestCaseForGetBlocks()
     }
     {
         ASSERT_EQ(5, blockFileNode->GetBlockCache()->GetBlockCount());
-        auto handles = future_lite::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({3, 4, 5, 6, 7}, option));
+        auto handles = async_simple::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({3, 4, 5, 6, 7}, option));
         for (size_t i = 0; i < 5; i++) {
             ASSERT_TRUE(handles[i].GetOrThrow().GetBlock() != NULL);
             const string expectData(_blockSize, 'a' + i + 3);
@@ -418,7 +419,7 @@ void BlockFileNodeTest::TestCaseForGetBlocks()
         EXPECT_EQ(expectData, string(addr1, _blockSize));
         ASSERT_EQ(9, blockFileNode->GetBlockCache()->GetBlockCount());
         auto handles =
-            future_lite::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({8, 9, 10, 11, 12}, option));
+            async_simple::coro::syncAwait(blockFileNode->_accessor.GetBlockHandles({8, 9, 10, 11, 12}, option));
         ASSERT_EQ((size_t)5, handles.size());
         for (size_t i = 0; i < 5; i++) {
             ASSERT_TRUE(handles[i].GetOrThrow().GetBlock() != NULL);
@@ -471,10 +472,10 @@ public:
         return FSEC_OK;
     }
 
-    future_lite::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
-                                                     future_lite::Executor* executor) noexcept override
+    async_simple::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
+                                                     async_simple::Executor* executor) noexcept override
     {
-        future_lite::Promise<FSResult<size_t>> promise;
+        async_simple::Promise<FSResult<size_t>> promise;
         auto future = promise.getFuture();
         MoveWrapper<decltype(promise)> p(std::move(promise));
         size_t realLength = 0;
@@ -698,7 +699,7 @@ void BlockFileNodeTest::TestCaseForBatchReadMergeBlock()
         util::BlockAccessCounter counter;
         ReadOption option;
         option.blockCounter = &counter;
-        auto result = future_lite::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, option));
+        auto result = async_simple::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, option));
         ASSERT_EQ(result.size(), batchIO.size());
         for (size_t i = 0; i < batchIO.size(); ++i) {
             ASSERT_TRUE(result[i].OK());
@@ -764,7 +765,7 @@ void BlockFileNodeTest::TestCaseForMultiThreadBatchRead()
                 }
                 sort(batchIO.begin(), batchIO.end());
                 auto readResult =
-                    future_lite::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, ReadOption()).via(executor));
+                    async_simple::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, ReadOption()).via(executor));
                 ASSERT_EQ(readResult.size(), batchSize);
                 for (size_t i = 0; i < batchSize; ++i) {
                     ASSERT_EQ(blockSize, readResult[i].GetOrThrow());
@@ -815,7 +816,7 @@ void BlockFileNodeTest::TestCaseForBatchReadWithIOError()
     ASSERT_EQ(FSEC_OK, blockFileNode->Open("LOGICAL_PATH", _fileName, FSOT_CACHE, -1));
     char buffer[3][8192];
     BatchIO batchIO({{buffer[0], 4096, 0}, {buffer[1], 4096, 4096}, {buffer[2], 4096, 8192}});
-    auto readResult = future_lite::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, ReadOption()));
+    auto readResult = async_simple::coro::syncAwait(blockFileNode->BatchReadOrdered(batchIO, ReadOption()));
     ASSERT_EQ(batchIO.size(), readResult.size());
     ASSERT_EQ(4096, readResult[0].GetOrThrow());
     ASSERT_FALSE(readResult[1].OK());

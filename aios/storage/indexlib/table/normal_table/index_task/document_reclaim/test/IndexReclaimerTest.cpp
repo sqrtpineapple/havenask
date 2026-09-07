@@ -68,7 +68,7 @@ public:
         return nullptr;
     }
 
-    future_lite::coro::Lazy<indexlib::index::Result<indexlib::index::PostingIterator*>>
+    async_simple::coro::Lazy<indexlib::index::Result<indexlib::index::PostingIterator*>>
     LookupAsync(const indexlib::index::Term* term, uint32_t statePoolSize, PostingType type,
                 autil::mem_pool::Pool* pool, indexlib::file_system::ReadOption option) noexcept override
     {
@@ -107,7 +107,7 @@ private:
         assert(false);
         return false;
     }
-    future_lite::coro::Lazy<indexlib::index::Result<bool>>
+    async_simple::coro::Lazy<indexlib::index::Result<bool>>
     GetSegmentPostingAsync(const indexlib::index::DictKeyInfo& key, uint32_t segmentIdx,
                            indexlib::index::SegmentPosting& segPosting, indexlib::file_system::ReadOption option,
                            indexlib::index::InvertedIndexSearchTracer* tracer) noexcept override

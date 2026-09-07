@@ -4,7 +4,7 @@ strict_cc_fast_test(
     srcs=['KKVSearchCoroutineTest.cpp'],
     copts=['-fno-access-control'],
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/config:schema',
         '//aios/storage/indexlib/document',
         '//aios/storage/indexlib/document/test:KVDocumentBatchMaker',

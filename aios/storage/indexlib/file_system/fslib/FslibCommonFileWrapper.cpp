@@ -29,28 +29,28 @@
 #include "fslib/common/common_type.h"
 #include "fslib/fs/File.h"
 #include "fslib/fs/IOController.h"
-#include "future_lite/Common.h"
-#include "future_lite/Helper.h"
-#include "future_lite/MoveWrapper.h"
-#include "future_lite/Promise.h"
-#include "future_lite/Try.h"
+#include "async_simple/Common.h"
+#include "Helper.h"
+#include "async_simple/MoveWrapper.h"
+#include "async_simple/Promise.h"
+#include "async_simple/Try.h"
 #include "indexlib/file_system/fslib/DataFlushController.h"
 #include "indexlib/file_system/fslib/FslibOption.h"
 #include "indexlib/file_system/fslib/MultiPathDataFlushController.h"
 #include "indexlib/util/Exception.h"
 #include "indexlib/util/IoExceptionController.h"
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
-} // namespace future_lite
+} // namespace async_simple
 
 using namespace std;
 
-using future_lite::Executor;
-using future_lite::Future;
-using future_lite::MoveWrapper;
-using future_lite::Promise;
-using future_lite::Try;
+using async_simple::Executor;
+using async_simple::Future;
+using async_simple::MoveWrapper;
+using async_simple::Promise;
+using async_simple::Try;
 
 namespace indexlib { namespace file_system {
 AUTIL_LOG_SETUP(indexlib.file_system, FslibCommonFileWrapper);
@@ -115,10 +115,10 @@ Future<FSResult<size_t>> FslibCommonFileWrapper::PReadAsync(void* buffer, size_t
     return InternalPReadASync(buffer, length, offset, advice, executor);
 }
 
-future_lite::coro::Lazy<FSResult<size_t>>
+async_simple::coro::Lazy<FSResult<size_t>>
 FslibCommonFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice, int64_t timeout) noexcept
 {
-    auto executor = co_await future_lite::CurrentExecutor();
+    auto executor = co_await async_simple::CurrentExecutor();
     if (!executor) {
         ssize_t readResult = _file->preadv(iov, iovcnt, offset);
         FSResult<size_t> ec;
@@ -208,7 +208,7 @@ Future<FSResult<size_t>> FslibCommonFileWrapper::PReadVAsync(const iovec* iov, i
                   "total size [%ld] exceeds PANGU_MAX_READ_BYTES[%ld] errno[%d]",
                   _file->getFileName(), totalReadLen, PANGU_MAX_READ_BYTES, _file->getLastError());
         // TODO(qisa.cb) 需要定义一个EC表示这个错误
-        return future_lite::makeReadyFuture<FSResult<size_t>>({FSEC_ERROR, 0});
+        return async_simple::makeReadyFuture<FSResult<size_t>>({FSEC_ERROR, 0});
     }
     Promise<FSResult<size_t>> promise;
     auto future = promise.getFuture();
@@ -220,19 +220,19 @@ Future<FSResult<size_t>> FslibCommonFileWrapper::PReadVAsync(const iovec* iov, i
     controller->setAdvice(advice);
     controller->setExecutor(executor);
 
-    future.checkout();
+    p.get().checkout();
     if (executor) {
-        future.setForceSched(true);
+        p.get().forceSched();
     }
     _file->preadv(controller, iov, iovcnt, offset, [p, controller, this]() mutable {
         if (controller->getErrorCode() == fslib::EC_OK) {
-            p.get().setValue({FSEC_OK, controller->getIoSize()});
+            p.get().setValue(FSResult<size_t>(FSEC_OK, controller->getIoSize()));
         } else if (controller->getErrorCode() == fslib::EC_OPERATIONTIMEOUT) {
             AUTIL_LOG(ERROR, "read file[%s] timeout", _file->getFileName());
-            p.get().setValue({ParseFromFslibEC(controller->getErrorCode()), 0});
+            p.get().setValue(FSResult<size_t>(ParseFromFslibEC(controller->getErrorCode()), 0));
         } else {
             AUTIL_LOG(ERROR, "preadv file[%s] failed, fslibec[%d]", _file->getFileName(), controller->getErrorCode());
-            p.get().setValue({ParseFromFslibEC(controller->getErrorCode()), 0});
+            p.get().setValue(FSResult<size_t>(ParseFromFslibEC(controller->getErrorCode()), 0));
         }
         delete controller;
     });
@@ -295,19 +295,19 @@ Future<FSResult<size_t>> FslibCommonFileWrapper::InternalPReadASync(void* buffer
                                                                     int advice, Executor* executor) noexcept
 {
     if (length == 0) {
-        return future_lite::makeReadyFuture(FSResult<size_t> {FSEC_OK, (size_t)0});
+        return async_simple::makeReadyFuture(FSResult<size_t> {FSEC_OK, (size_t)0});
     }
     size_t readLen = length > DEFAULT_READ_WRITE_LENGTH ? DEFAULT_READ_WRITE_LENGTH : length;
     auto future =
         SinglePreadAsync(buffer, readLen, offset, advice, executor)
             .thenValue([buffer, length, offset, advice, executor, this](FSResult<size_t>&& ret) mutable {
                 if (!ret.OK() || ret.Value() == 0) {
-                    return future_lite::makeReadyFuture(std::move(ret));
+                    return async_simple::makeReadyFuture(std::move(ret));
                 }
                 assert(ret.Value() > 0);
                 size_t result = ret.Value();
                 if (_useDirectIO && (result % MIN_ALIGNMENT) != 0) {
-                    return future_lite::makeReadyFuture(std::move(ret));
+                    return async_simple::makeReadyFuture(std::move(ret));
                 }
                 return InternalPReadASync((char*)buffer + result, length - result, offset + result, advice, executor)
                     .thenValue([result](FSResult<size_t>&& ret) {
@@ -328,17 +328,17 @@ Future<FSResult<size_t>> FslibCommonFileWrapper::SinglePreadAsync(void* buffer, 
     controller->setAdvice(advice);
     controller->setExecutor(executor);
 
-    future.checkout();
+    p.get().checkout();
     if (executor) {
-        future.setForceSched(true);
+        p.get().forceSched();
     }
 
     _file->pread(controller, buffer, length, offset, [p, controller, this]() mutable {
         if (controller->getErrorCode() == fslib::EC_OK) {
-            p.get().setValue({FSEC_OK, controller->getIoSize()});
+            p.get().setValue(FSResult<size_t>(FSEC_OK, controller->getIoSize()));
         } else {
             AUTIL_LOG(ERROR, "pread file[%s] failed, fslibec[%d]", _file->getFileName(), controller->getErrorCode());
-            p.get().setValue({ParseFromFslibEC(controller->getErrorCode()), 0});
+            p.get().setValue(FSResult<size_t>(ParseFromFslibEC(controller->getErrorCode()), 0));
         }
         delete controller;
     });

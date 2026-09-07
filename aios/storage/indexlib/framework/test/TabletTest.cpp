@@ -4,8 +4,8 @@
 
 #include "autil/LambdaWorkItem.h"
 #include "autil/ThreadPool.h"
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/base/MemoryQuotaSynchronizer.h"
 #include "indexlib/config/BuildConfig.h"
@@ -61,8 +61,8 @@ public:
 
     void setUp() override
     {
-        _executor.reset(new future_lite::executors::SimpleExecutor(5));
-        _taskScheduler.reset(new future_lite::TaskScheduler(_executor.get()));
+        _executor.reset(new async_simple::executors::SimpleExecutor(5));
+        _taskScheduler.reset(new async_simple::TaskScheduler(_executor.get()));
 
         _resource.dumpExecutor = _executor.get();
         _resource.taskScheduler = _taskScheduler.get();
@@ -103,8 +103,8 @@ private:
                             bool expectedBuild);
 
 private:
-    std::unique_ptr<future_lite::Executor> _executor;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::Executor> _executor;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler;
 
     indexlibv2::framework::TabletResource _resource;
     std::unique_ptr<MockTabletOptions> _options;
@@ -361,7 +361,7 @@ TEST_F(TabletTest, testSealSegment)
 TEST_F(TabletTest, testMemoryController4TabletLoader4NoMem)
 {
     const size_t tabletTotalQuota = 8 * 1024 * 1024;
-    auto executor = std::make_unique<future_lite::executors::SimpleExecutor>(2);
+    auto executor = std::make_unique<async_simple::executors::SimpleExecutor>(2);
     _resource.dumpExecutor = executor.get();
     _resource.memoryQuotaController = std::make_shared<MemoryQuotaController>("ut", tabletTotalQuota);
 
@@ -397,7 +397,7 @@ TEST_F(TabletTest, testMemoryController4TabletLoader4NoMem)
 
 TEST_F(TabletTest, testMemoryController4TabletLoader4Success)
 {
-    auto executor = std::make_unique<future_lite::executors::SimpleExecutor>(2);
+    auto executor = std::make_unique<async_simple::executors::SimpleExecutor>(2);
     const size_t tabletTotalQuota = 8 * 1024 * 1024;
     _resource.dumpExecutor = executor.get();
     _resource.memoryQuotaController = std::make_shared<MemoryQuotaController>("ut", tabletTotalQuota);
@@ -521,7 +521,7 @@ TEST_F(TabletTest, testTabletCenter)
 {
     TabletCenter::GetInstance()->Activate();
     auto createFakeTablet = [&](const indexlib::framework::TabletId& tabletId) {
-        auto executor = std::make_unique<future_lite::executors::SimpleExecutor>(2);
+        auto executor = std::make_unique<async_simple::executors::SimpleExecutor>(2);
         _resource.tabletId = tabletId;
         const size_t tabletTotalQuota = 8 * 1024 * 1024;
         _resource.memoryQuotaController = std::make_shared<MemoryQuotaController>("ut", tabletTotalQuota);
@@ -590,7 +590,7 @@ TEST_F(TabletTest, testTabletCenter)
 
 TEST_F(TabletTest, testCheckMemoryStatus4MaxRt4MultiTablet)
 {
-    auto executor = std::make_unique<future_lite::executors::SimpleExecutor>(2);
+    auto executor = std::make_unique<async_simple::executors::SimpleExecutor>(2);
     _resource.dumpExecutor = executor.get();
     _resource.memoryQuotaController = std::make_shared<MemoryQuotaController>("ut", 8 * 1024 * 1024);
     _resource.buildMemoryQuotaController = std::make_shared<MemoryQuotaController>("ut", 8 * 1024 * 1024);

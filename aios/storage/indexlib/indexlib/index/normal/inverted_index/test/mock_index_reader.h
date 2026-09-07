@@ -26,7 +26,7 @@ DEFINE_SHARED_PTR(MockMultiFieldIndexReader);
 class MockNormalIndexReader : public NormalIndexReader
 {
 public:
-    future_lite::coro::Lazy<index::Result<bool>>
+    async_simple::coro::Lazy<index::Result<bool>>
     GetSegmentPostingAsync(const index::DictKeyInfo& key, uint32_t segmentIdx, SegmentPosting& segPosting,
                            file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept override
     {

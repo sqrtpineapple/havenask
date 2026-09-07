@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "autil/Log.h"
-#include "future_lite/Executor.h"
-#include "future_lite/TaskScheduler.h"
+#include "async_simple/Executor.h"
+#include "TaskScheduler.h"
 #include "indexlib/config/ITabletSchema.h"
 #include "indexlib/config/TabletOptions.h"
 #include "indexlib/file_system/FileSystemCreator.h"
@@ -81,8 +81,8 @@ public:
     static std::shared_ptr<framework::Tablet> CreateTablet(const std::string& indexRootPath,
                                                            const std::shared_ptr<config::TabletSchema>& schema,
                                                            versionid_t versionId, segmentid_t* segmentIds,
-                                                           size_t segmentCount, future_lite::Executor* executor,
-                                                           future_lite::TaskScheduler* taskScheduler)
+                                                           size_t segmentCount, async_simple::Executor* executor,
+                                                           async_simple::TaskScheduler* taskScheduler)
     {
         framework::Version version(versionId);
         for (size_t i = 0; i < segmentCount; ++i) {

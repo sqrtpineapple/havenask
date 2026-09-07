@@ -55,7 +55,7 @@ public:
         }
         return INVALID_DOCID;
     }
-    docid64_t Lookup(const std::string& pkStr, future_lite::Executor* executor) const override { return Lookup(pkStr); }
+    docid64_t Lookup(const std::string& pkStr, async_simple::Executor* executor) const override { return Lookup(pkStr); }
     docid64_t Lookup(const autil::StringView& pkStr) const override { return INVALID_DOCID; }
     index::Result<indexlib::index::PostingIterator*> Lookup(const indexlib::index::Term& term,
                                                             uint32_t statePoolSize = 1000,
@@ -74,7 +74,7 @@ public:
         }
     }
 
-    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, future_lite::Executor* executor = nullptr) const override
+    docid64_t LookupWithPKHash(const autil::uint128_t& pkHash, async_simple::Executor* executor = nullptr) const override
     {
         assert(false);
         return INVALID_DOCID;

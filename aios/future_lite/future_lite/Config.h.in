@@ -1,7 +1,0 @@
-
-#ifndef FUTURE_LITE_CONFIG_H
-#define FUTURE_LITE_CONFIG_H
-
-#define FUTURE_LITE_CORO_SWITCH 1
-
-#endif

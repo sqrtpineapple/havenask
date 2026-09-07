@@ -31,13 +31,13 @@ public:
                          const std::shared_ptr<file_system::FileReader>& postingReader);
     ~RangeLevelLeafReader();
 
-    future_lite::coro::Lazy<index::ErrorCode>
+    async_simple::coro::Lazy<index::ErrorCode>
     FillSegmentPostings(const RangeFieldEncoder::Ranges& ranges, docid64_t baseDocId,
                         const std::shared_ptr<SegmentPostings>& segmentPostings, autil::mem_pool::Pool* sessionPool,
                         file_system::ReadOption option, InvertedIndexSearchTracer* tracer) noexcept;
 
 private:
-    future_lite::coro::Lazy<index::Result<SegmentPosting>> FillOneSegment(dictvalue_t value, docid64_t baseDocId,
+    async_simple::coro::Lazy<index::Result<SegmentPosting>> FillOneSegment(dictvalue_t value, docid64_t baseDocId,
                                                                           autil::mem_pool::Pool* sessionPool,
                                                                           file_system::ReadOption option,
                                                                           InvertedIndexSearchTracer* tracer) noexcept;

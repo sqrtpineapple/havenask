@@ -10,7 +10,7 @@ cc_library(
     copts=['-Werror'],
     include_prefix='indexlib/index/normal/primarykey/test',
     deps=[
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/indexlib:indexlib_testbase',
         '//aios/storage/indexlib/indexlib/index/test:indexlib_index_test_helper',
         '//aios/storage/indexlib/indexlib/util/test:indexlib_util_test_helper'

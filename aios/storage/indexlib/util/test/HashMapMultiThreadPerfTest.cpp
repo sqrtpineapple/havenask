@@ -44,9 +44,10 @@ void ReadHashMap(HashMap<uint64_t, uint64_t>* hashMap, bool* isSucess)
 
 void WriteHashMap(HashMap<uint64_t, uint64_t>* hashMap)
 {
-    for (; isDone == false; key = key + 3) {
+    for (; isDone == false;) {
         const uint64_t constKey = key;
         hashMap->FindAndInsert(constKey, constKey);
+        key = key + 3;
     }
 }
 

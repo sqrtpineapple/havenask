@@ -19,7 +19,7 @@
 #include <stdint.h>
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/util/DeVirtual.h"
 
 namespace indexlib { namespace util {
@@ -82,7 +82,7 @@ public:
 
     void MergeWith(ByteSliceList& other) noexcept;
     virtual void Clear(autil::mem_pool::Pool* pool) noexcept;
-    virtual future_lite::coro::Lazy<bool> Prefetch(size_t length) noexcept { co_return true; }
+    virtual async_simple::coro::Lazy<bool> Prefetch(size_t length) noexcept { co_return true; }
 
     IE_BASE_CLASS_DECLARE(ByteSliceList);
 

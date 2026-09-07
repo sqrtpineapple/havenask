@@ -37,7 +37,7 @@ public:
 public:
     Status Init(const indexlib::file_system::FileReaderPtr& fileReader, uint64_t dataBlockSize) override;
 
-    inline future_lite::coro::Lazy<indexlib::index::Result<bool>>
+    inline async_simple::coro::Lazy<indexlib::index::Result<bool>>
     GetValueInBlockAsync(const Key& key, uint64_t blockId, uint64_t keyCountInBlock,
                          indexlib::file_system::ReadOption option, Value* value) const noexcept override;
     AccessMode GetMode() const override { return AccessMode::CACHE; }
@@ -64,7 +64,7 @@ Status BlockArrayCacheDataAccessor<Key, Value>::Init(const indexlib::file_system
 }
 
 template <typename Key, typename Value>
-inline future_lite::coro::Lazy<indexlib::index::Result<bool>>
+inline async_simple::coro::Lazy<indexlib::index::Result<bool>>
 BlockArrayCacheDataAccessor<Key, Value>::GetValueInBlockAsync(const Key& key, uint64_t blockId,
                                                               uint64_t keyCountInBlock,
                                                               indexlib::file_system::ReadOption option,

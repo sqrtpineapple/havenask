@@ -16,7 +16,7 @@ cc_library(
     include_prefix='indexlib/test',
     visibility=['//aios/storage/indexlib/indexlib:__subpackages__'],
     deps=[
-        ':test_h', '//aios/future_lite/future_lite/executors:simple_executor',
+        ':test_h', '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/file_system', '//aios/unittest_framework'
     ],
     alwayslink=True
@@ -71,7 +71,7 @@ cc_library(
     visibility=['//aios/storage/indexlib/indexlib:__subpackages__'],
     deps=[
         ':document', ':query',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/ylt:async_simple',
         '//aios/storage/indexlib/indexlib/index:kkv',
         '//aios/storage/indexlib/indexlib/index:kv_reader_interface',
         '//aios/storage/indexlib/indexlib/index:source',

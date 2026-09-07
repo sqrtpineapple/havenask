@@ -95,7 +95,7 @@ FSResult<uint8_t*> DecompressCachedBlockDataRetriever::RetrieveBlockData(size_t 
     return {FSEC_OK, (uint8_t*)block->data + (compressBlockIdx - beginCompressBlockIdx) * _blockSize};
 }
 
-future_lite::coro::Lazy<ErrorCode> DecompressCachedBlockDataRetriever::Prefetch(size_t fileOffset,
+async_simple::coro::Lazy<ErrorCode> DecompressCachedBlockDataRetriever::Prefetch(size_t fileOffset,
                                                                                 size_t length) noexcept
 {
     size_t beginCompressBlockIdx = _compressAddrMapper->OffsetToBlockIdx(fileOffset);

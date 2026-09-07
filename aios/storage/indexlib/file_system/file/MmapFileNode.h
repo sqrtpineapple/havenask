@@ -25,7 +25,7 @@
 #include "autil/CommonMacros.h"
 #include "autil/Lock.h"
 #include "autil/Log.h"
-#include "future_lite/Future.h"
+#include "async_simple/Future.h"
 #include "indexlib/file_system/FileSystemDefine.h"
 #include "indexlib/file_system/file/FileNode.h"
 
@@ -67,7 +67,7 @@ public:
     util::ByteSliceList* ReadToByteSliceList(size_t length, size_t offset, ReadOption option) noexcept override;
     FSResult<size_t> Write(const void* buffer, size_t length) noexcept override;
     FSResult<void> Close() noexcept override;
-    future_lite::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
+    async_simple::Future<FSResult<uint32_t>> ReadVUInt32Async(size_t offset, ReadOption option) noexcept override;
     bool ReadOnly() const noexcept override { return _readOnly; };
     bool MatchType(FSOpenType type, FSFileType fileType, bool needWrite) const noexcept override;
 

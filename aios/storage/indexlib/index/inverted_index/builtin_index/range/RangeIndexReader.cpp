@@ -57,10 +57,10 @@ Status RangeIndexReader::DoOpen(const std::shared_ptr<indexlibv2::config::Invert
 Result<PostingIterator*> RangeIndexReader::Lookup(const index::Term& term, uint32_t statePoolSize, PostingType type,
                                                   autil::mem_pool::Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
+    return async_simple::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, nullptr));
 }
 
-future_lite::coro::Lazy<Result<PostingIterator*>>
+async_simple::coro::Lazy<Result<PostingIterator*>>
 RangeIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type,
                               autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept
 {
@@ -98,13 +98,13 @@ RangeIndexReader::LookupAsync(const index::Term* term, uint32_t statePoolSize, P
     auto* compositeIter = IE_POOL_COMPATIBLE_NEW_CLASS(sessionPool, SeekAndFilterIterator, iter, testIter, sessionPool);
     co_return compositeIter;
 }
-future_lite::coro::Lazy<Result<SegmentPostingsVec>>
+async_simple::coro::Lazy<Result<SegmentPostingsVec>>
 RangeIndexReader::GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                                      const DocIdRangeVector& ranges, file_system::ReadOption option,
                                      InvertedIndexSearchTracer* tracer) const noexcept
 {
     SegmentPostingsVec rangeSegmentPostings;
-    std::vector<future_lite::coro::Lazy<Result<SegmentPostingsVec>>> tasks;
+    std::vector<async_simple::coro::Lazy<Result<SegmentPostingsVec>>> tasks;
     bool needBuilding = false;
     size_t searchedSegmentCount = 0;
     if (ranges.empty()) {
@@ -157,7 +157,7 @@ RangeIndexReader::GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, auti
             needBuilding = true;
         }
     }
-    auto results = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto results = co_await async_simple::coro::collectAll(std::move(tasks));
     for (size_t i = 0; i < results.size(); ++i) {
         assert(!results[i].hasError());
         if (results[i].value().Ok()) {

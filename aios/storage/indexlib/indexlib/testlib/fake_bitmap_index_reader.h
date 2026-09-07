@@ -25,7 +25,7 @@ public:
                                                           PostingType type = pt_default,
                                                           autil::mem_pool::Pool* sessionPool = nullptr);
 
-    future_lite::coro::Lazy<indexlib::index::Result<indexlib::index::PostingIterator*>>
+    async_simple::coro::Lazy<indexlib::index::Result<indexlib::index::PostingIterator*>>
     LookupAsync(const indexlib::index::Term* term, uint32_t statePoolSize, PostingType type,
                 autil::mem_pool::Pool* pool, indexlib::file_system::ReadOption option) noexcept
     {

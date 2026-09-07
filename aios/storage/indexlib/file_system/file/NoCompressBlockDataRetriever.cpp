@@ -49,7 +49,7 @@ FSResult<uint8_t*> NoCompressBlockDataRetriever::RetrieveBlockData(size_t fileOf
     return {FSEC_OK, data};
 }
 
-future_lite::coro::Lazy<ErrorCode> NoCompressBlockDataRetriever::Prefetch(size_t fileOffset, size_t length) noexcept
+async_simple::coro::Lazy<ErrorCode> NoCompressBlockDataRetriever::Prefetch(size_t fileOffset, size_t length) noexcept
 {
     co_return co_await _prefetcher.Prefetch(fileOffset, length);
 }

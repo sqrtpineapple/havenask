@@ -58,7 +58,7 @@ strict_cc_fast_test(
     srcs=['UpdateFieldOperationTest.cpp'],
     copts=['-fno-access-control'],
     deps=[
-        '//aios/autil:long_hash_value', '//aios/future_lite',
+        '//aios/autil:long_hash_value', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/index/operation_log:UpdateFieldOperation',
         '//aios/unittest_framework'
     ]

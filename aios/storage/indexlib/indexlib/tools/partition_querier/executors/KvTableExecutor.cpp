@@ -89,7 +89,7 @@ Status KvTableExecutor::QueryAttrWithPk(const KVReaderPtr& kvReader, const PkTyp
     autil::mem_pool::Pool pool;
     autil::StringView value;
     // 对多个 attr 的查询只取一次 doc Value
-    if (!future_lite::interface::syncAwait(kvReader->GetAsync(pk, value, 0, indexlib::tsc_default, &pool))) {
+    if (!async_simple::interface::syncAwait(kvReader->GetAsync(pk, value, 0, indexlib::tsc_default, &pool))) {
         return Status::NotFound("no record found");
     }
     for (const auto& attr : attrs) {

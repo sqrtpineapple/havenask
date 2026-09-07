@@ -40,7 +40,7 @@ public:
     autil::StringView Read(ValueOffset valueOffset)
     {
         if (NeedSwitchChunk(valueOffset.chunkOffset)) {
-            if (!future_lite::interface::syncAwait(SwitchChunk(valueOffset.chunkOffset))) {
+            if (!async_simple::interface::syncAwait(SwitchChunk(valueOffset.chunkOffset))) {
                 return autil::StringView::empty_instance();
             }
         }

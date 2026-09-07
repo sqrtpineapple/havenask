@@ -98,8 +98,8 @@ void IndexApplicationTest::CaseSetUp()
     readerE.reset(new FakeIndexPartitionReaderBase());
 
     // for tablet
-    _executor.reset(new future_lite::executors::SimpleExecutor(5));
-    _taskScheduler.reset(new future_lite::TaskScheduler(_executor.get()));
+    _executor.reset(new async_simple::executors::SimpleExecutor(5));
+    _taskScheduler.reset(new async_simple::TaskScheduler(_executor.get()));
 }
 
 void IndexApplicationTest::CaseTearDown() {}

@@ -567,7 +567,7 @@ segmentid_t CustomOnlinePartitionReader::GetNextValidSegIdToLink()
     return nextValidLinkRtSegId == INVALID_SEGMENTID ? mLatestValidRtLinkSegId : nextValidLinkRtSegId;
 }
 
-std::shared_ptr<future_lite::Executor>
+std::shared_ptr<async_simple::Executor>
 CustomOnlinePartitionReader::CreateExecutor(const table::TableFactoryWrapperPtr& factoryWrapper,
                                             const config::IndexPartitionSchemaPtr& schema,
                                             const config::IndexPartitionOptions& options) const

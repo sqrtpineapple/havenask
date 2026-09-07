@@ -44,13 +44,13 @@ public:
     void Open(const config::IndexConfigPtr& indexConfig, const index_base::SegmentData& segmentData,
               const NormalIndexSegmentReader* hintReader) override;
 
-    future_lite::coro::Lazy<index::ErrorCode>
+    async_simple::coro::Lazy<index::ErrorCode>
     FillSegmentPostings(const indexlib::common::RangeFieldEncoder::Ranges& ranges,
                         const std::shared_ptr<SegmentPostings>& segmentPostings, autil::mem_pool::Pool* sessionPool,
                         file_system::ReadOption) noexcept;
 
 private:
-    future_lite::coro::Lazy<index::Result<SegmentPosting>>
+    async_simple::coro::Lazy<index::Result<SegmentPosting>>
     FillOneSegment(dictvalue_t value, autil::mem_pool::Pool* sessionPool, file_system::ReadOption option) noexcept;
 
     std::string mParentIndexName;

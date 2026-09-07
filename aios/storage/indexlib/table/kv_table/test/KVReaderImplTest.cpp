@@ -2,8 +2,8 @@
 #include "indexlib/table/kv_table/KVReaderImpl.h"
 
 #include "FakeSegmentReader.h"
-#include "future_lite/CoroInterface.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "CoroInterface.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/config/BuildConfig.h"
 #include "indexlib/config/OnlineConfig.h"
 #include "indexlib/config/TabletOptions.h"
@@ -96,14 +96,14 @@ void KVReaderImplTest::InnerTestGet(const string& offlineValues, uint64_t ttl, u
     readOptions.timestamp = searchTs;
     readOptions.timeoutTerminator = timeoutTerminator;
     readOptions.searchCacheType = indexlib::tsc_no_cache;
-    future_lite::executors::SimpleExecutor ex(1);
+    async_simple::executors::SimpleExecutor ex(1);
     {
         KVReaderImpl reader(DEFAULT_SCHEMAID);
         reader._hasTTL = true;
         reader._ttl = ttl;
         PrepareSegmentReader(offlineValues, reader, shardCount);
         autil::StringView value;
-        auto status = future_lite::interface::syncAwait(reader.InnerGet(&readOptions, key, value), &ex);
+        auto status = async_simple::interface::syncAwait(reader.InnerGet(&readOptions, key, value), &ex);
         ASSERT_EQ(successWithTTL, status == KVResultStatus::FOUND);
         if (successWithTTL) {
             ASSERT_EQ(expectValue, value.to_string());
@@ -115,7 +115,7 @@ void KVReaderImplTest::InnerTestGet(const string& offlineValues, uint64_t ttl, u
         reader._hasTTL = false;
         PrepareSegmentReader(offlineValues, reader, shardCount);
         autil::StringView value;
-        auto status = future_lite::interface::syncAwait(reader.InnerGet(&readOptions, key, value), &ex);
+        auto status = async_simple::interface::syncAwait(reader.InnerGet(&readOptions, key, value), &ex);
         ASSERT_EQ(successWithoutTTL, status == KVResultStatus::FOUND);
         if (successWithoutTTL) {
             ASSERT_EQ(expectValue, value.to_string());

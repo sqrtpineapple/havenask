@@ -26,7 +26,7 @@
 #include "build_service/config/ResourceReader.h"
 #include "build_service/proto/BasicDefs.pb.h"
 #include "build_service/util/Log.h"
-#include "future_lite/Executor.h"
+#include "async_simple/Executor.h"
 #include "indexlib/base/Status.h"
 #include "indexlib/config/ITabletSchema.h"
 #include "indexlib/config/TabletOptions.h"
@@ -34,9 +34,9 @@
 #include "indexlib/framework/Locator.h"
 #include "indexlib/framework/VersionCoord.h"
 
-namespace future_lite {
+namespace async_simple {
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace build_service::builder {
 class BuilderV2Impl;
@@ -69,7 +69,7 @@ public:
     void switchToConsistentMode() override;
 
 private:
-    std::unique_ptr<future_lite::Executor> createExecutor(const std::string& executorName, uint32_t threadCount) const;
+    std::unique_ptr<async_simple::Executor> createExecutor(const std::string& executorName, uint32_t threadCount) const;
     std::shared_ptr<indexlibv2::framework::ITabletMergeController>
     createMergeController(const std::shared_ptr<indexlibv2::config::ITabletSchema>& schema,
                           const std::shared_ptr<indexlibv2::config::TabletOptions>& options);
@@ -82,9 +82,9 @@ private:
 
     // resource for Tablet
     proto::PartitionId _partitionId;
-    std::unique_ptr<future_lite::Executor> _executor;
-    std::unique_ptr<future_lite::Executor> _localMergeExecutor;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler;
+    std::unique_ptr<async_simple::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _localMergeExecutor;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler;
     std::shared_ptr<indexlib::util::MetricProvider> _metricProvider;
     std::unique_ptr<BuilderV2Impl> _impl;
 

@@ -26,8 +26,9 @@
 #include "build_service/builder/BuilderV2Impl.h"
 #include "fslib/common/common_type.h"
 #include "fslib/fs/FileSystem.h"
-#include "future_lite/ExecutorCreator.h"
-#include "future_lite/TaskScheduler.h"
+#include "Executor.h"
+#include "ExecutorCreator.h"
+#include "TaskScheduler.h"
 #include "indexlib/base/Constant.h"
 #include "indexlib/base/MemoryQuotaController.h"
 #include "indexlib/config/BuildConfig.h"
@@ -45,7 +46,7 @@
 #include "indexlib/table/index_task/LocalTabletMergeController.h"
 #include "indexlib/util/metrics/MetricProvider.h"
 
-CHECK_FUTURE_LITE_EXECUTOR(async_io);
+CHECK_ASYNC_SIMPLE_EXECUTOR(async_io);
 
 namespace build_service::builder {
 BS_LOG_SETUP(builder, OfflineBuilderV2);
@@ -81,14 +82,14 @@ bool OfflineBuilderV2::init(const config::BuilderConfig& builderConfig,
     tabletOptions->SetFlushLocal(false);
     tabletOptions->SetIsOnline(false);
 
-    _executor = future_lite::ExecutorCreator::Create(
+    _executor = async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters()
+        async_simple::ExecutorCreator::Parameters()
             .SetExecutorName("tablet_dump" + autil::StringUtil::toString(_partitionId.range().from()) + "_" +
                              autil::StringUtil::toString(_partitionId.range().to()))
             .SetThreadNum(tabletOptions->GetOfflineConfig().GetBuildConfig().GetDumpThreadCount()));
 
-    _taskScheduler = std::make_unique<future_lite::TaskScheduler>(_executor.get());
+    _taskScheduler = std::make_unique<async_simple::TaskScheduler>(_executor.get());
 
     auto schema = _resourceReader->getTabletSchema(_clusterName);
     if (!schema) {
@@ -145,12 +146,12 @@ bool OfflineBuilderV2::init(const config::BuilderConfig& builderConfig,
     return true;
 }
 
-std::unique_ptr<future_lite::Executor> OfflineBuilderV2::createExecutor(const std::string& executorName,
+std::unique_ptr<async_simple::Executor> OfflineBuilderV2::createExecutor(const std::string& executorName,
                                                                         uint32_t threadCount) const
 {
-    return future_lite::ExecutorCreator::Create(
+    return async_simple::ExecutorCreator::Create(
         /*type*/ "async_io",
-        future_lite::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
+        async_simple::ExecutorCreator::Parameters().SetExecutorName(executorName).SetThreadNum(threadCount));
 }
 
 std::shared_ptr<indexlibv2::framework::ITabletMergeController>

@@ -53,7 +53,7 @@ public:
     inline bool GetValue(docid_t docId, autil::StringView& value,
                          autil::mem_pool::PoolBase* pool) const __ALWAYS_INLINE;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> GetValue(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> GetValue(const std::vector<docid_t>& docIds,
                                                           autil::mem_pool::PoolBase* pool,
                                                           file_system::ReadOption readOption,
                                                           std::vector<autil::StringView>* data) const noexcept;
@@ -69,7 +69,7 @@ private:
     inline bool GetValue(file_system::FileReader* fileReader, docid_t docId, autil::StringView& value,
                          autil::mem_pool::PoolBase* pool) const __ALWAYS_INLINE;
 
-    future_lite::coro::Lazy<index::ErrorCodeVec>
+    async_simple::coro::Lazy<index::ErrorCodeVec>
     GetOffsetAndLength(const std::shared_ptr<file_system::FileStream>& fileStream, const std::vector<docid_t>& docIds,
                        autil::mem_pool::PoolBase* sessionPool, file_system::ReadOption readOption,
                        std::vector<uint64_t>* offsets, std::vector<uint32_t>* lens) const noexcept;
@@ -193,7 +193,7 @@ inline bool VarLenDataReader::GetOffsetAndLength(file_system::FileReader* dataRe
     return true;
 }
 
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 VarLenDataReader::GetOffsetAndLength(const std::shared_ptr<file_system::FileStream>& fileStream,
                                      const std::vector<docid_t>& docIds, autil::mem_pool::PoolBase* sessionPool,
                                      file_system::ReadOption readOption, std::vector<uint64_t>* offsets,
@@ -304,7 +304,7 @@ VarLenDataReader::GetOffsetAndLength(const std::shared_ptr<file_system::FileStre
     co_return index::ErrorCodeVec();
 }
 
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 VarLenDataReader::GetValue(const std::vector<docid_t>& docIds, autil::mem_pool::PoolBase* pool,
                            file_system::ReadOption readOption, std::vector<autil::StringView>* data) const noexcept
 {

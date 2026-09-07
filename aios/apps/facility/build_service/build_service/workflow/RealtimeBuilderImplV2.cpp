@@ -30,7 +30,7 @@
 #include "build_service/reader/RawDocumentReader.h"
 #include "build_service/util/ErrorLogCollector.h"
 #include "build_service/workflow/BuildFlow.h"
-#include "future_lite/NamedTaskScheduler.h"
+#include "NamedTaskScheduler.h"
 #include "indexlib/base/Progress.h"
 #include "indexlib/config/TabletOptions.h"
 #include "indexlib/framework/CommitOptions.h"
@@ -66,7 +66,7 @@ BS_LOG_SETUP(workflow, RealtimeBuilderImplV2);
 RealtimeBuilderImplV2::RealtimeBuilderImplV2(const string& configPath,
                                              std::shared_ptr<indexlibv2::framework::ITablet> tablet,
                                              const RealtimeBuilderResource& builderResource,
-                                             future_lite::NamedTaskScheduler* tasker)
+                                             async_simple::NamedTaskScheduler* tasker)
     : _builder(NULL)
     , _configPath(configPath)
     , _tablet(std::move(tablet))
@@ -80,7 +80,7 @@ RealtimeBuilderImplV2::RealtimeBuilderImplV2(const string& configPath,
     , _timestampToSkip(-1)
     , _errorCode(ERROR_NONE)
     , _errorTime(0)
-    , _buildCtrlTaskHandle(future_lite::TaskScheduler::INVALID_HANDLE)
+    , _buildCtrlTaskHandle(async_simple::TaskScheduler::INVALID_HANDLE)
     , _swiftClientCreator(builderResource.swiftClientCreator)
     , _buildFlowThreadResource(builderResource.buildFlowThreadResource)
     , _tasker(tasker)

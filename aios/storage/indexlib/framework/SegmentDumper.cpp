@@ -117,7 +117,7 @@ void SegmentDumper::DumpTask(const std::vector<std::shared_ptr<SegmentDumpItem>>
 // number of threads to do the dump. The de facto behavior is related to the internal mechanism of
 // the `executor` passed in. It is possible that multiple dump tasks are assigned to one single
 // thread.
-Status SegmentDumper::Dump(future_lite::Executor* executor, const uint32_t dumpThreadCount)
+Status SegmentDumper::Dump(async_simple::Executor* executor, const uint32_t dumpThreadCount)
 {
     indexlib::util::ScopeLatencyReporter scopeTime(GetdumpSegmentLatencyMetric().get());
     auto segId = GetSegmentId();
@@ -161,7 +161,7 @@ Status SegmentDumper::SequentialDump(const std::vector<std::shared_ptr<SegmentDu
     return StoreSegmentInfo();
 }
 
-Status SegmentDumper::ParallelDump(future_lite::Executor* executor,
+Status SegmentDumper::ParallelDump(async_simple::Executor* executor,
                                    const std::vector<std::shared_ptr<SegmentDumpItem>>& dumpItems,
                                    const segmentid_t segId, const uint32_t parallelism)
 {

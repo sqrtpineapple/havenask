@@ -221,7 +221,7 @@ void SearchCacheTest::GetKVValue(PartitionStateMachine& psm, const string& key, 
     auto reader = indexPartition->GetReader();
     auto kvReader = reader->GetKVReader();
 
-    ASSERT_TRUE(future_lite::interface::syncAwait(
+    ASSERT_TRUE(async_simple::interface::syncAwait(
         kvReader->GetAsync(StringView("0"), value, 1000000, TableSearchCacheType::tsc_default, pool)));
 }
 
@@ -685,13 +685,13 @@ void SearchCacheTest::CheckKKVReader(const KKVReaderPtr& kkvReader, StringView& 
     Pool pool;
     KKVIterator* iter = NULL;
     if (skeyVec.empty()) {
-        iter = future_lite::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, type, &pool));
+        iter = async_simple::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, 0, type, &pool));
     } else {
         vector<StringView> skeyStrVec;
         for (size_t i = 0; i < skeyVec.size(); i++) {
             skeyStrVec.push_back(StringView(skeyVec[i]));
         }
-        iter = future_lite::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, skeyStrVec, 0, type, &pool));
+        iter = async_simple::interface::syncAwait(kkvReader->LookupAsync(pkeyStr, skeyStrVec, 0, type, &pool));
     }
     ASSERT_TRUE(iter);
 
@@ -738,7 +738,7 @@ void SearchCacheTest::TestKKVSearchCacheExpired()
     std::unique_ptr<KKVIterator, std::function<void(KKVIterator*)>> iter(
         nullptr, [&pool](KKVIterator* p) { IE_POOL_COMPATIBLE_DELETE_CLASS(&pool, p); });
 
-    iter.reset(future_lite::interface::syncAwait(
+    iter.reset(async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("0"), 0, TableSearchCacheType::tsc_default, &pool)));
     ASSERT_TRUE(iter.get());
     ASSERT_TRUE(iter->IsValid());
@@ -746,7 +746,7 @@ void SearchCacheTest::TestKKVSearchCacheExpired()
 
     // cerr << "VALUE: [ " << value <<"]"<< endl;
 
-    iter.reset(future_lite::interface::syncAwait(
+    iter.reset(async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("0"), 0, TableSearchCacheType::tsc_default, &pool)));
     ASSERT_TRUE(iter.get());
     ASSERT_TRUE(iter->IsValid());
@@ -761,7 +761,7 @@ void SearchCacheTest::TestKKVSearchCacheExpired()
     kkvReader = reader->GetKKVReader();
 
     StringView newValue;
-    iter.reset(future_lite::interface::syncAwait(
+    iter.reset(async_simple::interface::syncAwait(
         kkvReader->LookupAsync(StringView("0"), 0, TableSearchCacheType::tsc_default, &pool)));
     ASSERT_TRUE(iter.get());
     ASSERT_TRUE(iter->IsValid());

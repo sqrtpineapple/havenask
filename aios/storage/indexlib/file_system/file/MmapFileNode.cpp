@@ -34,8 +34,8 @@
 #include "fslib/common/common_type.h"
 #include "fslib/fs/File.h"
 #include "fslib/fs/MMapFile.h"
-#include "future_lite/Future.h"
-#include "future_lite/Helper.h"
+#include "async_simple/Future.h"
+#include "Helper.h"
 #include "indexlib/file_system/ErrorCode.h"
 #include "indexlib/file_system/FileSystemDefine.h"
 #include "indexlib/file_system/file/FileCarrier.h"
@@ -324,7 +324,7 @@ uint8_t MmapFileNode::WarmUp(const char* addr, int64_t len) noexcept
     return noUse;
 }
 
-future_lite::Future<FSResult<uint32_t>> MmapFileNode::ReadVUInt32Async(size_t offset, ReadOption option) noexcept
+async_simple::Future<FSResult<uint32_t>> MmapFileNode::ReadVUInt32Async(size_t offset, ReadOption option) noexcept
 {
     uint8_t* byte = static_cast<uint8_t*>(_data) + offset;
     uint32_t value = (*byte) & 0x7f;
@@ -334,7 +334,7 @@ future_lite::Future<FSResult<uint32_t>> MmapFileNode::ReadVUInt32Async(size_t of
         value |= ((*byte & 0x7F) << shift);
         shift += 7;
     }
-    return future_lite::makeReadyFuture<FSResult<uint32_t>>({FSEC_OK, value});
+    return async_simple::makeReadyFuture<FSResult<uint32_t>>({FSEC_OK, value});
 }
 
 bool MmapFileNode::MatchType(FSOpenType type, FSFileType fileType, bool needWrite) const noexcept

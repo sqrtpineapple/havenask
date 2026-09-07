@@ -49,7 +49,7 @@ OperationReplayer::OperationReplayer(const index_base::PartitionDataPtr& partiti
 
 bool OperationReplayer::RedoOneOperation(const PartitionModifierPtr& modifier, OperationBase* operation,
                                          const OperationIterator& iter, const OperationRedoHint& redoHint,
-                                         future_lite::Executor* executor)
+                                         async_simple::Executor* executor)
 {
     const util::BuildResourceMetricsPtr& buildResMetrics = modifier->GetBuildResourceMetrics();
     bool processResult = operation->Process(modifier, redoHint, executor);
@@ -77,7 +77,7 @@ bool OperationReplayer::RedoOneOperation(const PartitionModifierPtr& modifier, O
 bool OperationReplayer::RedoOperations(const PartitionModifierPtr& modifier, const Version& onDiskVersion,
                                        const OperationRedoStrategyPtr& redoStrategy)
 {
-    std::shared_ptr<future_lite::Executor> redoExecutor;
+    std::shared_ptr<async_simple::Executor> redoExecutor;
     if (modifier->GetPrimaryKeyIndexReader()->GetBuildExecutor()) {
         redoExecutor.reset(util::FutureExecutor::CreateExecutor(1, 32), [](auto* p) {
             if (p) {

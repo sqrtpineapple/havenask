@@ -37,7 +37,7 @@ public:
                                            PostingType type = pt_default,
                                            autil::mem_pool::Pool* sessionPool = nullptr) override;
 
-    future_lite::coro::Lazy<index::Result<PostingIterator*>>
+    async_simple::coro::Lazy<index::Result<PostingIterator*>>
     LookupAsync(const index::Term* term, uint32_t statePoolSize, PostingType type, autil::mem_pool::Pool* pool,
                 file_system::ReadOption option) noexcept override;
 
@@ -55,7 +55,7 @@ protected:
                   const std::vector<InvertedIndexReaderImpl::Indexer>& indexers) override;
 
 private:
-    future_lite::coro::Lazy<index::Result<SegmentPostingsVec>>
+    async_simple::coro::Lazy<index::Result<SegmentPostingsVec>>
     GetSegmentPostings(uint64_t leftTerm, uint64_t rightTerm, autil::mem_pool::Pool* sessionPool,
                        const DocIdRangeVector& ranges, file_system::ReadOption option,
                        InvertedIndexSearchTracer* tracer) const noexcept;

@@ -133,7 +133,7 @@ void BuiltSKeyIterator<SKeyType, Option>::MoveToNext()
         return;
     }
     if (NeedSwitchChunk()) {
-        if (!future_lite::interface::syncAwait(SwitchChunk())) {
+        if (!async_simple::interface::syncAwait(SwitchChunk())) {
             return;
         }
     }

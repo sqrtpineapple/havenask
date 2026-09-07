@@ -61,7 +61,7 @@ public:
         return sessionReader;
     }
 
-    future_lite::coro::Lazy<index::ErrorCodeVec> BatchGetOffset(const std::vector<docid_t>& docIds,
+    async_simple::coro::Lazy<index::ErrorCodeVec> BatchGetOffset(const std::vector<docid_t>& docIds,
                                                                 file_system::ReadOption readOption,
                                                                 std::vector<uint64_t>* offsets) const noexcept;
 
@@ -95,7 +95,7 @@ private:
 DEFINE_SHARED_PTR(AttributeOffsetReader);
 ///////////////////////////////////////////////////
 
-inline future_lite::coro::Lazy<index::ErrorCodeVec>
+inline async_simple::coro::Lazy<index::ErrorCodeVec>
 AttributeOffsetReader::BatchGetOffset(const std::vector<docid_t>& docIds, file_system::ReadOption readOption,
                                       std::vector<uint64_t>* offsets) const noexcept
 {

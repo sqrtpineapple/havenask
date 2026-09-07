@@ -558,7 +558,7 @@ void VarNumAttributeReaderTest::CheckIterator(const VarNumAttributeReader<T>& re
             docIds.push_back(i);
         }
         auto result =
-            future_lite::coro::syncAwait(typedIter->BatchSeek(docIds, file_system::ReadOption(), &values, &isNullVec));
+            async_simple::coro::syncAwait(typedIter->BatchSeek(docIds, file_system::ReadOption(), &values, &isNullVec));
         for (docid_t i = 0; i < (docid_t)ans.size(); i++) {
             autil::MultiValueType<T>& multiValue = values[i];
             if (ans[i].size() == NULL_VALUE_COUNT) {

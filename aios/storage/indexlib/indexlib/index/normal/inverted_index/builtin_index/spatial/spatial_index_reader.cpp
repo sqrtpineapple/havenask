@@ -86,10 +86,10 @@ std::shared_ptr<Shape> SpatialIndexReader::ParseShape(const string& shapeStr) co
 index::Result<PostingIterator*> SpatialIndexReader::Lookup(const Term& term, uint32_t statePoolSize, PostingType type,
                                                            Pool* sessionPool)
 {
-    return future_lite::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, /*option*/ nullptr));
+    return async_simple::coro::syncAwait(LookupAsync(&term, statePoolSize, type, sessionPool, /*option*/ nullptr));
 }
 
-future_lite::coro::Lazy<index::Result<PostingIterator*>>
+async_simple::coro::Lazy<index::Result<PostingIterator*>>
 SpatialIndexReader::LookupAsync(const Term* term, uint32_t statePoolSize, PostingType type, Pool* sessionPool,
                                 file_system::ReadOption option) noexcept
 {
@@ -110,14 +110,14 @@ SpatialIndexReader::LookupAsync(const Term* term, uint32_t statePoolSize, Postin
     vector<BufferedPostingIterator*> postingIterators;
     Term defaultTerm;
     defaultTerm.SetNull(false);
-    std::vector<future_lite::coro::Lazy<index::Result<PostingIterator*>>> tasks;
+    std::vector<async_simple::coro::Lazy<index::Result<PostingIterator*>>> tasks;
     tasks.reserve(terms.size());
     for (size_t i = 0; i < terms.size(); i++) {
         tasks.push_back(NormalIndexReader::CreatePostingIteratorByHashKey(&defaultTerm, index::DictKeyInfo(terms[i]),
                                                                           ranges, statePoolSize, sessionPool, option));
     }
 
-    auto results = co_await future_lite::coro::collectAll(std::move(tasks));
+    auto results = co_await async_simple::coro::collectAll(std::move(tasks));
     assert(terms.size() == results.size());
     for (size_t i = 0; i < terms.size(); ++i) {
         assert(!results[i].hasError());

@@ -55,7 +55,7 @@ public:
 
     uint32_t GetDocCount() const;
     bool IsSupportUpdate() const;
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     BatchGetOffset(const std::vector<docid_t>& docIds, indexlib::file_system::ReadOption readOption,
                    std::vector<uint64_t>* offsets) const noexcept;
 
@@ -76,7 +76,7 @@ private:
 
 ///////////////////////////////////////////////////
 
-inline future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+inline async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
 MultiValueAttributeOffsetReader::BatchGetOffset(const std::vector<docid_t>& docIds,
                                                 indexlib::file_system::ReadOption option,
                                                 std::vector<uint64_t>* offsets) const noexcept

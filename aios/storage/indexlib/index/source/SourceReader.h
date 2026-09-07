@@ -16,7 +16,7 @@
 #pragma once
 
 #include "autil/Log.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/base/Types.h"
 #include "indexlib/file_system/file/ReadOption.h"
 #include "indexlib/index/IIndexReader.h"
@@ -50,12 +50,12 @@ public:
     Status GetDocument(docid_t docId, const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                        indexlib::document::SourceDocument* sourceDocument) const;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocumentAsync(const std::vector<docid_t>& docIds, const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                      autil::mem_pool::PoolBase* sessionPool, indexlib::file_system::ReadOption option,
                      const std::vector<indexlib::document::SourceDocument*>* sourceDocs) const;
 
-    future_lite::coro::Lazy<indexlib::index::ErrorCodeVec>
+    async_simple::coro::Lazy<indexlib::index::ErrorCodeVec>
     GetDocumentAsync(const std::vector<docid_t>& docIds, const std::vector<index::sourcegroupid_t>& requiredGroupdIds,
                      autil::mem_pool::PoolBase* sessionPool, indexlib::file_system::ReadOption option,
                      const std::vector<indexlib::document::SerializedSourceDocument*>* sourceDocs) const;

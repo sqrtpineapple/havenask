@@ -596,7 +596,7 @@ cc_library(
         '//aios/storage/indexlib/indexlib/partition:indexlib_partition',
         '//aios/storage:table_models',
         '//aios/storage/indexlib/table/index_task:merge_task'
-    ] + ['//aios/future_lite/future_lite/executors:simple_async_io_executor']),
+    ] + ['//aios/ylt:async_simple', '//aios/ylt:simple_async_io_executor']),
     alwayslink=True
 )
 cc_library(
@@ -637,7 +637,7 @@ cc_library(
     deps=[
         ':bs_builder', ':bs_processor',
         '//aios/apps/facility/build_service/build_service/reader:bs_reader',
-        '//aios/future_lite', '//aios/storage/indexlib:interface'
+        '//aios/ylt:async_simple', '//aios/storage/indexlib:interface'
     ],
     alwayslink=True
 )
@@ -689,16 +689,16 @@ cc_library(
     include_prefix='build_service',
     strip_include_prefix='build_service',
     visibility=['//visibility:public'],
-    deps=([
+    deps=[
         ':bs_basic', ':bs_config', ':bs_task_base', ':bs_util',
-        '//aios/autil:env_util', '//aios/future_lite',
-        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/autil:env_util', '//aios/ylt:async_simple',
+        '//aios/ylt:simple_executor',
         '//aios/storage/indexlib/config:options',
         '//aios/storage/indexlib/config:schema',
         '//aios/storage/indexlib/framework:tablet',
         '//aios/storage/indexlib/framework/index_task:task_execute',
         '//aios/storage/indexlib/table/index_task:index_task_constant'
-    ] + ['//aios/future_lite/future_lite/executors:simple_async_io_executor']),
+    ] + ['//aios/ylt:simple_async_io_executor'],
     alwayslink=True
 )
 cc_library(
@@ -712,7 +712,7 @@ cc_library(
     deps=[
         ':bs_basic', ':bs_common', ':bs_config', ':bs_general_task',
         ':bs_merge', ':bs_task_base', ':bs_util', '//aios/autil:env_util',
-        '//aios/future_lite', '//aios/storage/indexlib/config:options',
+        '//aios/ylt:async_simple', '//aios/storage/indexlib/config:options',
         '//aios/storage/indexlib/config:schema',
         '//aios/storage/indexlib/framework:tablet',
         '//aios/storage/indexlib/framework:version_cleaner',
@@ -772,7 +772,7 @@ cc_library(
     strip_include_prefix='build_service',
     visibility=['//visibility:public'],
     deps=[
-        ':bs_task_base', '//aios/autil:env_util', '//aios/future_lite',
+        ':bs_task_base', '//aios/autil:env_util', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/config:options',
         '//aios/storage/indexlib/config:schema',
         '//aios/storage/indexlib/framework:tablet',

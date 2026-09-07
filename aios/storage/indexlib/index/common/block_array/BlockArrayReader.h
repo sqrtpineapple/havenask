@@ -70,7 +70,7 @@ public:
     indexlib::index::Result<bool> Find(const Key& key, indexlib::file_system::ReadOption option,
                                        Value* value) noexcept __ALWAYS_INLINE;
 
-    inline future_lite::coro::Lazy<indexlib::index::Result<bool>>
+    inline async_simple::coro::Lazy<indexlib::index::Result<bool>>
     FindAsync(const Key& key, indexlib::file_system::ReadOption option, Value* value) noexcept;
 
     inline uint64_t GetItemCount() const;
@@ -174,7 +174,7 @@ BlockArrayReader<Key, Value>::Find(const Key& key, indexlib::file_system::ReadOp
 }
 
 template <typename Key, typename Value>
-inline future_lite::coro::Lazy<indexlib::index::Result<bool>>
+inline async_simple::coro::Lazy<indexlib::index::Result<bool>>
 BlockArrayReader<Key, Value>::FindAsync(const Key& key, indexlib::file_system::ReadOption option, Value* value) noexcept
 {
     // step1 : we locate which block we use to find the Key (inline)

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/file_system/Directory.h"
 #include "indexlib/file_system/FileSystemCreator.h"
 #include "indexlib/file_system/FileSystemOptions.h"
@@ -111,20 +111,20 @@ TEST_F(LocalExecuteEngineTest, testSimpleExecute)
     context.TEST_SetFenceRoot(resourceDir);
     context._resourceManager = manager;
     auto opCreator = std::make_unique<GetSetOperationCreator>();
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "set");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "get");
     op1.AddDepend(0);
 
-    auto task = [&engine, &context, op0, op1]() -> future_lite::coro::Lazy<Status> {
+    auto task = [&engine, &context, op0, op1]() -> async_simple::coro::Lazy<Status> {
         auto status = co_await engine.Schedule(op0, &context);
         EXPECT_TRUE(status.IsOK());
         status = co_await engine.Schedule(op1, &context);
         EXPECT_TRUE(status.IsOK());
         co_return status;
     };
-    auto status = future_lite::coro::syncAwait(task());
+    auto status = async_simple::coro::syncAwait(task());
     ASSERT_TRUE(status.IsOK());
 
     // TODO: Check All Ops executed
@@ -150,7 +150,7 @@ TEST_F(LocalExecuteEngineTest, testTopoStages)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -183,7 +183,7 @@ TEST_F(LocalExecuteEngineTest, testCyclic)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -210,7 +210,7 @@ TEST_F(LocalExecuteEngineTest, testWholeCyclic)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -231,7 +231,7 @@ TEST_F(LocalExecuteEngineTest, testEmptyTaskPlan)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexTaskPlan plan("", "");
     plan._opDescs = std::vector<IndexOperationDescription> {};
@@ -247,7 +247,7 @@ TEST_F(LocalExecuteEngineTest, testWrongDepend)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -270,7 +270,7 @@ TEST_F(LocalExecuteEngineTest, testSelfDepend)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -294,7 +294,7 @@ TEST_F(LocalExecuteEngineTest, testDisconnectedTask)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
     IndexOperationDescription op0(/*id*/ 0, /*type*/ "");
     IndexOperationDescription op1(/*id*/ 1, /*type*/ "");
@@ -327,7 +327,7 @@ TEST_F(LocalExecuteEngineTest, testScheduleTask)
     auto resourceDir = indexlib::file_system::Directory::Get(fs);
     testlib::FakeSharedState st;
     auto opCreator = std::make_unique<testlib::FakeOperationCreator>(&st);
-    future_lite::executors::SimpleExecutor executor(2);
+    async_simple::executors::SimpleExecutor executor(2);
     IndexTaskContext context;
     context.TEST_SetFenceRoot(resourceDir);
     LocalExecuteEngine engine(&executor, std::move(opCreator));
@@ -341,10 +341,10 @@ TEST_F(LocalExecuteEngineTest, testScheduleTask)
     op3.AddDepend(2);
     IndexTaskPlan plan("", "");
     plan._opDescs = std::vector<IndexOperationDescription> {op3, op2, op1, op0};
-    auto task = [&engine, &context, plan]() -> future_lite::coro::Lazy<Status> {
+    auto task = [&engine, &context, plan]() -> async_simple::coro::Lazy<Status> {
         co_return co_await engine.ScheduleTask(plan, &context);
     };
-    auto status = future_lite::coro::syncAwait(task());
+    auto status = async_simple::coro::syncAwait(task());
     ASSERT_TRUE(status.IsOK());
     ASSERT_EQ(4u, st.executeIds.size());
     ASSERT_EQ(0, st.executeIds[0]);

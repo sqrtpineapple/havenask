@@ -1,7 +1,7 @@
 #include "indexlib/table/kv_table/test/KVTableTestSearcher.h"
 
 #include "autil/mem_pool/Pool.h"
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/index/attribute/config/AttributeConfig.h"
 #include "indexlib/index/common/field_format/pack_attribute/PackAttributeFormatter.h"
 #include "indexlib/index/kv/KVIndexReader.h"
@@ -50,7 +50,7 @@ std::shared_ptr<indexlibv2::table::Result> KVTableTestSearcher::Search(const str
     indexlibv2::index::KVReadOptions options;
     options.timestamp = timestamp;
     options.pool = &pool;
-    auto kvResult = future_lite::interface::syncAwait(_kvReader->GetAsync(key, options));
+    auto kvResult = async_simple::interface::syncAwait(_kvReader->GetAsync(key, options));
     if (kvResult.status != indexlibv2::index::KVResultStatus::FOUND) {
         return result;
     }

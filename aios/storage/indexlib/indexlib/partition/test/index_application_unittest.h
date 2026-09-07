@@ -1,7 +1,7 @@
 #pragma once
 
-#include "future_lite/coro/Lazy.h"
-#include "future_lite/executors/SimpleExecutor.h"
+#include "async_simple/coro/Lazy.h"
+#include "async_simple/executors/SimpleExecutor.h"
 #include "indexlib/common_define.h"
 #include "indexlib/config/TabletOptions.h"
 #include "indexlib/config/TabletSchema.h"
@@ -61,8 +61,8 @@ private:
     IndexPartitionReaderPtr readerC;
     IndexPartitionReaderPtr readerD;
     IndexPartitionReaderPtr readerE;
-    std::unique_ptr<future_lite::Executor> _executor = nullptr;
-    std::unique_ptr<future_lite::TaskScheduler> _taskScheduler = nullptr;
+    std::unique_ptr<async_simple::Executor> _executor = nullptr;
+    std::unique_ptr<async_simple::TaskScheduler> _taskScheduler = nullptr;
 
 private:
     IE_LOG_DECLARE();

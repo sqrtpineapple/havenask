@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "future_lite/coro/Lazy.h"
+#include "async_simple/coro/Lazy.h"
 #include "indexlib/common_define.h"
 #include "indexlib/config/index_partition_schema.h"
 #include "indexlib/indexlib.h"
@@ -17,10 +17,10 @@ class ITabletReader;
 class Tablet;
 } // namespace framework
 } // namespace indexlibv2
-namespace future_lite {
+namespace async_simple {
 class Executor;
 class TaskScheduler;
-} // namespace future_lite
+} // namespace async_simple
 
 namespace indexlib { namespace testlib {
 

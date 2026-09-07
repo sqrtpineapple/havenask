@@ -159,8 +159,8 @@ public:
         return fileReader;
     }
 
-    future_lite::coro::Lazy<indexlib::index::Result<docid_t>>
-    LookupAsync(const Key& hashKey, future_lite::Executor* executor) const noexcept
+    async_simple::coro::Lazy<indexlib::index::Result<docid_t>>
+    LookupAsync(const Key& hashKey, async_simple::Executor* executor) const noexcept
     {
         switch (_pkIndexType) {
         case pk_hash_table: {

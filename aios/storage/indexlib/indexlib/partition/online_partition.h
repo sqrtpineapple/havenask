@@ -57,7 +57,7 @@ namespace indexlib::file_system {
 class LifecycleTable;
 }
 
-namespace future_lite {
+namespace async_simple {
 class Executor;
 }
 
@@ -302,7 +302,7 @@ protected:
     int64_t mCheckSecondIndexIntervalInMin;
     int64_t mSubscribeSecondIndexIntervalInMin;
     std::atomic<int64_t> mMissingSegmentCount;
-    future_lite::Executor* mFutureExecutor;
+    async_simple::Executor* mFutureExecutor;
     int64_t mRecoverMaxTs;
     bool mNeedReportTemperature;
     document::SrcSignature mSrcSignature;

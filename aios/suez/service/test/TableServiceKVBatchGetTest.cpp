@@ -11,6 +11,7 @@
 #include "table/TableUtil.h"
 #include "table/test/TableTestUtil.h"
 #include "unittest/unittest.h"
+#include "ExecutorCreator.h"
 using namespace std;
 using namespace table;
 using namespace google::protobuf;
@@ -36,7 +37,7 @@ protected:
     std::unique_ptr<indexlibv2::table::KVTableTestHelper> _helper;
     MultiTableReader _multiReader;
     IndexProvider _provider;
-    std::unique_ptr<future_lite::Executor> _executor;
+    std::unique_ptr<async_simple::Executor> _executor;
 };
 
 std::vector<PartitionId> TableServiceKVBatchGetTest::createPartIds(const std::string &tableName, const int partCount) {
@@ -78,8 +79,8 @@ std::shared_ptr<indexlibv2::framework::ITablet> TableServiceKVBatchGetTest::crea
 }
 
 void TableServiceKVBatchGetTest::setUp() {
-    _executor = future_lite::ExecutorCreator::Create(
-        "async_io", future_lite::ExecutorCreator::Parameters().SetExecutorName("test").SetThreadNum(2));
+    _executor = async_simple::ExecutorCreator::Create(
+        "async_io", async_simple::ExecutorCreator::Parameters().SetExecutorName("test").SetThreadNum(2));
 }
 
 std::shared_ptr<TableServiceImpl>

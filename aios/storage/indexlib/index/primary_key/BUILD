@@ -67,7 +67,7 @@ strict_cc_library(
     ],
     deps=[
         ':PrimaryKeyIndexFields', '//aios/autil:NoCopyable',
-        '//aios/autil:bloom_filter', '//aios/autil:log', '//aios/future_lite',
+        '//aios/autil:bloom_filter', '//aios/autil:log', '//aios/ylt:async_simple',
         '//aios/storage/indexlib/base:NoExceptionWrapper',
         '//aios/storage/indexlib/base:Status',
         '//aios/storage/indexlib/document:interface',
