@@ -17,3 +17,14 @@ strict_cc_fast_test(
         '//aios/storage/indexlib/util/testutil:unittest'
     ]
 )
+
+strict_cc_fast_test(
+    name='YltFslibFileWrapperTest',
+    srcs=['YltFslibFileWrapperTest.cpp'],
+    copts=['-std=c++20', '-fcoroutines'],
+    deps=[
+        '//aios/storage/indexlib/file_system/fslib:ylt_fslib_file_wrapper',
+        '//aios/storage/indexlib/util/testutil:unittest',
+        '//aios/ylt:ylt_io_context_executor',
+    ],
+)

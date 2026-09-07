@@ -33,3 +33,18 @@ strict_cc_library(
         '//aios/storage/indexlib/util:path_util'
     ]
 )
+
+strict_cc_library(
+    name='ylt_fslib_file_wrapper',
+    srcs=['YltFslibFileWrapper.cpp'],
+    hdrs=['YltFslibFileWrapper.h'],
+    visibility=['//visibility:public'],
+    copts=['-std=c++20', '-fcoroutines'],
+    deps=[
+        ':fslib',
+        '//aios/autil:log',
+        '//aios/filesystem/fslib:fslib-framework',
+        '//aios/ylt:ylt_io_context_executor',
+        '@yalantinglibs//:coro_file',
+    ],
+)

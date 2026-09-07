@@ -73,3 +73,28 @@ cc_library(
     copts=['-std=c++20', '-fcoroutines'],
     alwayslink=True,
 )
+
+cc_library(
+    name='ylt_io_context_executor',
+    srcs=['YltIOContextExecutor.cpp'],
+    hdrs=['YltIOContextExecutor.h'],
+    deps=[
+        ':async_simple',
+        '@yalantinglibs//:coro_io_context_pool',
+    ],
+    visibility=['//visibility:public'],
+    includes=['.'],
+    copts=['-std=c++20', '-fcoroutines'],
+    strip_include_prefix='',
+    include_prefix='async_simple/executors',
+    alwayslink=True,
+)
+
+cc_test(
+    name='ylt_io_context_executor_test',
+    srcs=['YltIOContextExecutorTest.cpp'],
+    deps=[
+        ':ylt_io_context_executor',
+        '@com_google_googletest//:gtest_main',
+    ],
+)
