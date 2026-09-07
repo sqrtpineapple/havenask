@@ -36,8 +36,9 @@ public:
     {
         autil::EnvGuard envGuard("INDEXLIB_USE_IO_URING", "true");
         std::unique_ptr<async_simple::Executor, void (*)(async_simple::Executor*)> executor(
-            util::FutureExecutor::CreateExecutor(1, 32), util::FutureExecutor::DestroyExecutor);
-        ASSERT_NE(nullptr, dynamic_cast<async_simple::executors::YltIOContextExecutor*>(executor.get()));
+            util::FutureExecutor::CreateExecutor(4, 32), util::FutureExecutor::DestroyExecutor);
+        auto* yltExecutor = dynamic_cast<async_simple::executors::YltIOContextExecutor*>(executor.get());
+        ASSERT_NE(nullptr, yltExecutor);
 
         const std::string filePath = GET_TEMP_DATA_PATH() + "/block_file_accessor_ylt";
         ASSERT_EQ(FSEC_OK, FslibWrapper::AtomicStore(filePath, "0123456789").Code());
@@ -49,7 +50,9 @@ public:
         BlockFileAccessor accessor(blockCache.get(), false, false, "");
         accessor._executor = executor.get();
         ASSERT_EQ(FSEC_OK, accessor.Open(filePath, 10).Code());
-        ASSERT_NE(nullptr, dynamic_cast<YltFslibFileWrapper*>(accessor._filePtr.get()));
+        auto* yltWrapper = dynamic_cast<YltFslibFileWrapper*>(accessor._filePtr.get());
+        ASSERT_NE(nullptr, yltWrapper);
+        ASSERT_EQ(yltExecutor->getInnerExecutors().size(), yltWrapper->GetPoolSize());
 
         char buffer[5] = {};
         auto result = accessor.ReadAsync(buffer, 4, 3, ReadOption()).get();

@@ -16,11 +16,13 @@
 
 #include "indexlib/file_system/fslib/YltFslibFileWrapper.h"
 
+#include <array>
 #include <cstring>
 #include <future>
 #include <memory>
 #include <string>
 #include <sys/uio.h>
+#include <vector>
 
 #include "ExecutorCreator.h"
 #include "async_simple/coro/SyncAwait.h"
@@ -49,11 +51,13 @@ public:
         ASSERT_TRUE(file->isOpened());
         _wrapper = std::make_unique<YltFslibFileWrapper>(file);
         ASSERT_EQ(FSEC_OK, _wrapper->Open(_executor.get()).Code());
+        ASSERT_EQ(2, _wrapper->GetPoolSize());
     }
 
     void CaseTearDown() override
     {
         ASSERT_EQ(FSEC_OK, _wrapper->Close().Code());
+        ASSERT_EQ(0, _wrapper->GetPoolSize());
         _wrapper.reset();
         _executor.reset();
     }
@@ -105,6 +109,24 @@ public:
         ASSERT_EQ("5678", std::string(second, 4));
     }
 
+    void TestConcurrentReads()
+    {
+        constexpr size_t requestCount = 32;
+        std::array<std::array<char, 4>, requestCount> buffers = {};
+        std::vector<async_simple::Future<FSResult<size_t>>> futures;
+        futures.reserve(requestCount);
+        for (size_t i = 0; i < requestCount; ++i) {
+            futures.push_back(_wrapper->PReadAsync(buffers[i].data(), 3, i % 8, 0, _executor.get()));
+        }
+        for (size_t i = 0; i < requestCount; ++i) {
+            auto result = std::move(futures[i]).get();
+            const auto offset = i % 8;
+            ASSERT_EQ(FSEC_OK, result.Code());
+            ASSERT_EQ(3, result.Value());
+            ASSERT_EQ(std::string("0123456789").substr(offset, 3), std::string(buffers[i].data(), 3));
+        }
+    }
+
 private:
     std::string _filePath;
     std::unique_ptr<async_simple::Executor> _executor;
@@ -115,5 +137,6 @@ INDEXLIB_UNIT_TEST_CASE(YltFslibFileWrapperTest, TestLazyRead);
 INDEXLIB_UNIT_TEST_CASE(YltFslibFileWrapperTest, TestFutureRead);
 INDEXLIB_UNIT_TEST_CASE(YltFslibFileWrapperTest, TestFutureReadReturnsToCallingContext);
 INDEXLIB_UNIT_TEST_CASE(YltFslibFileWrapperTest, TestVectoredRead);
+INDEXLIB_UNIT_TEST_CASE(YltFslibFileWrapperTest, TestConcurrentReads);
 
 } // namespace indexlib::file_system

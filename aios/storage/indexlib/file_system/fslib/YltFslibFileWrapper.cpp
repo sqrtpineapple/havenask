@@ -15,6 +15,8 @@
  */
 #include "indexlib/file_system/fslib/YltFslibFileWrapper.h"
 
+#include <algorithm>
+#include <atomic>
 #include <cerrno>
 #include <cstring>
 #include <exception>
@@ -23,6 +25,7 @@
 #include <string_view>
 #include <sys/uio.h>
 #include <utility>
+#include <vector>
 
 #include "alog/Logger.h"
 #include "async_simple/Promise.h"
@@ -82,7 +85,32 @@ public:
     std::string filePath;
     bool useDirectIO;
     mutable std::mutex mutex;
-    std::shared_ptr<coro_io::random_coro_file> asyncFile;
+    std::vector<std::shared_ptr<coro_io::random_coro_file>> asyncFiles;
+    std::atomic<size_t> nextFileIndex = 0;
+
+    std::shared_ptr<coro_io::random_coro_file> GetNextFile() noexcept
+    {
+        if (asyncFiles.empty()) {
+            return nullptr;
+        }
+        const auto index = nextFileIndex.fetch_add(1, std::memory_order_relaxed) % asyncFiles.size();
+        return asyncFiles[index];
+    }
+
+    void Close() noexcept
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        CloseUnlocked();
+    }
+
+    void CloseUnlocked() noexcept
+    {
+        for (const auto& file : asyncFiles) {
+            file->close();
+        }
+        asyncFiles.clear();
+        nextFileIndex.store(0, std::memory_order_relaxed);
+    }
 };
 
 YltFslibFileWrapper::YltFslibFileWrapper(fslib::fs::File* file, bool useDirectIO, bool needClose)
@@ -93,11 +121,7 @@ YltFslibFileWrapper::YltFslibFileWrapper(fslib::fs::File* file, bool useDirectIO
 
 YltFslibFileWrapper::~YltFslibFileWrapper()
 {
-    std::lock_guard<std::mutex> lock(_impl->mutex);
-    if (_impl->asyncFile) {
-        _impl->asyncFile->close();
-        _impl->asyncFile.reset();
-    }
+    _impl->Close();
 }
 
 FSResult<void> YltFslibFileWrapper::Open(async_simple::Executor* executor) noexcept
@@ -107,52 +131,61 @@ FSResult<void> YltFslibFileWrapper::Open(async_simple::Executor* executor) noexc
         return FSEC_BADARGS;
     }
 
-    std::lock_guard<std::mutex> lock(_impl->mutex);
-    if (_impl->asyncFile) {
-        return FSEC_OK;
-    }
-
     const auto filePath = NormalizeLocalPath(_impl->filePath);
     if (filePath.empty() || filePath.find("://") != std::string::npos) {
         return FSEC_NOTSUP;
     }
 
-    try {
-        auto* innerExecutor = yltExecutor->getNextInnerExecutor();
-        auto* executorWrapper = dynamic_cast<coro_io::ExecutorWrapper<>*>(innerExecutor);
-        if (executorWrapper == nullptr) {
-            return FSEC_BADARGS;
-        }
-
-        auto asyncFile = std::make_shared<coro_io::random_coro_file>(executorWrapper);
-        if (!asyncFile->open(filePath, std::ios::in | std::ios::binary, _impl->useDirectIO)) {
-            AUTIL_LOG(ERROR, "failed to open YLT file [%s]: %s", _impl->filePath.c_str(), std::strerror(errno));
-            return FSEC_ERROR;
-        }
-        _impl->asyncFile = std::move(asyncFile);
+    std::lock_guard<std::mutex> lock(_impl->mutex);
+    if (!_impl->asyncFiles.empty()) {
         return FSEC_OK;
+    }
+
+    try {
+        const auto& innerExecutors = yltExecutor->getInnerExecutors();
+        _impl->asyncFiles.reserve(innerExecutors.size());
+        for (auto* innerExecutor : innerExecutors) {
+            auto* executorWrapper = dynamic_cast<coro_io::ExecutorWrapper<>*>(innerExecutor);
+            if (executorWrapper == nullptr) {
+                _impl->CloseUnlocked();
+                return FSEC_BADARGS;
+            }
+
+            auto asyncFile = std::make_shared<coro_io::random_coro_file>(executorWrapper);
+            if (!asyncFile->open(filePath, std::ios::in | std::ios::binary, _impl->useDirectIO)) {
+                AUTIL_LOG(ERROR, "failed to open YLT file [%s]: %s", _impl->filePath.c_str(), std::strerror(errno));
+                _impl->CloseUnlocked();
+                return FSEC_ERROR;
+            }
+            _impl->asyncFiles.push_back(std::move(asyncFile));
+        }
+        return _impl->asyncFiles.empty() ? FSEC_BADARGS : FSEC_OK;
     } catch (const std::exception& exception) {
         AUTIL_LOG(ERROR, "failed to open YLT file [%s]: %s", _impl->filePath.c_str(), exception.what());
+        _impl->CloseUnlocked();
         return FSEC_ERROR;
     }
 }
 
 FSResult<void> YltFslibFileWrapper::Close() noexcept
 {
-    {
-        std::lock_guard<std::mutex> lock(_impl->mutex);
-        if (_impl->asyncFile) {
-            _impl->asyncFile->close();
-            _impl->asyncFile.reset();
-        }
-    }
+    _impl->Close();
     return FslibCommonFileWrapper::Close();
 }
 
 bool YltFslibFileWrapper::IsOpen() const noexcept
 {
     std::lock_guard<std::mutex> lock(_impl->mutex);
-    return _impl->asyncFile != nullptr && _impl->asyncFile->is_open();
+    return !_impl->asyncFiles.empty() &&
+           std::all_of(_impl->asyncFiles.begin(), _impl->asyncFiles.end(), [](const auto& file) {
+               return file != nullptr && file->is_open();
+           });
+}
+
+size_t YltFslibFileWrapper::GetPoolSize() const noexcept
+{
+    std::lock_guard<std::mutex> lock(_impl->mutex);
+    return _impl->asyncFiles.size();
 }
 
 async_simple::Future<FSResult<size_t>>
@@ -219,11 +252,7 @@ YltFslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset, int, 
         co_return FSResult<size_t>(FSEC_OK, 0);
     }
 
-    std::shared_ptr<coro_io::random_coro_file> asyncFile;
-    {
-        std::lock_guard<std::mutex> lock(_impl->mutex);
-        asyncFile = _impl->asyncFile;
-    }
+    auto asyncFile = _impl->GetNextFile();
     if (!asyncFile || !asyncFile->is_open()) {
         co_return FSResult<size_t>(FSEC_ERROR, 0);
     }
@@ -234,10 +263,18 @@ YltFslibFileWrapper::PReadAsync(void* buffer, size_t length, off_t offset, int, 
 }
 
 async_simple::coro::Lazy<FSResult<size_t>>
-YltFslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int advice, int64_t timeout) noexcept
+YltFslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int, int64_t) noexcept
 {
     if (iovcnt < 0 || offset < 0 || (iov == nullptr && iovcnt != 0)) {
         co_return FSResult<size_t>(FSEC_BADARGS, 0);
+    }
+    if (iovcnt == 0) {
+        co_return FSResult<size_t>(FSEC_OK, 0);
+    }
+
+    auto asyncFile = _impl->GetNextFile();
+    if (!asyncFile || !asyncFile->is_open()) {
+        co_return FSResult<size_t>(FSEC_ERROR, 0);
     }
 
     size_t totalReadLength = 0;
@@ -246,12 +283,13 @@ YltFslibFileWrapper::PReadVAsync(const iovec* iov, int iovcnt, off_t offset, int
         if (iov[i].iov_base == nullptr && iov[i].iov_len != 0) {
             co_return FSResult<size_t>(FSEC_BADARGS, 0);
         }
-        auto result = co_await PReadAsync(iov[i].iov_base, iov[i].iov_len, currentOffset, advice, timeout);
-        if (!result.OK()) {
-            co_return result;
+        auto [error, readLength] = co_await asyncFile->async_read_at(
+            static_cast<uint64_t>(currentOffset), static_cast<char*>(iov[i].iov_base), iov[i].iov_len);
+        if (error) {
+            co_return FSResult<size_t>(ParseYltError(error), 0);
         }
-        totalReadLength += result.Value();
-        if (result.Value() != iov[i].iov_len) {
+        totalReadLength += readLength;
+        if (readLength != iov[i].iov_len) {
             break;
         }
         currentOffset += static_cast<off_t>(iov[i].iov_len);

@@ -33,6 +33,7 @@ public:
     FSResult<void> Open(async_simple::Executor* executor) noexcept;
     FSResult<void> Close() noexcept override;
     bool IsOpen() const noexcept;
+    size_t GetPoolSize() const noexcept;
 
     async_simple::Future<FSResult<size_t>> PReadAsync(void* buffer, size_t length, off_t offset, int advice,
                                                      async_simple::Executor* executor) noexcept override;

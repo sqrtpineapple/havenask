@@ -46,6 +46,7 @@ public:
     bool checkin(Func func, Context ctx, ScheduleOptions opts) override;
     IOExecutor* getIOExecutor() override;
     Executor* getNextInnerExecutor() noexcept;
+    const std::vector<Executor*>& getInnerExecutors() const noexcept { return _innerExecutors; }
 
 protected:
     void schedule(Func func, Duration dur) override;
