@@ -1,8 +1,8 @@
-# Havenask 1.2.0 `ReadAsyncCoro` 性能测试报告
+# Havenask 1.2.0 协程文件读取接口性能测试报告
 
 ## 1. 测试目的
 
-本测试用于测量 Havenask 1.2.0 文件系统中真正的协程异步读取路径：
+本测试用于测量 Havenask 1.2.0 文件系统中的两条协程异步读取路径：
 
 ```text
 BlockFileNode::ReadAsyncCoro
@@ -10,9 +10,16 @@ BlockFileNode::ReadAsyncCoro
   -> FslibCommonFileWrapper::PReadVAsync
   -> LocalDirectFile::preadv
   -> future_lite::SimpleIOExecutor::submitIOV
+
+BlockFileAccessor::GetBlockAsyncCoro
+  -> BlockFileAccessor::DoGetBlockCoro
+  -> BlockFileAccessor::ReadBlockFromFileToCache
+  -> FslibCommonFileWrapper::PReadAsync
+  -> LocalDirectFile::pread
+  -> future_lite::SimpleIOExecutor::submitIO
 ```
 
-测试没有使用 `FileNode::ReadAsyncCoro` 的默认同步退化实现，也没有测试同步 `Read` 接口。
+测试没有使用 `FileNode::ReadAsyncCoro` 的默认同步退化实现，也没有测试同步 `Read` 或 `GetBlock` 接口。
 
 ## 2. 代码版本
 
@@ -28,6 +35,10 @@ BlockFileNode::ReadAsyncCoro
 | `aios/storage/indexlib/file_system` | `72f023406aaa9876f1d112302a7c60e98eee31ef` |
 | `aios/future_lite` | `0a25dd756de70667f18f7c4d849a739fc6d6a3c7` |
 | `WORKSPACE` | `73cc4904e3701a70a0da99cc9cef0f6ad74311a9` |
+
+新增 `GetBlockAsyncCoro` 模式的 benchmark 源文件 SHA-256 为
+`d7c4aef1550a9613c9f382c63438b65a6b901e2710eff62011399d4dbd10e151`。测试机仍使用上述隔离源码，
+只同步替换该 benchmark 源文件后重新构建，没有修改被测文件系统实现。
 
 ## 3. 测试环境
 
@@ -86,7 +97,7 @@ benchmark 通过 `.via(&executor)` 将顶层协程绑定到 `future_lite::execut
 
 ## 5. 测试方法
 
-- 接口：`BlockFileNode::ReadAsyncCoro`
+- 接口：`BlockFileNode::ReadAsyncCoro`、`BlockFileAccessor::GetBlockAsyncCoro`
 - I/O 模式：随机读、4 KiB、Direct I/O
 - BlockCache：容量为 0，确保每次读取都产生底层 I/O
 - 文件对象：一个 `BlockFileNode`，对应一个文件 wrapper
@@ -98,8 +109,11 @@ benchmark 通过 `.via(&executor)` 将顶层协程绑定到 `future_lite::execut
 - 每档重复：3 次
 - 运行顺序：`1/32/320`、`320/32/1`、`32/1/320`，用于降低顺序漂移影响
 - 随机偏移：固定种子，每次读取按 4 KiB 对齐
-- 延迟：围绕每次 `ReadAsyncCoro` 调用测量端到端完成时间
+- 延迟：围绕每次被测接口调用测量端到端完成时间；`GetBlockAsyncCoro` 包含 `BlockHandle` 释放
 - 错误检查：分别统计 coroutine exception、I/O error 和 short read
+
+benchmark 使用 `--interface read|get-block` 选择接口，默认值为 `read`。两种模式复用相同的文件、随机数生成器、
+协程调度、并发度和统计逻辑；`get-block` 模式不执行 `ReadAsyncCoro` 中将 block 数据复制到调用方 buffer 的步骤。
 
 示例运行命令：
 
@@ -107,6 +121,7 @@ benchmark 通过 `.via(&executor)` 将顶层协程绑定到 `future_lite::execut
 FSLIB_LOCAL_ASYNC_CORO_READ=1 taskset -c 1-32 \
   bazel-bin/aios/storage/indexlib/file_system/file/test/block_file_read_async_coro_benchmark \
   --file /export/data/havenask/test.dat \
+  --interface get-block \
   --concurrency 32 \
   --executor-threads 32 \
   --block-size 4096 \
@@ -119,7 +134,9 @@ FSLIB_LOCAL_ASYNC_CORO_READ=1 taskset -c 1-32 \
 
 ## 6. 测试结果
 
-下表为每档 3 次测试的中位数：
+### 6.1 `BlockFileNode::ReadAsyncCoro`
+
+下表为原测试每档 3 次的中位数：
 
 | 协程并发 | IOPS | MiB/s | 平均延迟 | P50 | P95 | P99 | P99.9 | IOPS CV |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -142,9 +159,42 @@ errors=0
 short_reads=0
 ```
 
+### 6.2 `BlockFileAccessor::GetBlockAsyncCoro`
+
+下表为新增测试每档 3 次的中位数：
+
+| 协程并发 | IOPS | MiB/s | 平均延迟 | P50 | P95 | P99 | P99.9 | IOPS CV |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 14,202 | 55.476 | 70.368 us | 68.818 us | 78.835 us | 85.451 us | 92.461 us | 0.98% |
+| 32 | 17,123 | 66.886 | 1.869 ms | 1.868 ms | 1.914 ms | 1.934 ms | 1.967 ms | 0.15% |
+| 320 | 17,286 | 67.525 | 18.504 ms | 18.511 ms | 18.909 ms | 19.082 ms | 19.294 ms | 0.17% |
+
+原始 IOPS：
+
+| 协程并发 | 第 1 轮 | 第 2 轮 | 第 3 轮 |
+| ---: | ---: | ---: | ---: |
+| 1 | 14,201.794 | 14,309.679 | 13,975.747 |
+| 32 | 17,129.028 | 17,072.919 | 17,122.825 |
+| 320 | 17,286.344 | 17,325.562 | 17,253.440 |
+
+所有 9 轮均为 `errors=0`、`short_reads=0`。
+
+### 6.3 接口对比
+
+| 协程并发 | `ReadAsyncCoro` IOPS | `GetBlockAsyncCoro` IOPS | 差异 |
+| ---: | ---: | ---: | ---: |
+| 1 | 13,897 | 14,202 | +2.19% |
+| 32 | 17,014 | 17,123 | +0.64% |
+| 320 | 17,288 | 17,286 | -0.01% |
+
+两组测试在同一天、同一机器和同一文件上运行，但没有逐轮交错执行。因此小于约 2% 的差异应视为运行波动，
+不能据此断言两个接口存在稳定的吞吐差距。
+
 ## 7. 资源开销
 
-资源数据来自额外的 10 秒 `pidstat -t -u -w` 采样：
+资源数据来自额外短时运行期间的 `pidstat -t -u -w` 采样：
+
+`ReadAsyncCoro`：
 
 | 协程并发 | 用户态 CPU | 内核态 CPU | 总 CPU | voluntary cs/s | involuntary cs/s |
 | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -152,15 +202,24 @@ short_reads=0
 | 32 | 95.8% | 27.6% | 123.4% | 106,005 | 0.4 |
 | 320 | 84.2% | 59.9% | 144.1% | 254,504 | 0.5 |
 
+`GetBlockAsyncCoro`：
+
+| 协程并发 | 用户态 CPU | 内核态 CPU | 总 CPU | voluntary cs/s | involuntary cs/s |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 99.6% | 17.3% | 116.9% | 60,994 | 0.2 |
+| 32 | 93.6% | 26.1% | 119.6% | 108,125 | 0.3 |
+| 320 | 77.2% | 65.1% | 142.3% | 265,341 | 0.7 |
+
 `/proc/<pid>/fdinfo` 中测试文件描述符 flags 为八进制 `0140000`，其中包含 `O_DIRECT`。
 
 ## 8. 结论
 
-1. `ReadAsyncCoro` 在并发 1 时约为 13.9K IOPS；并发提升至 32 后约为 17.0K IOPS，提升约 22.4%。
-2. 并发从 32 提升至 320 后，吞吐仅继续提升约 1.6%，但 P50 从约 1.88 ms 增长到约 18.52 ms，接口已在约 17K IOPS 附近进入明显排队状态。
-3. 并发升高时系统态 CPU 和线程上下文切换显著增加。
-4. 1.2.0 使用的后端是 `SimpleExecutor` 中的 POSIX AIO，不是 io_uring。`SimpleIOExecutor` 使用单个轮询线程扫描受互斥锁保护的 outstanding I/O，并且每轮只处理一个完成项；测试结果与该软件路径成为瓶颈的现象一致，但本次没有采集函数级 profiling，不能仅凭吞吐数据断言唯一根因。
-5. 本结果衡量的是完整 Havenask 文件系统调用链，包括 block 分配、缓存查询、数据复制和 coroutine 调度开销，不等同于裸设备 fio 上限。
+1. `ReadAsyncCoro` 和 `GetBlockAsyncCoro` 在并发 32 时都达到约 17.1K IOPS，并发继续增加到 320 没有明显吞吐收益。
+2. 两个接口的吞吐差异处于约 -0.01% 到 +2.19% 范围，和本次运行波动接近；省略一次 4 KiB 内存复制没有改变整体瓶颈。
+3. 并发从 32 增加到 320 时，两个接口的 P50 都从约 1.87 ms 增长到约 18.5 ms，说明约 17K IOPS 后主要增加排队延迟。
+4. `GetBlockAsyncCoro` 的 cache miss 路径通过 `PReadAsync`/`submitIO`，`ReadAsyncCoro` 单 block 路径通过 `PReadVAsync`/`submitIOV`；两者在本测试条件下表现相当。
+5. 并发升高时系统态 CPU 和线程上下文切换显著增加。1.2.0 使用的后端是 `SimpleExecutor` 中的 POSIX AIO，不是 io_uring。
+6. 本结果衡量的是完整 Havenask 文件系统调用链，包括 block 分配、缓存查询、handle 管理、数据复制和 coroutine 调度开销，不等同于裸设备 fio 上限。
 
 ## 9. 原始记录
 
@@ -181,3 +240,19 @@ short_reads=0
 - `preflight.log`：机器与存储环境预检
 - `build.log`：最终构建日志
 
+新增 `GetBlockAsyncCoro` 数据保存在：
+
+```text
+/export/suez_data/getblock-coro-perf-20260910-153800/
+```
+
+其中：
+
+- `results.jsonl`：9 轮机器可读原始结果
+- `summary.json`：聚合统计
+- `c*-r*.log`：各轮 benchmark 输出
+- `c*-r*.pidstat.log`：各轮进程资源数据
+- `resource-profile-c*.pidstat-thread.log`：线程级资源数据
+- `preflight.log`：机器、存储、测试文件和 benchmark SHA-256
+- `build.log`：新增模式的构建日志
+- `runner.status`：完整性校验结果，`0` 表示 9 轮完成且无错误或短读

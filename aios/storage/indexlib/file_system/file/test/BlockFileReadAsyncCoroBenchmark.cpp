@@ -27,8 +27,14 @@ using indexlib::util::BlockCache;
 using indexlib::util::BlockCacheCreator;
 using indexlib::util::BlockCacheOption;
 
+enum class InterfaceType {
+    READ,
+    GET_BLOCK,
+};
+
 struct Options {
     std::string file;
+    InterfaceType interfaceType = InterfaceType::READ;
     size_t concurrency = 32;
     size_t executorThreads = 32;
     size_t blockSize = 4096;
@@ -50,7 +56,7 @@ struct WorkerStats {
 void Usage(const char* program)
 {
     std::cerr << "Usage: " << program
-              << " --file PATH [--concurrency N] [--executor-threads N] [--block-size N]"
+              << " --file PATH [--interface read|get-block] [--concurrency N] [--executor-threads N] [--block-size N]"
                  " [--warmup-seconds N] [--duration-seconds N] [--seed N]\n";
 }
 
@@ -76,6 +82,10 @@ bool ParseArgs(int argc, char** argv, Options* options)
         size_t parsed = 0;
         if (argument == "--file") {
             options->file = value;
+        } else if (argument == "--interface" && value == "read") {
+            options->interfaceType = InterfaceType::READ;
+        } else if (argument == "--interface" && value == "get-block") {
+            options->interfaceType = InterfaceType::GET_BLOCK;
         } else if (argument == "--concurrency" && ParsePositive(value, &parsed)) {
             options->concurrency = parsed;
         } else if (argument == "--executor-threads" && ParsePositive(value, &parsed)) {
@@ -106,7 +116,8 @@ uint64_t NextRandom(uint64_t* state)
 }
 
 future_lite::coro::Lazy<WorkerStats> RunWorker(BlockFileNode* fileNode, size_t blockSize, size_t blockCount,
-                                               Clock::time_point deadline, uint64_t seed, bool collectLatency)
+                                               InterfaceType interfaceType, Clock::time_point deadline, uint64_t seed,
+                                               bool collectLatency)
 {
     WorkerStats stats;
     std::vector<char> buffer(blockSize);
@@ -117,20 +128,38 @@ future_lite::coro::Lazy<WorkerStats> RunWorker(BlockFileNode* fileNode, size_t b
     while (Clock::now() < deadline) {
         const size_t offset = (NextRandom(&randomState) % blockCount) * blockSize;
         const auto begin = Clock::now();
-        auto result = co_await fileNode->ReadAsyncCoro(buffer.data(), blockSize, offset, ReadOption());
+        bool success = false;
+        if (interfaceType == InterfaceType::READ) {
+            auto result = co_await fileNode->ReadAsyncCoro(buffer.data(), blockSize, offset, ReadOption());
+            if (!result.OK()) {
+                ++stats.errors;
+            } else if (result.Value() != blockSize) {
+                ++stats.shortReads;
+            } else {
+                success = true;
+                stats.checksum += static_cast<unsigned char>(buffer[0]);
+            }
+        } else {
+            auto result = co_await fileNode->GetAccessor()->GetBlockAsyncCoro(offset, ReadOption());
+            if (!result.OK()) {
+                ++stats.errors;
+            } else {
+                auto handle = std::move(result.Value());
+                if (!handle.GetData() || handle.GetDataSize() < blockSize) {
+                    ++stats.shortReads;
+                } else {
+                    success = true;
+                    stats.checksum += static_cast<unsigned char>(handle.GetData()[0]);
+                }
+            }
+        }
         const auto latency = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - begin).count();
         ++stats.operations;
-        if (!result.OK()) {
-            ++stats.errors;
+        if (!success) {
             continue;
         }
-        if (result.Value() != blockSize) {
-            ++stats.shortReads;
-            continue;
-        }
-        stats.bytes += result.Value();
+        stats.bytes += blockSize;
         stats.latencyNanos += static_cast<uint64_t>(latency);
-        stats.checksum += static_cast<unsigned char>(buffer[0]);
         if (collectLatency) {
             stats.latencies.push_back(static_cast<uint32_t>(std::min<int64_t>(latency, UINT32_MAX)));
         }
@@ -140,13 +169,13 @@ future_lite::coro::Lazy<WorkerStats> RunWorker(BlockFileNode* fileNode, size_t b
 
 future_lite::coro::Lazy<std::vector<future_lite::Try<WorkerStats>>>
 RunPhase(BlockFileNode* fileNode, size_t blockSize, size_t blockCount, size_t concurrency, int seconds, uint64_t seed,
-         bool collectLatency)
+         InterfaceType interfaceType, bool collectLatency)
 {
     const auto deadline = Clock::now() + std::chrono::seconds(seconds);
     std::vector<future_lite::coro::Lazy<WorkerStats>> workers;
     workers.reserve(concurrency);
     for (size_t index = 0; index < concurrency; ++index) {
-        workers.emplace_back(RunWorker(fileNode, blockSize, blockCount, deadline,
+        workers.emplace_back(RunWorker(fileNode, blockSize, blockCount, interfaceType, deadline,
                                        seed + index * 0x9e3779b97f4a7c15ULL, collectLatency));
     }
     co_return co_await future_lite::coro::collectAll(std::move(workers));
@@ -195,7 +224,7 @@ int main(int argc, char** argv)
     future_lite::executors::SimpleExecutor executor(options.executorThreads);
     auto warmup = future_lite::coro::syncAwait(
         RunPhase(&fileNode, options.blockSize, blockCount, options.concurrency, options.warmupSeconds, options.seed,
-                 false)
+                 options.interfaceType, false)
             .via(&executor));
     for (const auto& result : warmup) {
         if (result.hasError()) {
@@ -207,7 +236,7 @@ int main(int argc, char** argv)
     const auto begin = Clock::now();
     auto results = future_lite::coro::syncAwait(
         RunPhase(&fileNode, options.blockSize, blockCount, options.concurrency, options.durationSeconds,
-                 options.seed ^ 0xd1b54a32d192ed03ULL, true)
+                 options.seed ^ 0xd1b54a32d192ed03ULL, options.interfaceType, true)
             .via(&executor));
     const double elapsedSeconds = std::chrono::duration<double>(Clock::now() - begin).count();
 
@@ -234,8 +263,11 @@ int main(int argc, char** argv)
                                   ? 0.0
                                   : static_cast<double>(total.latencyNanos) / 1000.0 /
                                         static_cast<double>(total.operations);
-    std::cout << std::fixed << std::setprecision(3)
-              << "RESULT_JSON {\"interface\":\"BlockFileNode::ReadAsyncCoro\",\"backend\":\"future_lite-posix-aio\""
+    const char* interfaceName = options.interfaceType == InterfaceType::READ
+                                    ? "BlockFileNode::ReadAsyncCoro"
+                                    : "BlockFileAccessor::GetBlockAsyncCoro";
+    std::cout << std::fixed << std::setprecision(3) << "RESULT_JSON {\"interface\":\"" << interfaceName
+              << "\",\"backend\":\"future_lite-posix-aio\""
               << ",\"file\":\"" << options.file << "\",\"file_size\":" << fileNode.GetLength()
               << ",\"block_size\":" << options.blockSize << ",\"direct_io\":true,\"cache_bytes\":0"
               << ",\"concurrency\":" << options.concurrency << ",\"executor_threads\":"
