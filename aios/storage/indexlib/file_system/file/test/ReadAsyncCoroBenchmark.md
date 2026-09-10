@@ -256,3 +256,113 @@ short_reads=0
 - `preflight.log`：机器、存储、测试文件和 benchmark SHA-256
 - `build.log`：新增模式的构建日志
 - `runner.status`：完整性校验结果，`0` 表示 9 轮完成且无错误或短读
+
+## 10. 仅调参数达到 200 万聚合 IOPS
+
+### 10.1 结论与适用边界
+
+在不修改 Havenask 业务代码和文件系统实现的前提下，两个接口都可以在本测试机上达到 200 万以上聚合 IOPS：
+
+| 接口 | 30 秒三轮 IOPS | 中位数 | 中位 MiB/s | IOPS CV |
+| --- | --- | ---: | ---: | ---: |
+| `BlockFileNode::ReadAsyncCoro` | 2,137,637 / 2,098,256 / 2,075,916 | **2,098,256** | 8,196.306 | 1.21% |
+| `BlockFileAccessor::GetBlockAsyncCoro` | 2,137,972 / 2,144,695 / 2,114,037 | **2,137,972** | 8,351.451 | 0.62% |
+
+所有 6 轮均收齐 192/192 个进程的结果，且 `errors=0`、`short_reads=0`。
+
+这个结论有一个重要边界：表中的 200 万是 **192 个 benchmark 进程、192 个 `SimpleExecutor`、192 个
+`SimpleIOExecutor` 的整机聚合吞吐**，不是单进程或单 Havenask 实例的吞吐。每个进程各创建一个
+`BlockFileNode`，但都读取同一个 10 GiB 测试文件。
+
+单实例调参不能接近 200 万。固定协程并发为 64，把同一个 `SimpleExecutor` 的调度线程数从 1 依次增加到
+2、4、8、32、64 后：
+
+| 接口 | 最低 IOPS | 最高 IOPS | 最优调度线程数 |
+| --- | ---: | ---: | ---: |
+| `BlockFileNode::ReadAsyncCoro` | 17,151 | 17,418 | 8 |
+| `BlockFileAccessor::GetBlockAsyncCoro` | 17,174 | 17,357 | 8 |
+
+原因是 Havenask 1.2.0 的每个 `SimpleExecutor` 无论配置多少调度线程，内部都只有一个
+`SimpleIOExecutor`。增加 `--executor-threads` 只增加协程调度线程，不会增加 POSIX AIO poller。若要求单进程
+达到 200 万，则需要修改 executor/I/O backend 架构，不再属于“仅调参数”的范围。
+
+### 10.2 最终参数
+
+| 参数 | 最终值 |
+| --- | --- |
+| 进程数 | 192 |
+| 每进程 `SimpleExecutor` 调度线程 | 1 |
+| 每进程协程并发 | 4 |
+| 总在途协程请求 | 768 |
+| CPU affinity | 每个进程绑定一个物理核的两个 SMT sibling，覆盖 192 个物理核 |
+| 读取模式 | 4 KiB 随机 Direct I/O |
+| BlockCache | 0 bytes |
+| 测试文件 | `/export/data/havenask/test.dat`，10 GiB，所有进程共享 |
+| 预热 / 采样 | 5 秒 / 30 秒 |
+| 运行时开关 | `FSLIB_LOCAL_ASYNC_CORO_READ=1` |
+| 构建参数 | `--define=use_coro=yes --copt=-O2` |
+
+调参过程中，使用共享 CPU affinity 的 96 进程、每进程并发 32 只能达到约 112 万至 119 万 IOPS。
+改为按物理核隔离后，每进程并发 4 优于并发 32；随着进程数增加，144、160、168、172、192 进程的吞吐
+大致从 180 万、195 万、201 万、205 万增长到 210 万以上。继续提高单进程并发只会增加协程调度和排队开销。
+
+每个进程的等价运行命令为：
+
+```bash
+FSLIB_LOCAL_ASYNC_CORO_READ=1 taskset -c <physical-core>,<smt-sibling> \
+  bazel-bin/aios/storage/indexlib/file_system/file/test/block_file_read_async_coro_benchmark \
+  --file /export/data/havenask/test.dat \
+  --interface read \
+  --concurrency 4 \
+  --executor-threads 1 \
+  --block-size 4096 \
+  --warmup-seconds 5 \
+  --duration-seconds 30 \
+  --seed <per-process-seed>
+```
+
+将 `--interface read` 改为 `--interface get-block` 即测试 `GetBlockAsyncCoro`。192 个进程在同一目标时间启动，
+每个进程使用不同随机种子；两组接口按 `read/get-block` 交错执行 3 轮。
+
+### 10.3 延迟与设备侧验证
+
+下表中的延迟是每轮 192 个进程各自统计值的中位数，不是把所有请求合并后重新计算的全局分位数：
+
+| 接口 | 轮次 | 平均延迟中位数 | P50 中位数 | P95 中位数 | P99 中位数 | P99.9 中位数 | 单进程 P99 最大值 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `ReadAsyncCoro` | 1 | 356.132 us | 344.666 us | 442.324 us | 506.984 us | 593.928 us | 5,986.871 us |
+| `ReadAsyncCoro` | 2 | 366.886 us | 348.028 us | 489.623 us | 581.415 us | 1,355.904 us | 3,001.062 us |
+| `ReadAsyncCoro` | 3 | 364.343 us | 347.712 us | 481.879 us | 564.408 us | 677.776 us | 4,675.358 us |
+| `GetBlockAsyncCoro` | 1 | 356.591 us | 343.493 us | 447.118 us | 516.603 us | 670.511 us | 3,044.523 us |
+| `GetBlockAsyncCoro` | 2 | 358.923 us | 345.865 us | 457.001 us | 526.725 us | 626.136 us | 2,994.398 us |
+| `GetBlockAsyncCoro` | 3 | 359.787 us | 344.303 us | 462.029 us | 541.299 us | 1,216.690 us | 6,025.936 us |
+
+设备上限和应用计数经过两种方式交叉验证：
+
+- 同一文件上的 host fio，4 KiB 随机 Direct I/O、`libaio`、32 jobs × QD32，达到 **4,378,654 IOPS**；设备能力高于目标。
+- 额外 15 秒 `iostat` 运行中，应用分别报告 2,143,862 和 2,150,047 IOPS；`dm-0` 同期约为
+  213 万至 217 万 r/s，两块 NVMe 各约 106 万至 109 万 r/s。应用结果求和与块设备观测一致。
+
+因此，200 万结果不是 page cache、BlockCache 或统计口径造成的虚高；同时设备 `%util` 已接近 100%，最终配置
+基本使用了整台 192 物理核测试机和两块 NVMe。该配置约产生 768 个 benchmark 线程，不适合作为单实例生产能力
+结论，只能证明“在不改代码时，可以通过扩展进程和 I/O poller 数量达到 200 万整机聚合 IOPS”。
+
+### 10.4 本轮原始记录
+
+本轮参数扫描、最终三轮结果、fio 和 `iostat` 原始数据保存在：
+
+```text
+/export/suez_data/native-coro-2m-tuning-20260910-163000/
+```
+
+关键文件：
+
+- `final-summary.json`：最终两接口三轮聚合结果和 CV
+- `final-validation.log`：最终交错长测输出
+- `final-*-c4-p192-w5-d30-r*/`：每轮 192 个进程的原始日志和汇总
+- `single-executor-sweep.jsonl`：单实例调度线程数扫描
+- `partitioned-target-sweep.log`、`partitioned-target-margin-sweep.log`：进程数扫描
+- `partitioned-concurrency-sweep.log`：每进程协程并发扫描
+- `fio-32x32.json`：同文件 fio 设备上限
+- `iostat-read.log`、`iostat-get-block.log`：设备侧逐秒 IOPS
+- `run_partitioned_stage.sh`：按物理核分区的多进程运行脚本
