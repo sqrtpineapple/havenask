@@ -1,6 +1,16 @@
 load(
-    '//aios/storage:defs.bzl', 'strict_cc_fast_test', 'strict_cc_library',
+    '//aios/storage:defs.bzl', 'strict_cc_binary', 'strict_cc_fast_test', 'strict_cc_library',
     'strict_cc_slow_test'
+)
+strict_cc_binary(
+    name='block_file_read_async_coro_benchmark',
+    srcs=['BlockFileReadAsyncCoroBenchmark.cpp'],
+    linkstatic=False,
+    testonly=True,
+    deps=[
+        '//aios/future_lite/future_lite/executors:simple_executor',
+        '//aios/storage/indexlib/file_system',
+    ]
 )
 strict_cc_library(
     name='indexlib_file_system_file_test_helper',
